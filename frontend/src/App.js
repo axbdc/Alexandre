@@ -10,6 +10,7 @@ import AboutServices from "@/components/AboutServices";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import CustomCursor from "@/components/CustomCursor";
+import RichMediaViewer from "@/components/RichMediaViewer";
 import AdminLogin from "@/admin/AdminLogin";
 import AdminProjects from "@/admin/AdminProjects";
 import RequireAuth from "@/admin/RequireAuth";
@@ -53,6 +54,7 @@ function App() {
                             </RequireAuth>
                         }
                     />
+                    <Route path="/rm/:id" element={<RichMediaViewer />} />
                     <Route path="*" element={<Portfolio />} />
                 </Routes>
             </BrowserRouter>
