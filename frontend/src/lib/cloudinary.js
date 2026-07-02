@@ -5,8 +5,8 @@
 //  - CLOUDINARY_PRESET = nome de um "upload preset" UNSIGNED que crias em
 //    Cloudinary → Settings → Upload → Upload presets → Add → Signing Mode: Unsigned
 //
-export const CLOUDINARY_CLOUD = "PÕE_AQUI_O_TEU_CLOUD_NAME";
-export const CLOUDINARY_PRESET = "PÕE_AQUI_O_PRESET";
+export const CLOUDINARY_CLOUD = "dtfcvu4gu";
+export const CLOUDINARY_PRESET = "portfolio";
 
 export async function uploadToCloudinary(file) {
     const fd = new FormData();
