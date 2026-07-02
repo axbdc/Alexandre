@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { PROJECTS } from "@/data/content";
+import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 
 const CATS = [
     { id: "ar3d", label: "AR & 3D" },
@@ -84,6 +85,7 @@ const AdminProjects = () => {
     const [filter, setFilter] = useState("all");
     const [editing, setEditing] = useState(null); // {id?, ...fields}
     const [busy, setBusy] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [msg, setMsg] = useState("");
 
     const load = async () => {
@@ -146,6 +148,34 @@ const AdminProjects = () => {
     const togglePublish = async (it) => {
         await updateDoc(doc(db, "projects", it.id), { published: !it.published });
         await load();
+    };
+
+    const handleUpload = async (files, target) => {
+        const list = Array.from(files || []);
+        if (!list.length) return;
+        if (!CLOUDINARY_CLOUD || CLOUDINARY_CLOUD.startsWith("PÕE")) {
+            setMsg("Configura o Cloudinary primeiro em lib/cloudinary.js.");
+            return;
+        }
+        setUploading(true);
+        setMsg("");
+        try {
+            for (const file of list) {
+                const url = await uploadToCloudinary(file);
+                if (target === "cover") {
+                    setEditing((e) => ({ ...e, cover: url }));
+                } else {
+                    setEditing((e) => ({
+                        ...e,
+                        gallery: [...(e.gallery || []), url],
+                    }));
+                }
+            }
+        } catch (e) {
+            setMsg("Upload falhou: " + e.message);
+        } finally {
+            setUploading(false);
+        }
     };
 
     const logout = async () => {
@@ -224,6 +254,26 @@ const AdminProjects = () => {
                     <Field label="Descrição completa (EN)" k="details_en" area />
 
                     <Field label="Imagem de capa (URL)" k="cover" />
+                    <div className="-mt-1 mb-3 flex items-center gap-3">
+                        <label className="cursor-pointer text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink">
+                            {uploading ? "A carregar…" : "Carregar capa"}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                    handleUpload(e.target.files, "cover")
+                                }
+                            />
+                        </label>
+                        {editing.cover ? (
+                            <img
+                                src={editing.cover}
+                                alt=""
+                                className="h-12 w-12 object-cover border border-hairline"
+                            />
+                        ) : null}
+                    </div>
                     <Field label="Link (site live / vídeo)" k="url" />
 
                     <label className="block mb-3">
@@ -262,6 +312,19 @@ const AdminProjects = () => {
                                 )
                             }
                             className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+                        />
+                    </label>
+
+                    <label className="cursor-pointer inline-flex text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink mb-6">
+                        {uploading ? "A carregar…" : "Carregar p/ galeria"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) =>
+                                handleUpload(e.target.files, "gallery")
+                            }
                         />
                     </label>
 
