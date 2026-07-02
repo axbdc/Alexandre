@@ -16,6 +16,7 @@ import {
 import { auth, db } from "@/lib/firebase";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
+import RichMediaEditor from "@/admin/RichMediaEditor";
 
 const CATS = [
     { id: "ar3d", label: "AR & 3D" },
@@ -327,6 +328,30 @@ const AdminProjects = () => {
                             }
                         />
                     </label>
+
+                    {editing.category === "motion" ? (
+                        <div className="mb-6 border border-hairline p-4">
+                            <label className="flex items-center gap-2 text-sm mb-1">
+                                <input
+                                    type="checkbox"
+                                    checked={!!editing.is_richmedia}
+                                    onChange={(e) =>
+                                        set("is_richmedia", e.target.checked)
+                                    }
+                                />
+                                Protótipo de rich media (Marvel — ecrãs clicáveis)
+                            </label>
+                            {editing.is_richmedia ? (
+                                <RichMediaEditor
+                                    screens={editing.screens || []}
+                                    fit={editing.rm_fit || "contain"}
+                                    onScreens={(s) => set("screens", s)}
+                                    onFit={(f) => set("rm_fit", f)}
+                                    onMsg={setMsg}
+                                />
+                            ) : null}
+                        </div>
+                    ) : null}
 
                     <label className="flex items-center gap-2 mb-6 text-sm">
                         <input
