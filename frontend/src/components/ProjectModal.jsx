@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
 import { launchAR, hasARAssets } from "../lib/ar";
+import { PhoneStrip } from "./RichMedia";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -23,6 +24,7 @@ const COPY = {
     link: { PT: "Ver projeto", EN: "View project" },
     link_live: { PT: "Ver site ao vivo", EN: "Visit live site" },
     link_video: { PT: "Ver vídeo", EN: "Watch video" },
+    link_test: { PT: "Testar rich media", EN: "Test rich media" },
     rm_hint: { PT: "Toca para interagir", EN: "Tap to interact" },
     rm_restart: { PT: "Recomeçar", EN: "Restart" },
     view_ar: { PT: "Ver em AR / 3D", EN: "View in AR / 3D" },
@@ -195,133 +197,6 @@ const PlayerFrame = ({ src, alt, url }) => {
     );
 };
 
-// RICH MEDIA — protótipo clicável tipo Marvel, dentro de um telemóvel de
-// tamanho FIXO (igual para todos os RMs). Corre uma sequência de ecrãs (PNGs
-// exportados do PSD). Tocar avança; com `hotspots` definidos, só as zonas
-// clicáveis avançam (e podem saltar para um ecrã específico).
-//
-// Formato dos dados (no content.js), dentro de um projeto de motion:
-//   richmedia: {
-//     fit: "contain",                    // "contain" (default, barras pretas) ou "cover"
-//     screens: [
-//       { src: "/rm/natura/1.png" },                                  // tap -> seguinte
-//       { src: "/rm/natura/2.png", hotspots: [{ x:10, y:72, w:80, h:12, to:2 }] },
-//       { src: "/rm/natura/3.png" },                                  // x/y/w/h em %, to = indice (comeca em 0)
-//     ],
-//   }
-// Nao precisas de width/height: o RM aparece sempre no mesmo telemovel.
-
-// Telemovel = mockup PNG do utilizador (frontend/public/phone-frame.png).
-// Tamanho fixo, igual para todos os RMs. O conteudo (children) e' posicionado
-// na zona exata do ecra detetada no mockup.
-const PhoneMock = ({ children }) => (
-    <div className="relative mx-auto w-[230px]">
-        <img
-            src="/phone-frame.png"
-            alt=""
-            draggable={false}
-            className="block w-full h-auto select-none pointer-events-none"
-        />
-        <div
-            className="absolute overflow-hidden bg-black"
-            style={{
-                top: "1.2%",
-                left: "2.9%",
-                right: "4.6%",
-                bottom: "1.5%",
-                borderRadius: "1.1rem",
-            }}
-        >
-            {children}
-        </div>
-    </div>
-);
-
-const RichMediaPlayer = ({ screens = [], lang, fit = "contain" }) => {
-    const [i, setI] = React.useState(0);
-    const [showHint, setShowHint] = React.useState(true);
-
-    if (!screens.length) return null;
-
-    const screen = screens[i] || {};
-    const hasHotspots =
-        Array.isArray(screen.hotspots) && screen.hotspots.length > 0;
-
-    const go = (to) => {
-        setShowHint(false);
-        setI((prev) => {
-            const n = typeof to === "number" ? to : prev + 1;
-            return Math.max(0, Math.min(screens.length - 1, n));
-        });
-    };
-
-    const onScreenClick = () => {
-        if (hasHotspots) return; // com hotspots, so as zonas avancam
-        if (i < screens.length - 1) go(i + 1);
-    };
-
-    return (
-        <div className="flex flex-col items-center">
-            <PhoneMock>
-                <img
-                    src={screen.src}
-                    alt={`${i + 1}`}
-                    onClick={onScreenClick}
-                    draggable={false}
-                    className={`w-full h-full ${
-                        fit === "cover" ? "object-cover" : "object-contain"
-                    } ${hasHotspots ? "" : "cursor-pointer"}`}
-                />
-
-                {/* Zonas clicaveis (hotspots) */}
-                {hasHotspots
-                    ? screen.hotspots.map((h, idx) => (
-                          <button
-                              key={idx}
-                              type="button"
-                              onClick={() => go(h.to)}
-                              aria-label={`-> ${h.to + 1}`}
-                              className="absolute hover:bg-bone/10 transition-colors"
-                              style={{
-                                  left: `${h.x}%`,
-                                  top: `${h.y}%`,
-                                  width: `${h.w}%`,
-                                  height: `${h.h}%`,
-                              }}
-                          />
-                      ))
-                    : null}
-
-                {/* Dica inicial */}
-                {showHint && i === 0 ? (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-                        <span className="rounded-full bg-bone/90 px-3 py-1 text-[11px] tracking-wide text-ink animate-pulse">
-                            {t(COPY.rm_hint, lang)}
-                        </span>
-                    </div>
-                ) : null}
-            </PhoneMock>
-
-            {/* Controlos */}
-            <div className="mt-3 flex items-center gap-4 text-[11px] tracking-wide text-mist">
-                <span>
-                    {String(i + 1).padStart(2, "0")} /{" "}
-                    {String(screens.length).padStart(2, "0")}
-                </span>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setI(0);
-                        setShowHint(true);
-                    }}
-                    className="link-underline text-ink"
-                >
-                    {t(COPY.rm_restart, lang)}
-                </button>
-            </div>
-        </div>
-    );
-};
 
 const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     const lang = useLang().lang;
@@ -347,6 +222,12 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     const cat = project.category;
     const isWeb = cat === "web";
     const isMotion = cat === "motion";
+    const isRM = !!(
+        isMotion &&
+        project.richmedia &&
+        project.richmedia.screens &&
+        project.richmedia.screens.length
+    );
 
     const renderCover = () => {
         const title = t(project.title, lang);
@@ -410,10 +291,9 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         if (isMotion) {
             if (project.richmedia && project.richmedia.screens?.length) {
                 return (
-                    <RichMediaPlayer
+                    <PhoneStrip
                         screens={project.richmedia.screens}
                         fit={project.richmedia.fit}
-                        lang={lang}
                     />
                 );
             }
@@ -572,6 +452,18 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                                 ))}
                                             </ul>
                                         </div>
+                                    ) : null}
+                                    {isRM ? (
+                                        <a
+                                            href={`/rm/${project.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            data-testid="modal-test-rm"
+                                            className="inline-flex items-center gap-2 bg-ink text-bone px-4 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-terracotta transition-colors"
+                                        >
+                                            {t(COPY.link_test, lang)}
+                                            <ArrowUpRight size={14} />
+                                        </a>
                                     ) : null}
                                     {project.url ? (
                                         <a
