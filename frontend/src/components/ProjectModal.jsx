@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X,
@@ -200,10 +200,49 @@ const PlayerFrame = ({ src, alt, url }) => {
 
 const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     const lang = useLang().lang;
+    const [lightboxIndex, setLightboxIndex] = useState(null);
+    const gallery = (project && project.gallery) || [];
+
+    const lbNext = useCallback(
+        () =>
+            setLightboxIndex((i) =>
+                i === null || !gallery.length ? i : (i + 1) % gallery.length,
+            ),
+        [gallery.length],
+    );
+    const lbPrev = useCallback(
+        () =>
+            setLightboxIndex((i) =>
+                i === null || !gallery.length
+                    ? i
+                    : (i - 1 + gallery.length) % gallery.length,
+            ),
+        [gallery.length],
+    );
+
+    // Fecha o lightbox ao trocar de projeto
+    useEffect(() => {
+        setLightboxIndex(null);
+    }, [project && project.id]);
 
     useEffect(() => {
         if (!project) return;
         const onKey = (e) => {
+            if (lightboxIndex !== null) {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    setLightboxIndex(null);
+                }
+                if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    lbPrev();
+                }
+                if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    lbNext();
+                }
+                return;
+            }
             if (e.key === "Escape") onClose();
             if (e.key === "ArrowLeft") onPrev();
             if (e.key === "ArrowRight") onNext();
@@ -215,7 +254,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
             window.removeEventListener("keydown", onKey);
             document.body.style.overflow = prevOverflow;
         };
-    }, [project, onClose, onPrev, onNext]);
+    }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext]);
 
     if (!project) return null;
 
@@ -510,22 +549,94 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                                         {project.gallery.map((src, i) => (
-                                            <div
+                                            <button
                                                 key={i}
-                                                className="project-image-wrap aspect-[4/3]"
+                                                type="button"
+                                                onClick={() => setLightboxIndex(i)}
+                                                className="project-image-wrap aspect-[4/3] block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                                                aria-label={`${t(project.title, lang)} — ${i + 1}`}
                                             >
                                                 <img
                                                     src={src}
                                                     alt={`${t(project.title, lang)} — ${i + 1}`}
                                                     loading="lazy"
                                                 />
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
                             ) : null}
                         </div>
                     </motion.div>
+
+                    {/* Lightbox da galeria */}
+                    <AnimatePresence>
+                        {lightboxIndex !== null && gallery[lightboxIndex] ? (
+                            <motion.div
+                                className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/92 backdrop-blur-md p-4"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => setLightboxIndex(null)}
+                                data-testid="gallery-lightbox"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setLightboxIndex(null);
+                                    }}
+                                    aria-label={t(COPY.close, lang)}
+                                    className="absolute top-5 right-5 h-10 w-10 inline-flex items-center justify-center border border-bone/40 text-bone hover:bg-bone hover:text-ink transition-colors"
+                                >
+                                    <X size={16} />
+                                </button>
+
+                                {gallery.length > 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            lbPrev();
+                                        }}
+                                        aria-label={t(COPY.prev, lang)}
+                                        className="absolute left-4 md:left-8 h-11 w-11 inline-flex items-center justify-center border border-bone/40 text-bone hover:bg-bone hover:text-ink transition-colors"
+                                    >
+                                        <ArrowLeft size={18} />
+                                    </button>
+                                ) : null}
+
+                                <img
+                                    src={gallery[lightboxIndex]}
+                                    alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl"
+                                />
+
+                                {gallery.length > 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            lbNext();
+                                        }}
+                                        aria-label={t(COPY.next, lang)}
+                                        className="absolute right-4 md:right-8 h-11 w-11 inline-flex items-center justify-center border border-bone/40 text-bone hover:bg-bone hover:text-ink transition-colors"
+                                    >
+                                        <ArrowRight size={18} />
+                                    </button>
+                                ) : null}
+
+                                {gallery.length > 1 ? (
+                                    <span className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs tracking-[0.18em] text-bone/70 tabular-nums">
+                                        {String(lightboxIndex + 1).padStart(2, "0")}{" "}
+                                        / {String(gallery.length).padStart(2, "0")}
+                                    </span>
+                                ) : null}
+                            </motion.div>
+                        ) : null}
+                    </AnimatePresence>
                 </motion.div>
             )}
         </AnimatePresence>
