@@ -23,7 +23,8 @@ const CATS = [
     { id: "graphic", label: "Design Gráfico" },
     { id: "photo", label: "Fotografia" },
     { id: "web", label: "Web" },
-    { id: "motion", label: "Motion & Rich Media" },
+    { id: "motion", label: "Motion" },
+    { id: "richmedia", label: "Rich Media" },
 ];
 
 const L = (v, l) => (typeof v === "string" ? v : (v && v[l]) || "");
@@ -145,6 +146,7 @@ const AdminProjects = () => {
         setBusy(true);
         setMsg("");
         const { id, ...data } = editing;
+        data.is_richmedia = data.category === "richmedia";
         try {
             if (id) {
                 await updateDoc(doc(db, "projects", id), data);
@@ -331,27 +333,18 @@ const AdminProjects = () => {
                         />
                     </label>
 
-                    {editing.category === "motion" ? (
+                    {editing.category === "richmedia" ? (
                         <div className="mb-6 border border-hairline p-4">
-                            <label className="flex items-center gap-2 text-sm mb-1">
-                                <input
-                                    type="checkbox"
-                                    checked={!!editing.is_richmedia}
-                                    onChange={(e) =>
-                                        set("is_richmedia", e.target.checked)
-                                    }
-                                />
-                                Protótipo de rich media (Marvel — ecrãs clicáveis)
-                            </label>
-                            {editing.is_richmedia ? (
-                                <RichMediaEditor
-                                    screens={editing.screens || []}
-                                    fit={editing.rm_fit || "contain"}
-                                    onScreens={(s) => set("screens", s)}
-                                    onFit={(f) => set("rm_fit", f)}
-                                    onMsg={setMsg}
-                                />
-                            ) : null}
+                            <div className="overline text-mist mb-2">
+                                Ecrãs do rich media (protótipo Marvel)
+                            </div>
+                            <RichMediaEditor
+                                screens={editing.screens || []}
+                                fit={editing.rm_fit || "contain"}
+                                onScreens={(s) => set("screens", s)}
+                                onFit={(f) => set("rm_fit", f)}
+                                onMsg={setMsg}
+                            />
                         </div>
                     ) : null}
 
