@@ -460,6 +460,25 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                 {renderCover()}
                             </div>
 
+                            {/* CTA grande para testar o rich media */}
+                            {isRM ? (
+                                <div className="px-5 md:px-8 pt-5 flex justify-center">
+                                    <a
+                                        href={`/rm/${project.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        data-testid="modal-test-rm"
+                                        className="group inline-flex items-center gap-3 bg-ink text-bone px-8 md:px-10 py-4 md:py-5 text-sm md:text-base tracking-[0.18em] uppercase hover:bg-terracotta transition-colors shadow-[0_18px_44px_-18px_rgba(28,27,26,0.55)]"
+                                    >
+                                        {t(COPY.link_test, lang)}
+                                        <ArrowUpRight
+                                            size={20}
+                                            className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                        />
+                                    </a>
+                                </div>
+                            ) : null}
+
                             {/* Body */}
                             <div className="px-5 md:px-8 pt-8 pb-2 grid grid-cols-12 gap-6">
                                 <aside className="col-span-12 md:col-span-4 space-y-5 text-sm">
@@ -495,18 +514,6 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                                 ))}
                                             </ul>
                                         </div>
-                                    ) : null}
-                                    {isRM ? (
-                                        <a
-                                            href={`/rm/${project.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            data-testid="modal-test-rm"
-                                            className="inline-flex items-center gap-2 bg-ink text-bone px-4 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-terracotta transition-colors"
-                                        >
-                                            {t(COPY.link_test, lang)}
-                                            <ArrowUpRight size={14} />
-                                        </a>
                                     ) : null}
                                     {project.url ? (
                                         <a
