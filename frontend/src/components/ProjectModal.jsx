@@ -262,7 +262,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     const isWeb = cat === "web";
     const isMotion = cat === "motion";
     const isRM = !!(
-        isMotion &&
+        cat === "richmedia" &&
         project.richmedia &&
         project.richmedia.screens &&
         project.richmedia.screens.length
@@ -327,7 +327,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
             );
         }
 
-        if (isMotion) {
+        if (cat === "richmedia") {
             if (project.richmedia && project.richmedia.screens?.length) {
                 return (
                     <PhoneStrip
@@ -337,11 +337,15 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                 );
             }
             return (
-                <PlayerFrame
-                    src={project.cover}
-                    alt={title}
-                    url={project.url}
-                />
+                <div className="relative project-image-wrap aspect-[16/9]">
+                    <img src={project.cover} alt={title} />
+                </div>
+            );
+        }
+
+        if (isMotion) {
+            return (
+                <PlayerFrame src={project.cover} alt={title} url={project.url} />
             );
         }
 
@@ -354,7 +358,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
 
     const linkLabel = isWeb
         ? t(COPY.link_live, lang)
-        : isMotion && !project.richmedia
+        : isMotion
           ? t(COPY.link_video, lang)
           : t(COPY.link, lang);
 
