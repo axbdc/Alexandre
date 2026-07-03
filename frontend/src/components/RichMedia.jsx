@@ -1,5 +1,5 @@
 // frontend/src/components/RichMedia.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { t } from "../context/LanguageContext";
 
 const COPY = {
@@ -55,6 +55,31 @@ export const RichMediaPlayer = ({ screens = [], lang, fit = "contain" }) => {
         if (i < screens.length - 1) go(i + 1);
     };
 
+    // Ação de uma zona: abrir site (nova aba) ou ir para um ecrã.
+    const act = (h) => {
+        if (h && h.type === "url" && h.href) {
+            window.open(h.href, "_blank", "noopener,noreferrer");
+            return;
+        }
+        go(h.to);
+    };
+
+    // Tempo automático: se o ecrã tiver duração, avança sozinho.
+    useEffect(() => {
+        const s = screens[i];
+        if (!s || !s.duration) return;
+        const to = typeof s.durationTo === "number" ? s.durationTo : i + 1;
+        if (to > screens.length - 1) return; // não avança além do último
+        const timer = setTimeout(
+            () => {
+                setShowHint(false);
+                setI(Math.max(0, Math.min(screens.length - 1, to)));
+            },
+            s.duration * 1000,
+        );
+        return () => clearTimeout(timer);
+    }, [i, screens]);
+
     return (
         <div className="flex flex-col items-center">
             <PhoneMock>
@@ -73,7 +98,7 @@ export const RichMediaPlayer = ({ screens = [], lang, fit = "contain" }) => {
                           <button
                               key={idx}
                               type="button"
-                              onClick={() => go(h.to)}
+                              onClick={() => act(h)}
                               aria-label={`-> ${h.to + 1}`}
                               className="absolute hover:bg-bone/10 transition-colors"
                               style={{
