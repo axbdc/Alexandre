@@ -90,6 +90,7 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                               y: +y.toFixed(1),
                               w: +w.toFixed(1),
                               h: +h.toFixed(1),
+                              type: "screen",
                               to,
                           },
                       ],
@@ -109,6 +110,44 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                       ),
                   }
                 : s,
+        );
+        onScreens(arr);
+    };
+    const setHType = (hi, type) => {
+        const arr = screens.map((s, i) =>
+            i === sel
+                ? {
+                      ...s,
+                      hotspots: s.hotspots.map((h, k) =>
+                          k === hi ? { ...h, type } : h,
+                      ),
+                  }
+                : s,
+        );
+        onScreens(arr);
+    };
+    const setHref = (hi, href) => {
+        const arr = screens.map((s, i) =>
+            i === sel
+                ? {
+                      ...s,
+                      hotspots: s.hotspots.map((h, k) =>
+                          k === hi ? { ...h, href } : h,
+                      ),
+                  }
+                : s,
+        );
+        onScreens(arr);
+    };
+    const setDuration = (val) => {
+        const arr = screens.map((s, i) =>
+            i === sel ? { ...s, duration: val } : s,
+        );
+        onScreens(arr);
+    };
+    const setDurationTo = (val) => {
+        const arr = screens.map((s, i) =>
+            i === sel ? { ...s, durationTo: val } : s,
         );
         onScreens(arr);
     };
@@ -255,6 +294,46 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                             ) : null}
                         </div>
 
+                        {/* Tempo automático do ecrã */}
+                        <div className="mt-3 flex items-center gap-2 flex-wrap text-xs border border-hairline p-2">
+                            <span className="text-mist">Tempo automático:</span>
+                            <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={screen && screen.duration ? screen.duration : ""}
+                                onChange={(e) =>
+                                    setDuration(Number(e.target.value) || 0)
+                                }
+                                className="w-16 border border-hairline bg-bone px-2 py-1 text-ink"
+                            />
+                            <span className="text-mist">s</span>
+                            {screen && screen.duration ? (
+                                <>
+                                    <span className="text-mist">→ salta p/</span>
+                                    <select
+                                        value={
+                                            typeof screen.durationTo === "number"
+                                                ? screen.durationTo
+                                                : Math.min(sel + 1, screens.length - 1)
+                                        }
+                                        onChange={(e) =>
+                                            setDurationTo(Number(e.target.value))
+                                        }
+                                        className="border border-hairline bg-bone px-2 py-1 text-ink"
+                                    >
+                                        {screens.map((_, k) => (
+                                            <option key={k} value={k}>
+                                                ecrã {k + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </>
+                            ) : (
+                                <span className="text-mist">(0 = desligado)</span>
+                            )}
+                        </div>
+
                         {/* lista de hotspots do ecrã */}
                         <div className="mt-3 space-y-2">
                             {screen && (screen.hotspots || []).length === 0 ? (
@@ -267,29 +346,66 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                 (screen.hotspots || []).map((h, hi) => (
                                     <div
                                         key={hi}
-                                        className="flex items-center gap-2 text-xs"
+                                        className="flex items-center gap-2 text-xs flex-wrap border border-hairline p-2"
                                     >
                                         <span className="w-4 text-mist">
                                             {hi + 1}
                                         </span>
-                                        <span className="text-mist">vai para</span>
                                         <select
-                                            value={h.to}
+                                            value={h.type || "screen"}
                                             onChange={(e) =>
-                                                setTarget(hi, Number(e.target.value))
+                                                setHType(hi, e.target.value)
                                             }
                                             className="border border-hairline bg-bone px-2 py-1 text-ink"
                                         >
-                                            {screens.map((_, k) => (
-                                                <option key={k} value={k}>
-                                                    ecrã {k + 1}
-                                                </option>
-                                            ))}
+                                            <option value="screen">
+                                                Ir para ecrã
+                                            </option>
+                                            <option value="url">Abrir site</option>
                                         </select>
+
+                                        {(h.type || "screen") === "screen" ? (
+                                            <select
+                                                value={
+                                                    typeof h.to === "number"
+                                                        ? h.to
+                                                        : 0
+                                                }
+                                                onChange={(e) =>
+                                                    setTarget(
+                                                        hi,
+                                                        Number(e.target.value),
+                                                    )
+                                                }
+                                                className="border border-hairline bg-bone px-2 py-1 text-ink"
+                                            >
+                                                {screens.map((_, k) => (
+                                                    <option key={k} value={k}>
+                                                        ecrã {k + 1}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <>
+                                                <input
+                                                    type="url"
+                                                    placeholder="https://..."
+                                                    value={h.href || ""}
+                                                    onChange={(e) =>
+                                                        setHref(hi, e.target.value)
+                                                    }
+                                                    className="flex-1 min-w-[140px] border border-hairline bg-bone px-2 py-1 text-ink"
+                                                />
+                                                <span className="text-mist">
+                                                    (abre em nova aba)
+                                                </span>
+                                            </>
+                                        )}
+
                                         <button
                                             type="button"
                                             onClick={() => delHotspot(hi)}
-                                            className="text-terracotta"
+                                            className="text-terracotta ml-auto"
                                         >
                                             apagar
                                         </button>
