@@ -26,9 +26,10 @@ const mapDoc = (id, d) => ({
             : [d.cover].filter(Boolean),
     model_glb: d.model_glb || undefined,
     model_usdz: d.model_usdz || undefined,
-    richmedia: d.is_richmedia
-        ? { fit: d.rm_fit || "contain", screens: d.screens || [] }
-        : undefined,
+    richmedia:
+        d.category === "richmedia" || d.is_richmedia
+            ? { fit: d.rm_fit || "contain", screens: d.screens || [] }
+            : undefined,
     sort_order: typeof d.sort_order === "number" ? d.sort_order : 0,
 });
 
