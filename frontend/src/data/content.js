@@ -45,7 +45,8 @@ export const CATEGORIES = [
     { id: "graphic", label: { PT: "Design Gráfico", EN: "Graphic Design" } },
     { id: "photo", label: { PT: "Fotografia", EN: "Photography" } },
     { id: "web", label: { PT: "Web", EN: "Web" } },
-    { id: "motion", label: { PT: "Motion & Rich Media", EN: "Motion & Rich Media" } },
+    { id: "motion", label: { PT: "Motion", EN: "Motion" } },
+    { id: "richmedia", label: { PT: "Rich Media", EN: "Rich Media" } },
 ];
 
 // -------- Projects (REAIS) --------
@@ -305,7 +306,7 @@ export const PROJECTS = [
     // ===== Motion & Rich Media =====
     {
         id: "motion-01",
-        category: "motion",
+        category: "richmedia",
         title: { PT: "World Cup Predictor 2026", EN: "World Cup Predictor 2026" },
         subtitle: { PT: "Rich Media / HTML5", EN: "Rich Media / HTML5" },
         client: "World Sports Betting",
