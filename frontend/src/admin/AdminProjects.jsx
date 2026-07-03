@@ -79,6 +79,27 @@ const emptyDoc = () => ({
     published: true,
 });
 
+// Campo estável (definido fora do componente para o input não perder o foco).
+const Field = ({ label, value, onChange, area }) => (
+    <label className="block mb-3">
+        <span className="overline text-mist">{label}</span>
+        {area ? (
+            <textarea
+                rows={4}
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+            />
+        ) : (
+            <input
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+            />
+        )}
+    </label>
+);
+
 const AdminProjects = () => {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
@@ -190,25 +211,6 @@ const AdminProjects = () => {
     // ---------- EDITOR ----------
     if (editing) {
         const set = (k, v) => setEditing((e) => ({ ...e, [k]: v }));
-        const Field = ({ label, k, area }) => (
-            <label className="block mb-3">
-                <span className="overline text-mist">{label}</span>
-                {area ? (
-                    <textarea
-                        rows={4}
-                        value={editing[k] || ""}
-                        onChange={(e) => set(k, e.target.value)}
-                        className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
-                    />
-                ) : (
-                    <input
-                        value={editing[k] || ""}
-                        onChange={(e) => set(k, e.target.value)}
-                        className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
-                    />
-                )}
-            </label>
-        );
 
         return (
             <div className="min-h-screen bg-bone text-ink">
@@ -241,20 +243,20 @@ const AdminProjects = () => {
                     </label>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                        <Field label="Título (PT)" k="title_pt" />
-                        <Field label="Título (EN)" k="title_en" />
-                        <Field label="Subtítulo (PT)" k="subtitle_pt" />
-                        <Field label="Subtítulo (EN)" k="subtitle_en" />
-                        <Field label="Cliente" k="client" />
-                        <Field label="Ano" k="year" />
+                        <Field label="Título (PT)" value={editing.title_pt} onChange={(v) => set("title_pt", v)} />
+                        <Field label="Título (EN)" value={editing.title_en} onChange={(v) => set("title_en", v)} />
+                        <Field label="Subtítulo (PT)" value={editing.subtitle_pt} onChange={(v) => set("subtitle_pt", v)} />
+                        <Field label="Subtítulo (EN)" value={editing.subtitle_en} onChange={(v) => set("subtitle_en", v)} />
+                        <Field label="Cliente" value={editing.client} onChange={(v) => set("client", v)} />
+                        <Field label="Ano" value={editing.year} onChange={(v) => set("year", v)} />
                     </div>
 
-                    <Field label="Resumo (PT)" k="summary_pt" area />
-                    <Field label="Resumo (EN)" k="summary_en" area />
-                    <Field label="Descrição completa (PT)" k="details_pt" area />
-                    <Field label="Descrição completa (EN)" k="details_en" area />
+                    <Field label="Resumo (PT)" value={editing.summary_pt} onChange={(v) => set("summary_pt", v)} area />
+                    <Field label="Resumo (EN)" value={editing.summary_en} onChange={(v) => set("summary_en", v)} area />
+                    <Field label="Descrição completa (PT)" value={editing.details_pt} onChange={(v) => set("details_pt", v)} area />
+                    <Field label="Descrição completa (EN)" value={editing.details_en} onChange={(v) => set("details_en", v)} area />
 
-                    <Field label="Imagem de capa (URL)" k="cover" />
+                    <Field label="Imagem de capa (URL)" value={editing.cover} onChange={(v) => set("cover", v)} />
                     <div className="-mt-1 mb-3 flex items-center gap-3">
                         <label className="cursor-pointer text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink">
                             {uploading ? "A carregar…" : "Carregar capa"}
@@ -275,7 +277,7 @@ const AdminProjects = () => {
                             />
                         ) : null}
                     </div>
-                    <Field label="Link (site live / vídeo)" k="url" />
+                    <Field label="Link (site live / vídeo)" value={editing.url} onChange={(v) => set("url", v)} />
 
                     <label className="block mb-3">
                         <span className="overline text-mist">
