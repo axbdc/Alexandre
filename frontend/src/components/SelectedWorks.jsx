@@ -160,6 +160,7 @@ const SelectedWorks = () => {
                                             src={p.cover}
                                             alt={t(p.title, lang)}
                                             loading="lazy"
+                                            style={{ objectFit: "contain" }}
                                         />
                                         <span className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-full bg-bone/0 group-hover:bg-bone/95 backdrop-blur-sm flex items-center justify-center text-ink opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
                                             <ArrowUpRight size={16} />
