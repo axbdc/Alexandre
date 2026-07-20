@@ -201,7 +201,16 @@ const PlayerFrame = ({ src, alt, url }) => {
 const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     const lang = useLang().lang;
     const [lightboxIndex, setLightboxIndex] = useState(null);
-    const gallery = (project && project.gallery) || [];
+
+    const isPostsProject =
+        project &&
+        project.category === "graphic" &&
+        project.subtype === "posts";
+    const posts = (project && project.posts) || [];
+    const stories = (project && project.stories) || [];
+    const gallery = isPostsProject
+        ? [...posts, ...stories]
+        : (project && project.gallery) || [];
 
     const lbNext = useCallback(
         () =>
@@ -553,24 +562,86 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                             </div>
 
                             {/* Gallery */}
-                            {project.gallery?.length ? (
+                            {isPostsProject ? (
+                                posts.length || stories.length ? (
+                                    <div className="px-5 md:px-8 pt-8 pb-8 space-y-8">
+                                        {posts.length ? (
+                                            <div>
+                                                <div className="overline mb-4">
+                                                    Posts
+                                                </div>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                                    {posts.map((src, i) => (
+                                                        <button
+                                                            key={i}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setLightboxIndex(i)
+                                                            }
+                                                            className="block cursor-pointer overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                                                            aria-label={`Post ${i + 1}`}
+                                                        >
+                                                            <img
+                                                                src={src}
+                                                                alt={`Post ${i + 1}`}
+                                                                loading="lazy"
+                                                                className="w-full h-auto block"
+                                                            />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                        {stories.length ? (
+                                            <div>
+                                                <div className="overline mb-4">
+                                                    Stories
+                                                </div>
+                                                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                                                    {stories.map((src, j) => (
+                                                        <button
+                                                            key={j}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setLightboxIndex(
+                                                                    posts.length + j,
+                                                                )
+                                                            }
+                                                            className="block cursor-pointer overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                                                            aria-label={`Story ${j + 1}`}
+                                                        >
+                                                            <img
+                                                                src={src}
+                                                                alt={`Story ${j + 1}`}
+                                                                loading="lazy"
+                                                                className="w-full h-auto block"
+                                                            />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : null
+                            ) : project.gallery?.length ? (
                                 <div className="px-5 md:px-8 pt-8 pb-8">
                                     <div className="overline mb-4">
                                         {t(COPY.gallery, lang)}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                    <div className="columns-2 gap-3 md:gap-4">
                                         {project.gallery.map((src, i) => (
                                             <button
                                                 key={i}
                                                 type="button"
                                                 onClick={() => setLightboxIndex(i)}
-                                                className="project-image-wrap aspect-[4/3] block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                                                className="block w-full mb-3 md:mb-4 cursor-pointer overflow-hidden break-inside-avoid focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                                                 aria-label={`${t(project.title, lang)} — ${i + 1}`}
                                             >
                                                 <img
                                                     src={src}
                                                     alt={`${t(project.title, lang)} — ${i + 1}`}
                                                     loading="lazy"
+                                                    className="w-full h-auto block"
                                                 />
                                             </button>
                                         ))}
