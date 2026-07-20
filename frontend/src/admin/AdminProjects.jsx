@@ -51,6 +51,9 @@ const toDoc = (p, i) => ({
     is_richmedia: !!(p.richmedia && p.richmedia.screens && p.richmedia.screens.length),
     rm_fit: (p.richmedia && p.richmedia.fit) || "contain",
     screens: (p.richmedia && p.richmedia.screens) || [],
+    subtype: p.subtype || "",
+    posts: p.posts || [],
+    stories: p.stories || [],
     sort_order: i,
     published: true,
 });
@@ -76,6 +79,9 @@ const emptyDoc = () => ({
     is_richmedia: false,
     rm_fit: "contain",
     screens: [],
+    subtype: "posts",
+    posts: [],
+    stories: [],
     sort_order: 0,
     published: true,
 });
@@ -99,6 +105,37 @@ const Field = ({ label, value, onChange, area }) => (
             />
         )}
     </label>
+);
+
+// Lista de imagens (URLs, um por linha) + upload. Fora do componente (foco).
+const ImageListField = ({ label, help, value, onChange, onUpload, uploading }) => (
+    <div className="mb-4">
+        <div className="overline text-mist mb-1">{label}</div>
+        {help ? <div className="text-[11px] text-mist mb-1">{help}</div> : null}
+        <textarea
+            rows={3}
+            value={(value || []).join("\n")}
+            onChange={(e) =>
+                onChange(
+                    e.target.value
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                )
+            }
+            className="w-full border border-hairline bg-bone px-3 py-2 text-sm text-ink outline-none focus:border-ink"
+        />
+        <label className="cursor-pointer inline-flex text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink mt-2">
+            {uploading ? "A carregar…" : "Carregar imagens"}
+            <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={onUpload}
+            />
+        </label>
+    </div>
 );
 
 const AdminProjects = () => {
@@ -189,9 +226,10 @@ const AdminProjects = () => {
                 if (target === "cover") {
                     setEditing((e) => ({ ...e, cover: url }));
                 } else {
+                    // gallery | posts | stories
                     setEditing((e) => ({
                         ...e,
-                        gallery: [...(e.gallery || []), url],
+                        [target]: [...(e[target] || []), url],
                     }));
                 }
             }
@@ -243,6 +281,24 @@ const AdminProjects = () => {
                             ))}
                         </select>
                     </label>
+
+                    {editing.category === "graphic" ? (
+                        <label className="block mb-3">
+                            <span className="overline text-mist">
+                                Tipo de design
+                            </span>
+                            <select
+                                value={editing.subtype || "posts"}
+                                onChange={(e) => set("subtype", e.target.value)}
+                                className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+                            >
+                                <option value="posts">Posts &amp; Stories</option>
+                                <option value="banners">Banners</option>
+                                <option value="posters">Posters</option>
+                                <option value="print">Impressão / Outros</option>
+                            </select>
+                        </label>
+                    ) : null}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                         <Field label="Título (PT)" value={editing.title_pt} onChange={(v) => set("title_pt", v)} />
@@ -300,38 +356,41 @@ const AdminProjects = () => {
                         />
                     </label>
 
-                    <label className="block mb-3">
-                        <span className="overline text-mist">
-                            Galeria (um URL por linha)
-                        </span>
-                        <textarea
-                            rows={3}
-                            value={(editing.gallery || []).join("\n")}
-                            onChange={(e) =>
-                                set(
-                                    "gallery",
-                                    e.target.value
-                                        .split("\n")
-                                        .map((s) => s.trim())
-                                        .filter(Boolean),
-                                )
-                            }
-                            className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
-                        />
-                    </label>
-
-                    <label className="cursor-pointer inline-flex text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink mb-6">
-                        {uploading ? "A carregar…" : "Carregar p/ galeria"}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={(e) =>
+                    {editing.category === "graphic" &&
+                    (editing.subtype || "posts") === "posts" ? (
+                        <>
+                            <ImageListField
+                                label="Posts"
+                                help="Imagens dos posts (aparecem em cima na galeria)."
+                                value={editing.posts}
+                                onChange={(a) => set("posts", a)}
+                                onUpload={(e) =>
+                                    handleUpload(e.target.files, "posts")
+                                }
+                                uploading={uploading}
+                            />
+                            <ImageListField
+                                label="Stories"
+                                help="Imagens verticais dos stories (aparecem por baixo)."
+                                value={editing.stories}
+                                onChange={(a) => set("stories", a)}
+                                onUpload={(e) =>
+                                    handleUpload(e.target.files, "stories")
+                                }
+                                uploading={uploading}
+                            />
+                        </>
+                    ) : (
+                        <ImageListField
+                            label="Galeria"
+                            value={editing.gallery}
+                            onChange={(a) => set("gallery", a)}
+                            onUpload={(e) =>
                                 handleUpload(e.target.files, "gallery")
                             }
+                            uploading={uploading}
                         />
-                    </label>
+                    )}
 
                     {editing.category === "richmedia" ? (
                         <div className="mb-6 border border-hairline p-4">
