@@ -30,6 +30,9 @@ const mapDoc = (id, d) => ({
         d.category === "richmedia" || d.is_richmedia
             ? { fit: d.rm_fit || "contain", screens: d.screens || [] }
             : undefined,
+    subtype: d.subtype || "",
+    posts: Array.isArray(d.posts) ? d.posts : [],
+    stories: Array.isArray(d.stories) ? d.stories : [],
     sort_order: typeof d.sort_order === "number" ? d.sort_order : 0,
 });
 
