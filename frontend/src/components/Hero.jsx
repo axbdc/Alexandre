@@ -2,7 +2,6 @@ import React from "react";
 import { useLang, t } from "../context/LanguageContext";
 import { HERO } from "../data/content";
 import { ArrowDownRight } from "lucide-react";
-import Hero3D from "./three/Hero3D";
 
 const Hero = () => {
     const { lang } = useLang();
@@ -19,8 +18,6 @@ const Hero = () => {
             className="relative pt-32 md:pt-40 pb-20 md:pb-32 px-6 md:px-12"
         >
             <div className="mx-auto max-w-[1400px] relative">
-                <Hero3D />
-
                 <div className="flex items-center justify-between mb-12 md:mb-20">
                     <span className="overline" data-testid="hero-overline">
                         {t(HERO.overline, lang)}
