@@ -1,13 +1,16 @@
 // frontend/src/admin/RichMediaEditor.jsx
 import React, { useRef, useState } from "react";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
+import { ScreenStack, TRANSITIONS, TRANSITION_DURS } from "@/components/RichMedia";
 
-// screens: [{ src, hotspots: [{x,y,w,h,to}] }]  (x/y/w/h em % do ecrã)
+// screens: [{ src, hotspots: [{x,y,w,h,to}], duration, durationTo, transition, transitionDur }]
+// (x/y/w/h em % do ecrã; transition = como o ecrã ENTRA)
 const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMsg }) => {
     const [sel, setSel] = useState(0);
     const [drawing, setDrawing] = useState(false);
     const [draft, setDraft] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [pv, setPv] = useState(null); // pré-visualização da transição
     const boxRef = useRef(null);
 
     const screen = screens[sel] || null;
@@ -151,6 +154,31 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
         );
         onScreens(arr);
     };
+    const setTransition = (patch) => {
+        const arr = screens.map((s, i) => (i === sel ? { ...s, ...patch } : s));
+        onScreens(arr);
+    };
+    const applyTransitionToAll = () => {
+        if (!screen) return;
+        const t = screen.transition || "none";
+        const d = screen.transitionDur || 600;
+        onScreens(
+            screens.map((s, i) =>
+                i === 0 ? s : { ...s, transition: t, transitionDur: d },
+            ),
+        );
+        onMsg && onMsg("Transição aplicada aos ecrãs 2 em diante.");
+    };
+    const previewTransition = () => {
+        if (!screen || screens.length < 2) return;
+        const from = sel > 0 ? sel - 1 : screens.length - 1;
+        const dur = Number(screen.transitionDur) || 600;
+        setDrawing(false);
+        setPv({ idx: from, anim: false });
+        setTimeout(() => setPv({ idx: sel, anim: true }), 450);
+        setTimeout(() => setPv(null), 450 + dur + 300);
+    };
+
     const delHotspot = (hi) => {
         const arr = screens.map((s, i) =>
             i === sel
@@ -260,16 +288,16 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                             style={{ width: "220px", aspectRatio: "9 / 19" }}
                         >
                             {screen ? (
-                                <img
-                                    src={screen.src}
-                                    alt=""
-                                    draggable={false}
-                                    className={`w-full h-full ${fit === "cover" ? "object-cover" : "object-contain"} pointer-events-none`}
+                                <ScreenStack
+                                    screens={screens}
+                                    index={pv ? pv.idx : sel}
+                                    fit={fit}
+                                    animate={!!(pv && pv.anim)}
                                 />
                             ) : null}
 
                             {/* hotspots existentes */}
-                            {screen &&
+                            {screen && !pv &&
                                 (screen.hotspots || []).map((h, hi) => (
                                     <div
                                         key={hi}
@@ -292,6 +320,56 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                     style={draftStyle}
                                 />
                             ) : null}
+                        </div>
+
+                        {/* Transição de entrada do ecrã */}
+                        <div className="mt-3 flex items-center gap-2 flex-wrap text-xs border border-hairline p-2">
+                            <span className="text-mist">Transição ao entrar:</span>
+                            <select
+                                value={(screen && screen.transition) || "none"}
+                                onChange={(e) =>
+                                    setTransition({ transition: e.target.value })
+                                }
+                                className="border border-hairline bg-bone px-2 py-1 text-ink"
+                            >
+                                {TRANSITIONS.map((t) => (
+                                    <option key={t.id} value={t.id}>
+                                        {t.label}
+                                    </option>
+                                ))}
+                            </select>
+                            {screen && screen.transition && screen.transition !== "none" ? (
+                                <select
+                                    value={screen.transitionDur || 600}
+                                    onChange={(e) =>
+                                        setTransition({
+                                            transitionDur: Number(e.target.value),
+                                        })
+                                    }
+                                    className="border border-hairline bg-bone px-2 py-1 text-ink"
+                                >
+                                    {TRANSITION_DURS.map((d) => (
+                                        <option key={d} value={d}>
+                                            {d / 1000}s
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : null}
+                            <button
+                                type="button"
+                                onClick={previewTransition}
+                                disabled={!!pv || screens.length < 2}
+                                className="border border-hairline px-2 py-1 hover:border-ink disabled:opacity-40"
+                            >
+                                {pv ? "A mostrar…" : "Pré-visualizar"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={applyTransitionToAll}
+                                className="text-mist hover:text-ink underline"
+                            >
+                                aplicar a todos
+                            </button>
                         </div>
 
                         {/* Tempo automático do ecrã */}

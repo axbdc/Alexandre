@@ -1,5 +1,5 @@
 // frontend/src/components/RichMedia.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { t } from "../context/LanguageContext";
 
 const COPY = {
@@ -31,10 +31,110 @@ export const PhoneMock = ({ children, width = 230 }) => (
     </div>
 );
 
+// ---------- Transições entre ecrãs ----------
+// Cada ecrã pode ter { transition, transitionDur } = a forma como ENTRA.
+export const TRANSITIONS = [
+    { id: "none", label: "Corte seco" },
+    { id: "fade", label: "Fade" },
+    { id: "slide", label: "Deslizar" },
+    { id: "zoom", label: "Zoom + fade" },
+    { id: "flash", label: "Flash branco" },
+];
+export const TRANSITION_DURS = [300, 600, 1000, 1500];
+
+const RM_CSS = `
+@keyframes rmFade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rmSlide { from { transform: translateX(100%) } to { transform: translateX(0) } }
+@keyframes rmZoom { from { opacity: 0; transform: scale(1.15) } to { opacity: 1; transform: scale(1) } }
+@keyframes rmFlash { from { opacity: 1 } to { opacity: 0 } }
+`;
+
+const animFor = (type, dur) => {
+    if (type === "fade") return `rmFade ${dur}ms ease both`;
+    if (type === "slide") return `rmSlide ${dur}ms cubic-bezier(.2,.8,.2,1) both`;
+    if (type === "zoom") return `rmZoom ${dur}ms ease-out both`;
+    return "none";
+};
+
+// Mostra o ecrã atual por cima do anterior e anima a entrada.
+// Tem de estar dentro de um contentor com position relative/absolute.
+export const ScreenStack = ({
+    screens = [],
+    index = 0,
+    fit = "contain",
+    animate = true,
+    onClick,
+    clickable = false,
+}) => {
+    const [prev, setPrev] = useState(null);
+    const last = useRef(index);
+    const s = screens[index] || {};
+    const type = animate ? s.transition || "none" : "none";
+    const dur = Number(s.transitionDur) || 600;
+
+    useEffect(() => {
+        if (last.current === index) return;
+        const from = last.current;
+        last.current = index;
+        if (type === "none" || type === "flash") {
+            setPrev(null);
+            return;
+        }
+        setPrev(from);
+        const timer = setTimeout(() => setPrev(null), dur + 60);
+        return () => clearTimeout(timer);
+    }, [index, type, dur]);
+
+    const fitCls = fit === "cover" ? "object-cover" : "object-contain";
+    const p = prev !== null ? screens[prev] : null;
+
+    return (
+        <>
+            <style>{RM_CSS}</style>
+            {p ? (
+                <img
+                    src={p.src}
+                    alt=""
+                    draggable={false}
+                    className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
+                />
+            ) : null}
+            {s.src ? (
+                <img
+                    key={index}
+                    src={s.src}
+                    alt={`${index + 1}`}
+                    draggable={false}
+                    onClick={onClick}
+                    className={`absolute inset-0 w-full h-full ${fitCls} ${clickable ? "cursor-pointer" : ""} ${onClick ? "" : "pointer-events-none"}`}
+                    style={{ animation: animFor(type, dur) }}
+                />
+            ) : null}
+            {type === "flash" ? (
+                <div
+                    key={`flash-${index}`}
+                    className="absolute inset-0 bg-white pointer-events-none"
+                    style={{ animation: `rmFlash ${dur}ms ease-out both` }}
+                />
+            ) : null}
+        </>
+    );
+};
+
 // Player INTERATIVO (usado no separador de teste). Tocar avança; hotspots saltam.
 export const RichMediaPlayer = ({ screens = [], lang, fit = "contain" }) => {
     const [i, setI] = useState(0);
     const [showHint, setShowHint] = useState(true);
+
+    // Pré-carrega os ecrãs para as transições não piscarem.
+    useEffect(() => {
+        screens.forEach((sc) => {
+            if (sc && sc.src) {
+                const im = new Image();
+                im.src = sc.src;
+            }
+        });
+    }, [screens]);
 
     if (!screens.length) return null;
 
@@ -83,14 +183,12 @@ export const RichMediaPlayer = ({ screens = [], lang, fit = "contain" }) => {
     return (
         <div className="flex flex-col items-center">
             <PhoneMock>
-                <img
-                    src={screen.src}
-                    alt={`${i + 1}`}
+                <ScreenStack
+                    screens={screens}
+                    index={i}
+                    fit={fit}
                     onClick={onScreenClick}
-                    draggable={false}
-                    className={`w-full h-full ${
-                        fit === "cover" ? "object-cover" : "object-contain"
-                    } ${hasHotspots ? "" : "cursor-pointer"}`}
+                    clickable={!hasHotspots}
                 />
 
                 {hasHotspots
