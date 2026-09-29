@@ -23,7 +23,7 @@ const Experience = () => {
         >
             <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-12 md:gap-12">
                 <div className="col-span-12 md:col-span-3 reveal">
-                    <span className="overline !text-terracotta">— 04</span>
+                    <span className="overline !text-terracotta">04</span>
                     <h2 className="font-display text-4xl md:text-5xl mt-3 text-ink">
                         {t(SECTION_LABELS.experience, lang)}
                     </h2>

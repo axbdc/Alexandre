@@ -13,8 +13,8 @@ export const NAV = {
 
 export const HERO = {
     overline: {
-        PT: "Portfólio — Disponível para projetos 2026",
-        EN: "Portfolio — Available for 2026 projects",
+        PT: "Portfólio 2026",
+        EN: "Portfolio 2026",
     },
     role: { PT: "Design & Multimedia Lead", EN: "Design & Multimedia Lead" },
     // 📷 FOTO DO HERO
@@ -28,7 +28,7 @@ export const HERO = {
     },
     disciplines: [
         { PT: "Realidade Aumentada", EN: "Augmented Reality" },
-        { PT: "3D — Blender", EN: "3D — Blender" },
+        { PT: "3D e Blender", EN: "3D and Blender" },
         { PT: "Design Gráfico", EN: "Graphic Design" },
         { PT: "Web", EN: "Web" },
         { PT: "Motion", EN: "Motion" },
@@ -36,14 +36,14 @@ export const HERO = {
     ],
     location: { PT: "Ericeira, Portugal", EN: "Ericeira, Portugal" },
     intro: {
-        PT: "Design, AR e imagem para marcas que recusam o óbvio. Trabalho na fronteira entre o gráfico, o tridimensional e o que ainda não tem nome.",
-        EN: "Design, AR and image for brands that refuse the obvious. I work on the edge between graphic, three-dimensional, and what has yet to be named.",
+        PT: "Faço design, experiências em AR, 3D e sites para marcas. Gosto de projetos onde o gráfico e o interativo se cruzam, e acompanho-os da ideia até à entrega.",
+        EN: "I do design, AR experiences, 3D and websites for brands. I like projects where graphic design and interaction meet, and I see them through from the first idea to delivery.",
     },
     cta: { PT: "Ver trabalhos", EN: "See work" },
     cta_secondary: { PT: "Falar comigo", EN: "Get in touch" },
     floating_note: {
-        PT: "Selecionados — 2022 / 2026",
-        EN: "Selected — 2022 / 2026",
+        PT: "Trabalhos de 2022 a 2026",
+        EN: "Work from 2022 to 2026",
     },
 };
 
@@ -407,22 +407,22 @@ export const PROJECTS = [
 
 export const ABOUT = {
     heading: {
-        PT: "Designer multidisciplinar, 23 anos, baseado entre a Ericeira e Lisboa.",
-        EN: "Multidisciplinary designer, 23, based between Ericeira and Lisbon.",
+        PT: "Sou o Alexandre, designer multidisciplinar. Tenho 23 anos e vivo entre a Ericeira e Lisboa.",
+        EN: "I'm Alexandre, a multidisciplinary designer. I'm 23 and I live between Ericeira and Lisbon.",
     },
     body: [
         {
-            PT: "Formado em Engenharia Multimédia pelo ISTEC. Trabalho atualmente como Multimedia & AR Specialist na YDIGITAL MEDIA, depois de uma passagem pelo GCI Media Group enquanto designer gráfico.",
-            EN: "Multimedia Engineering graduate from ISTEC. Currently Multimedia & AR Specialist at YDIGITAL MEDIA after a spell at GCI Media Group as a graphic designer.",
+            PT: "Formei-me em Engenharia Multimédia no ISTEC. Hoje sou Design & Multimedia Lead na Ydigital Media, onde entrei como Multimedia & AR Specialist. Antes disso estive no GCI Media Group, como designer gráfico.",
+            EN: "I studied Multimedia Engineering at ISTEC. Today I'm Design & Multimedia Lead at Ydigital Media, where I started as Multimedia & AR Specialist. Before that I worked at GCI Media Group as a graphic designer.",
         },
         {
-            PT: "Movo-me confortavelmente entre o estático e o interativo, entre uma campanha impressa e uma experiência em AR. Encaro cada brief como um problema de composição — e o resto resolve-se com gosto e disciplina.",
-            EN: "I move comfortably between the static and the interactive, between a print campaign and an AR experience. I treat each brief as a composition problem — the rest is solved with taste and discipline.",
+            PT: "Tanto faço uma campanha para impressão como uma experiência em AR ou um site. Em qualquer um deles, o que me interessa é que fique bem feito e que funcione para quem o vai usar.",
+            EN: "I work on print campaigns as much as on AR experiences and websites. Whatever the format, what I care about is that it's well made and works for the people who use it.",
         },
     ],
     pull: {
-        PT: "Aprender depressa, errar com calma, entregar com clareza.",
-        EN: "Learn fast, fail calmly, deliver with clarity.",
+        PT: "Aprendo depressa e gosto de entregar trabalho bem acabado.",
+        EN: "I learn fast and I like to hand over work that is properly finished.",
     },
 };
 
@@ -439,24 +439,24 @@ export const SERVICES = [
         no: "02",
         title: { PT: "Design Gráfico", EN: "Graphic Design" },
         body: {
-            PT: "Identidade visual, campanhas, editorial e packaging com sensibilidade tipográfica.",
-            EN: "Visual identity, campaigns, editorial and packaging with typographic sensibility.",
+            PT: "Identidade visual, campanhas, editorial e packaging, com atenção à tipografia.",
+            EN: "Visual identity, campaigns, editorial and packaging, with attention to typography.",
         },
     },
     {
         no: "03",
         title: { PT: "3D & Direção de Arte", EN: "3D & Art Direction" },
         body: {
-            PT: "Modelação, render e composição em Blender — para web, social, AR ou impressão.",
-            EN: "Modelling, render and composition in Blender — for web, social, AR or print.",
+            PT: "Modelação, render e composição em Blender, para web, redes sociais, AR ou impressão.",
+            EN: "Modelling, rendering and composition in Blender, for web, social media, AR or print.",
         },
     },
     {
         no: "04",
         title: { PT: "Web Design & Desenvolvimento", EN: "Web Design & Development" },
         body: {
-            PT: "Sites em React/TypeScript ou HTML/CSS, com SEO, deploy em Vercel e tipografia cuidada.",
-            EN: "Sites in React/TypeScript or HTML/CSS, with SEO, Vercel deploy and careful typography.",
+            PT: "Sites em React/TypeScript ou HTML/CSS, com SEO e publicados na Vercel.",
+            EN: "Websites in React/TypeScript or HTML/CSS, with SEO, published on Vercel.",
         },
     },
     {
@@ -471,8 +471,8 @@ export const SERVICES = [
         no: "06",
         title: { PT: "Vídeo & Pós-produção", EN: "Video & Post-production" },
         body: {
-            PT: "Edição em Premiere e motion em After Effects — peças curtas, social cuts, teasers.",
-            EN: "Premiere editing and After Effects motion — shorts, social cuts, teasers.",
+            PT: "Edição em Premiere e animação em After Effects para vídeos curtos, redes sociais e teasers.",
+            EN: "Editing in Premiere and animation in After Effects for short videos, social media and teasers.",
         },
     },
 ];
@@ -493,8 +493,30 @@ export const TOOLS = [
 
 export const EXPERIENCE = [
     {
-        period: "2025 — Hoje",
-        period_en: "2025 — Present",
+        period: "Desde 2026",
+        period_en: "Since 2026",
+        role: { PT: "Design & Multimedia Lead", EN: "Design & Multimedia Lead" },
+        company: "YDIGITAL MEDIA",
+        scope: {
+            PT: "Lidero o design da agência: campanhas, rich media, 3D e redes sociais.",
+            EN: "I lead the agency's design work: campaigns, rich media, 3D and social media.",
+        },
+        details: {
+            PT: [
+                "Lidero o departamento de design e acompanho o trabalho da equipa, do briefing à entrega.",
+                "Campanhas rich media e banners HTML5 para marcas internacionais.",
+                "Animações 3D, newsletters e design para redes sociais.",
+            ],
+            EN: [
+                "I lead the design department and follow the team's work from brief to delivery.",
+                "Rich media campaigns and HTML5 banners for international brands.",
+                "3D animation, newsletters and social media design.",
+            ],
+        },
+    },
+    {
+        period: "2025 a 2026",
+        period_en: "2025 to 2026",
         role: { PT: "Multimedia & AR Specialist", EN: "Multimedia & AR Specialist" },
         company: "YDIGITAL MEDIA",
         scope: {
@@ -530,14 +552,14 @@ export const EXPERIENCE = [
         details: {
             PT: [
                 "Desenvolvimento de campanhas publicitárias do conceito ao deliverable final.",
-                "Design gráfico para suportes online e offline — redes sociais, print, OOH.",
+                "Design gráfico para redes sociais, impressão e publicidade exterior.",
                 "Web design e protótipos em Figma para websites e landings de clientes.",
                 "Conceção de packaging e expositores PLV para retalho e eventos.",
                 "Trabalho diário em equipa criativa: briefing, iteração com art directors e apresentação a cliente.",
             ],
             EN: [
                 "Development of advertising campaigns from concept to final deliverable.",
-                "Graphic design for online and offline media — social, print, OOH.",
+                "Graphic design for social media, print and outdoor advertising.",
                 "Web design and prototyping in Figma for client websites and landings.",
                 "Packaging design and POS displays for retail and events.",
                 "Daily work in a creative team: briefing, iteration with art directors and client presentation.",
@@ -545,8 +567,8 @@ export const EXPERIENCE = [
         },
     },
     {
-        period: "2022 — Hoje",
-        period_en: "2022 — Present",
+        period: "Desde 2022",
+        period_en: "Since 2022",
         role: { PT: "Web & Vídeo Freelancer", EN: "Freelance Web & Video" },
         company: { PT: "Independente", EN: "Independent" },
         scope: {
@@ -556,21 +578,21 @@ export const EXPERIENCE = [
         details: {
             PT: [
                 "Desenvolvimento e entrega de websites para negócios locais (Ericeira, Lisboa, Mafra), com deploy em Vercel.",
-                "Cobertura fotográfica de provas e eventos desportivos — automobilismo, surf e amadores.",
+                "Fotografia de provas e eventos desportivos, sobretudo automobilismo e surf.",
                 "Captação e edição de vídeo para eventos corporate e conteúdo social.",
                 "Gestão direta com clientes: orçamentação, agenda, contrato e entrega.",
             ],
             EN: [
                 "Development and delivery of websites for local businesses (Ericeira, Lisbon, Mafra), deployed to Vercel.",
-                "Photographic coverage of sporting events — motorsport, surf and amateur races.",
+                "Photography of races and sporting events, mostly motorsport and surf.",
                 "Filming and editing of video for corporate events and social content.",
                 "Direct client management: quoting, scheduling, contracts and delivery.",
             ],
         },
     },
     {
-        period: "2022 — 2023",
-        period_en: "2022 — 2023",
+        period: "2022 a 2023",
+        period_en: "2022 to 2023",
         role: { PT: "Técnico de Montagem Audiovisual", EN: "Audiovisual Technician" },
         company: "PALCO 22",
         scope: {
@@ -580,13 +602,13 @@ export const EXPERIENCE = [
         details: {
             PT: [
                 "Instalação e processamento de sinal de vídeo e áudio em eventos ao vivo.",
-                "Operação de câmara em ambiente indoor e outdoor — multi-câmara e câmara isolada.",
+                "Operação de câmara em interior e exterior, em multicâmara e câmara isolada.",
                 "Organização logística de eventos com foco em luz, imagem e som.",
                 "Trabalho em equipa técnica sob pressão de tempo e gestão de imprevistos.",
             ],
             EN: [
                 "Install and processing of video and audio signal in live events.",
-                "Camera operation in indoor and outdoor settings — multi-camera and isolated camera.",
+                "Camera operation indoors and outdoors, in multi-camera and single-camera setups.",
                 "Logistical organisation of events focused on light, image and sound.",
                 "Teamwork under time pressure and on-the-fly problem solving.",
             ],
@@ -596,12 +618,12 @@ export const EXPERIENCE = [
 
 export const CONTACT = {
     heading: {
-        PT: "Tem um projeto. Vamos\nfazê-lo bem.",
-        EN: "Got a project. Let's\nmake it well.",
+        PT: "Tens um projeto?\nVamos falar.",
+        EN: "Got a project?\nLet's talk.",
     },
     sub: {
-        PT: "Para propostas, colaborações ou apenas para dizer olá — envie uma mensagem. Respondo geralmente em 48h.",
-        EN: "For briefs, collaborations or just to say hi — send a message. I usually reply within 48h.",
+        PT: "Propostas de trabalho, colaborações ou só para dizer olá. Costumo responder em 48 horas.",
+        EN: "Job offers, collaborations or just to say hi. I usually reply within 48 hours.",
     },
     fields: {
         name: { PT: "Nome", EN: "Name" },
@@ -631,8 +653,8 @@ export const FOOTER = {
         EN: "Cabinet Grotesk · Satoshi · Newsreader",
     },
     available: {
-        PT: "Disponível para projetos",
-        EN: "Available for projects",
+        PT: "Aberto a novas oportunidades",
+        EN: "Open to new opportunities",
     },
 };
 

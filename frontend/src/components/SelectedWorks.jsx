@@ -62,7 +62,7 @@ const SelectedWorks = () => {
             <div className="mx-auto max-w-[1400px]">
                 <div className="flex items-end justify-between mb-12 md:mb-16 reveal">
                     <div>
-                        <span className="overline !text-terracotta">— 01</span>
+                        <span className="overline !text-terracotta">01</span>
                         <h2 className="font-display text-4xl md:text-6xl mt-3 text-ink">
                             {t(SECTION_LABELS.work, lang)}
                         </h2>

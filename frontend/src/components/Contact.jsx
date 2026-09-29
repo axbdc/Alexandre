@@ -97,7 +97,7 @@ const Contact = () => {
 
             <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-16 md:gap-12">
                 <div className="col-span-12 md:col-span-5 reveal">
-                    <span className="overline !text-terracotta">— 05</span>
+                    <span className="overline !text-terracotta">05</span>
                     <h2
                         className="font-display text-4xl md:text-6xl mt-3 text-ink whitespace-pre-line leading-[0.95]"
                         data-testid="contact-heading"
@@ -254,7 +254,7 @@ const Contact = () => {
                     <span className="text-terracotta">.</span>
                 </div>
                 <div className="text-sm text-graphite md:text-right space-y-1">
-                    <div>© {new Date().getFullYear()} — {t(FOOTER.rights, lang)}</div>
+                    <div>© {new Date().getFullYear()} · {t(FOOTER.rights, lang)}</div>
                     <div className="text-mist">{t(FOOTER.colophon, lang)}</div>
                     <div className="overline pt-2">
                         <span className="inline-block h-1.5 w-1.5 rounded-full bg-terracotta mr-2 align-middle" />

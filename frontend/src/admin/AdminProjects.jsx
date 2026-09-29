@@ -44,6 +44,7 @@ const toDoc = (p, i) => ({
     details_en: p.details ? L(p.details, "EN") : "",
     cover: p.cover || "",
     url: p.url || "",
+    video: p.video || "",
     tools: p.tools || [],
     gallery: p.gallery && p.gallery.length > 1 ? p.gallery : [],
     model_glb: p.model_glb || "",
@@ -72,6 +73,7 @@ const emptyDoc = () => ({
     details_en: "",
     cover: "",
     url: "",
+    video: "",
     tools: [],
     gallery: [],
     model_glb: "",
@@ -147,7 +149,7 @@ const ListInput = ({ value, onChange, sep, area, rows, className }) => {
 };
 
 // Lista de imagens (URLs, um por linha) + upload. Fora do componente (foco).
-const ImageListField = ({ label, help, value, onChange, onUpload, uploading }) => (
+const ImageListField = ({ label, help, value, onChange, onUpload, uploading, accept = "image/*", buttonLabel = "Carregar imagens" }) => (
     <div className="mb-4">
         <div className="overline text-mist mb-1">{label}</div>
         {help ? <div className="text-[11px] text-mist mb-1">{help}</div> : null}
@@ -160,10 +162,10 @@ const ImageListField = ({ label, help, value, onChange, onUpload, uploading }) =
             className="w-full border border-hairline bg-bone px-3 py-2 text-sm text-ink outline-none focus:border-ink"
         />
         <label className="cursor-pointer inline-flex text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink mt-2">
-            {uploading ? "A carregar…" : "Carregar imagens"}
+            {uploading ? "A carregar…" : buttonLabel}
             <input
                 type="file"
-                accept="image/*"
+                accept={accept}
                 multiple
                 className="hidden"
                 onChange={onUpload}
@@ -272,8 +274,8 @@ const AdminProjects = () => {
         try {
             for (const file of list) {
                 const url = await uploadToCloudinary(file);
-                if (target === "cover") {
-                    setEditing((e) => ({ ...e, cover: url }));
+                if (target === "cover" || target === "video") {
+                    setEditing((e) => ({ ...e, [target]: url }));
                 } else {
                     // gallery | posts | stories
                     setEditing((e) => ({
@@ -390,6 +392,41 @@ const AdminProjects = () => {
                     </div>
                     <Field label="Link (site live / vídeo)" value={editing.url} onChange={(v) => set("url", v)} />
 
+                    {editing.category === "motion" ? (
+                        <div className="mb-4 border border-hairline p-3">
+                            <Field
+                                label="Vídeo principal (toca dentro do site)"
+                                value={editing.video}
+                                onChange={(v) => set("video", v)}
+                            />
+                            <div className="-mt-1 flex items-center gap-3 flex-wrap">
+                                <label className="cursor-pointer text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink">
+                                    {uploading ? "A carregar…" : "Carregar vídeo"}
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        className="hidden"
+                                        onChange={(e) =>
+                                            handleUpload(e.target.files, "video")
+                                        }
+                                    />
+                                </label>
+                                <span className="text-[11px] text-mist">
+                                    A capa serve de imagem antes de carregar em play. Máx. ~100 MB no plano grátis do Cloudinary.
+                                </span>
+                            </div>
+                            {editing.video ? (
+                                <video
+                                    src={editing.video}
+                                    className="mt-3 w-full max-h-56 bg-black"
+                                    controls
+                                    muted
+                                    preload="metadata"
+                                />
+                            ) : null}
+                        </div>
+                    ) : null}
+
                     <label className="block mb-3">
                         <span className="overline text-mist">
                             Ferramentas (separadas por vírgula)
@@ -428,7 +465,10 @@ const AdminProjects = () => {
                         </>
                     ) : (
                         <ImageListField
-                            label="Galeria"
+                            label={editing.category === "motion" ? "Galeria — imagens e vídeos" : "Galeria"}
+                            help={editing.category === "motion" ? "Um URL por linha. Podes misturar imagens e vídeos (mp4, webm, mov); os vídeos são reconhecidos sozinhos." : undefined}
+                            accept={editing.category === "motion" ? "image/*,video/*" : "image/*"}
+                            buttonLabel={editing.category === "motion" ? "Carregar imagens / vídeos" : "Carregar imagens"}
                             value={editing.gallery}
                             onChange={(a) => set("gallery", a)}
                             onUpload={(e) =>

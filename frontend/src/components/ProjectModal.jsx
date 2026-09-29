@@ -11,6 +11,7 @@ import {
 import { useLang, t } from "../context/LanguageContext";
 import { launchAR, hasARAssets } from "../lib/ar";
 import { PhoneStrip } from "./RichMedia";
+import { isVideo, videoPoster } from "../lib/media";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -151,7 +152,23 @@ const PhotoFrame = ({ src, alt, caption }) => (
 
 // MOTION & RICH MEDIA — chrome de leitor de vídeo. Se houver `url`, o play
 // abre o vídeo; caso contrário fica decorativo (sinaliza "isto é vídeo").
-const PlayerFrame = ({ src, alt, url }) => {
+const PlayerFrame = ({ src, alt, url, video }) => {
+    // Vídeo principal carregado no admin: toca aqui mesmo.
+    if (video) {
+        return (
+            <div className="relative border border-hairline bg-ink overflow-hidden">
+                <video
+                    src={video}
+                    poster={src || videoPoster(video)}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="block w-full aspect-[16/9] bg-ink object-contain"
+                    aria-label={alt}
+                />
+            </div>
+        );
+    }
     const PlayButton = (
         <span className="h-14 w-14 md:h-16 md:w-16 rounded-full bg-bone/90 backdrop-blur-sm flex items-center justify-center shadow-lg transition-transform duration-500 group-hover:scale-105">
             <Play
@@ -354,7 +371,12 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
 
         if (isMotion) {
             return (
-                <PlayerFrame src={project.cover} alt={title} url={project.url} />
+                <PlayerFrame
+                    src={project.cover}
+                    alt={title}
+                    url={project.url}
+                    video={project.video}
+                />
             );
         }
 
@@ -637,12 +659,30 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                                 className="block w-full mb-3 md:mb-4 cursor-pointer overflow-hidden break-inside-avoid focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                                                 aria-label={`${t(project.title, lang)} — ${i + 1}`}
                                             >
-                                                <img
-                                                    src={src}
-                                                    alt={`${t(project.title, lang)} — ${i + 1}`}
-                                                    loading="lazy"
-                                                    className="w-full h-auto block"
-                                                />
+                                                {isVideo(src) ? (
+                                                    <span className="relative block">
+                                                        <video
+                                                            src={src}
+                                                            poster={videoPoster(src)}
+                                                            muted
+                                                            loop
+                                                            autoPlay
+                                                            playsInline
+                                                            preload="metadata"
+                                                            className="w-full h-auto block bg-ink"
+                                                        />
+                                                        <span className="absolute left-3 bottom-3 h-9 w-9 rounded-full bg-bone/90 flex items-center justify-center">
+                                                            <Play size={14} className="text-ink translate-x-[1px]" fill="currentColor" />
+                                                        </span>
+                                                    </span>
+                                                ) : (
+                                                    <img
+                                                        src={src}
+                                                        alt={`${t(project.title, lang)} — ${i + 1}`}
+                                                        loading="lazy"
+                                                        className="w-full h-auto block"
+                                                    />
+                                                )}
                                             </button>
                                         ))}
                                     </div>
@@ -689,12 +729,25 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                     </button>
                                 ) : null}
 
-                                <img
-                                    src={gallery[lightboxIndex]}
-                                    alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
-                                />
+                                {isVideo(gallery[lightboxIndex]) ? (
+                                    <video
+                                        key={gallery[lightboxIndex]}
+                                        src={gallery[lightboxIndex]}
+                                        poster={videoPoster(gallery[lightboxIndex])}
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] shadow-2xl bg-ink"
+                                    />
+                                ) : (
+                                    <img
+                                        src={gallery[lightboxIndex]}
+                                        alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
+                                    />
+                                )}
 
                                 {gallery.length > 1 ? (
                                     <button

@@ -14,10 +14,16 @@ export async function uploadToCloudinary(file) {
     fd.append("upload_preset", CLOUDINARY_PRESET);
 
     const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/upload`,
+        // "auto" aceita imagens e vídeos
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`,
         { method: "POST", body: fd },
     );
     if (!res.ok) throw new Error("upload falhou (" + res.status + ")");
     const data = await res.json();
+    // Vídeos: entrega sempre em .mp4 (o Cloudinary converte), para tocar em
+    // qualquer browser mesmo que o original seja .mov.
+    if (data.resource_type === "video") {
+        return data.secure_url.replace(/\.[a-z0-9]+$/i, ".mp4");
+    }
     return data.secure_url;
 }

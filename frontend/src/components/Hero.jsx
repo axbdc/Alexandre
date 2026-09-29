@@ -37,8 +37,8 @@ const Portrait = ({ lang }) => {
                 </div>
                 <div className="mt-1 text-xs text-mist max-w-[220px]">
                     {lang === "PT"
-                        ? "Retrato vertical 4:5 — define HERO.photo em content.js"
-                        : "Vertical 4:5 portrait — set HERO.photo in content.js"}
+                        ? "Retrato vertical 4:5. Define HERO.photo em content.js"
+                        : "Vertical 4:5 portrait. Set HERO.photo in content.js"}
                 </div>
             </div>
             <div className="absolute left-5 bottom-5 inline-flex items-center gap-2 rounded-full bg-bone/80 backdrop-blur px-4 py-2 text-xs text-ink">

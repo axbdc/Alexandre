@@ -19,6 +19,7 @@ const mapDoc = (id, d) => ({
             : undefined,
     cover: d.cover || "",
     url: d.url || undefined,
+    video: d.video || undefined,
     tools: Array.isArray(d.tools) ? d.tools : [],
     gallery:
         Array.isArray(d.gallery) && d.gallery.length
