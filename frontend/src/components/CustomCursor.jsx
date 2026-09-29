@@ -15,9 +15,17 @@ const CustomCursor = () => {
         let tx = x;
         let ty = y;
 
+        // O site pode estar com zoom (--site-zoom); o cursor tem de compensar.
+        let z = 1;
+        const readZoom = () => {
+            z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--site-zoom")) || 1;
+        };
+        readZoom();
+        window.addEventListener("resize", readZoom);
+
         const onMove = (e) => {
-            tx = e.clientX;
-            ty = e.clientY;
+            tx = e.clientX / z;
+            ty = e.clientY / z;
         };
 
         const tick = () => {
@@ -46,6 +54,7 @@ const CustomCursor = () => {
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("mouseover", onOver);
             window.removeEventListener("mouseout", onOut);
+            window.removeEventListener("resize", readZoom);
             document.body.classList.remove("has-custom-cursor");
         };
     }, []);

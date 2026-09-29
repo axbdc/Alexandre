@@ -5,12 +5,11 @@ import {
     ArrowLeft,
     ArrowRight,
     ArrowUpRight,
-    Box,
     Play,
 } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
-import { launchAR, hasARAssets } from "../lib/ar";
 import { PhoneStrip } from "./RichMedia";
+import ProjectModel3D from "./three/ProjectModel3D";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -27,7 +26,6 @@ const COPY = {
     link_test: { PT: "Testar rich media", EN: "Test rich media" },
     rm_hint: { PT: "Toca para interagir", EN: "Tap to interact" },
     rm_restart: { PT: "Recomeçar", EN: "Restart" },
-    view_ar: { PT: "Ver em AR / 3D", EN: "View in AR / 3D" },
     prev: { PT: "Anterior", EN: "Previous" },
     next: { PT: "Seguinte", EN: "Next" },
     close: { PT: "Fechar", EN: "Close" },
@@ -122,7 +120,7 @@ const PrintFrame = ({ src, alt }) => (
         <img
             src={src}
             alt={alt}
-            className="max-w-full max-h-[58vh] object-contain bg-white shadow-[0_30px_60px_-25px_rgba(28,27,26,0.55)]"
+            className="max-w-full max-h-[calc(58vh/var(--site-zoom))] object-contain bg-white shadow-[0_30px_60px_-25px_rgba(28,27,26,0.55)]"
             loading="lazy"
         />
     </div>
@@ -292,32 +290,17 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         }
 
         if (cat === "ar3d") {
-            const arOverlay = hasARAssets(project) ? (
-                <button
-                    type="button"
-                    onClick={() =>
-                        launchAR({
-                            glb: project.model_glb,
-                            usdz: project.model_usdz,
-                            title,
-                            image: project.cover,
-                        })
-                    }
-                    data-testid="modal-ar-button"
-                    className="absolute bottom-3 right-3 md:bottom-4 md:right-4 inline-flex items-center gap-2 bg-ink text-bone hover:bg-terracotta transition-colors duration-500 px-4 py-2.5 shadow-lg"
-                >
-                    <Box size={14} />
-                    <span className="text-xs tracking-[0.18em] uppercase">
-                        {t(COPY.view_ar, lang)}
-                    </span>
-                </button>
-            ) : null;
+            // Modelo .glb real → fica embutido e rodável ali mesmo, sem
+            // botão nem hand-off para uma app externa. Sem modelo, mantém
+            // o render estático em "estúdio" como antes.
+            if (project.model_glb) {
+                return <ProjectModel3D url={project.model_glb} />;
+            }
             return (
                 <StageFrame
                     src={project.cover}
                     alt={title}
                     label={t(project.subtitle, lang)}
-                    overlay={arOverlay}
                 />
             );
         }
@@ -397,7 +380,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                     {/* Centered card */}
                     <motion.div
                         key={project.id}
-                        className="relative bg-bone w-full max-w-[940px] max-h-[88vh] flex flex-col shadow-[0_30px_80px_-20px_rgba(28,27,26,0.35)]"
+                        className="relative bg-bone w-full max-w-[940px] max-h-[calc(88vh/var(--site-zoom))] flex flex-col shadow-[0_30px_80px_-20px_rgba(28,27,26,0.35)]"
                         initial={{ y: 24, opacity: 0, scale: 0.985 }}
                         animate={{ y: 0, opacity: 1, scale: 1 }}
                         exit={{ y: 12, opacity: 0, scale: 0.99 }}
@@ -693,7 +676,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                     src={gallery[lightboxIndex]}
                                     alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl"
+                                    className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
                                 />
 
                                 {gallery.length > 1 ? (

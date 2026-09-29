@@ -1,5 +1,5 @@
 /* App-level styles intentionally minimal — see index.css */
 .App {
-    min-height: 100vh;
+    min-height: calc(100vh / var(--site-zoom, 1));
     background: var(--bone);
 }

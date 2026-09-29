@@ -24,7 +24,7 @@ const Portfolio = () => {
     }, []);
 
     return (
-        <div className="App grain" data-testid="portfolio-root">
+        <div className="App grain site-zoom" data-testid="portfolio-root">
             <CustomCursor />
             <Navigation />
             <main>

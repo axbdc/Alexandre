@@ -159,6 +159,20 @@
     }
 }
 
+/* Escala do site em ecrãs grandes (equivale ao zoom do browser).
+   Para mudar a escala, altera só o valor 0.75. */
+:root {
+    --site-zoom: 1;
+}
+@media (min-width: 1280px) {
+    :root {
+        --site-zoom: 0.75;
+    }
+}
+.site-zoom {
+    zoom: var(--site-zoom);
+}
+
 /* Custom cursor */
 .cursor-dot {
     position: fixed;
