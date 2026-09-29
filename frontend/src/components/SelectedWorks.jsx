@@ -152,6 +152,7 @@ const SelectedWorks = () => {
                                     type="button"
                                     onClick={() => setOpenId(p.id)}
                                     data-testid={`project-card-${p.id}`}
+                                    data-cursor="project"
                                     aria-label={t(p.title, lang)}
                                     className="group block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                                 >

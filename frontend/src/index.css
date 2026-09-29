@@ -244,32 +244,91 @@
     zoom: var(--site-zoom);
 }
 
-/* Custom cursor */
-.cursor-dot {
+/* Custom cursor: ponto + anel (ver CustomCursor.jsx) */
+.cursor-dot,
+.cursor-ring {
     position: fixed;
     top: 0;
     left: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--ink);
     pointer-events: none;
     z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition:
-        width 0.25s ease,
-        height 0.25s ease,
-        background 0.25s ease,
-        opacity 0.25s ease;
-    mix-blend-mode: difference;
+    opacity: 0;
+    will-change: transform;
+    /* anula o zoom do site: o cursor fica sempre com o tamanho real */
+    zoom: calc(1 / var(--site-zoom, 1));
 }
-.cursor-dot.hover {
+.cursor-dot.on,
+.cursor-ring.on {
+    opacity: 1;
+}
+.cursor-dot {
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 999px;
+    background: var(--ink);
+    box-shadow: 0 0 0 1.5px var(--bone);
+    transition: opacity 0.2s ease;
+}
+.cursor-dot.is-project {
+    opacity: 0;
+}
+.cursor-ring {
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border-radius: 999px;
+    border: 1.5px solid rgb(var(--c-ink) / 0.5);
+    display: grid;
+    place-items: center;
+    transition:
+        width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        margin 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        border-color 0.25s ease,
+        background 0.25s ease,
+        opacity 0.2s ease;
+}
+.cursor-ring.is-hover {
     width: 56px;
     height: 56px;
-    background: var(--bone);
+    margin: -28px 0 0 -28px;
+    border-color: rgb(var(--c-accent));
+    background: rgb(var(--c-accent) / 0.08);
+}
+.cursor-ring.is-project {
+    width: 104px;
+    height: 104px;
+    margin: -52px 0 0 -52px;
+    border-color: rgb(var(--c-accent));
+    background: rgb(var(--c-accent));
+}
+.cursor-ring.is-down {
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+}
+.cursor-ring.is-project.is-down {
+    width: 92px;
+    height: 92px;
+    margin: -46px 0 0 -46px;
+}
+.cursor-ring-label {
+    font-family: "Satoshi", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: #fff;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.cursor-ring.is-project .cursor-ring-label {
+    opacity: 1;
 }
 @media (hover: none), (pointer: coarse) {
-    .cursor-dot {
+    .cursor-dot,
+    .cursor-ring {
         display: none;
     }
 }
