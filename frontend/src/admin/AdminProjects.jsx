@@ -1,5 +1,5 @@
 // frontend/src/admin/AdminProjects.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import {
@@ -107,22 +107,56 @@ const Field = ({ label, value, onChange, area }) => (
     </label>
 );
 
+// Campo de lista (ferramentas, imagens). Guarda o texto tal como é escrito
+// e só converte para array por baixo — assim dá para escrever vírgulas,
+// espaços e mudanças de linha sem serem apagados a meio.
+const parseList = (text, sep) =>
+    text
+        .split(sep)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+const ListInput = ({ value, onChange, sep, area, rows, className }) => {
+    const joiner = sep === "," ? ", " : "\n";
+    const [text, setText] = useState((value || []).join(joiner));
+    const last = useRef(value || []);
+
+    // Se o array mudar por fora (ex.: upload de imagem, abrir outro projeto),
+    // atualiza o texto.
+    useEffect(() => {
+        const v = value || [];
+        if (JSON.stringify(v) !== JSON.stringify(last.current)) {
+            last.current = v;
+            setText(v.join(joiner));
+        }
+    }, [value, joiner]);
+
+    const handle = (e) => {
+        const t = e.target.value;
+        setText(t);
+        const arr = parseList(t, sep);
+        last.current = arr;
+        onChange(arr);
+    };
+
+    return area ? (
+        <textarea rows={rows} value={text} onChange={handle} className={className} />
+    ) : (
+        <input value={text} onChange={handle} className={className} />
+    );
+};
+
 // Lista de imagens (URLs, um por linha) + upload. Fora do componente (foco).
 const ImageListField = ({ label, help, value, onChange, onUpload, uploading }) => (
     <div className="mb-4">
         <div className="overline text-mist mb-1">{label}</div>
         {help ? <div className="text-[11px] text-mist mb-1">{help}</div> : null}
-        <textarea
+        <ListInput
+            area
             rows={3}
-            value={(value || []).join("\n")}
-            onChange={(e) =>
-                onChange(
-                    e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                )
-            }
+            sep={"\n"}
+            value={value}
+            onChange={onChange}
             className="w-full border border-hairline bg-bone px-3 py-2 text-sm text-ink outline-none focus:border-ink"
         />
         <label className="cursor-pointer inline-flex text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink mt-2">
@@ -341,17 +375,10 @@ const AdminProjects = () => {
                         <span className="overline text-mist">
                             Ferramentas (separadas por vírgula)
                         </span>
-                        <input
-                            value={(editing.tools || []).join(", ")}
-                            onChange={(e) =>
-                                set(
-                                    "tools",
-                                    e.target.value
-                                        .split(",")
-                                        .map((s) => s.trim())
-                                        .filter(Boolean),
-                                )
-                            }
+                        <ListInput
+                            sep=","
+                            value={editing.tools}
+                            onChange={(a) => set("tools", a)}
                             className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
                         />
                     </label>
