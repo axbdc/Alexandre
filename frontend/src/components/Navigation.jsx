@@ -64,7 +64,7 @@ const Navigation = () => {
                     ))}
                 </ul>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 md:gap-6">
                     <button
                         onClick={toggle}
                         data-testid="nav-pt-en-toggle"
@@ -91,6 +91,15 @@ const Navigation = () => {
                             EN
                         </span>
                     </button>
+
+                    <a
+                        href="#contact"
+                        onClick={go("contact")}
+                        data-testid="nav-cta"
+                        className="hidden md:inline-flex items-center gap-2 rounded-full bg-ink text-bone px-5 py-2.5 text-sm font-medium hover:bg-terracotta transition-colors duration-300"
+                    >
+                        {lang === "PT" ? "Vamos falar" : "Let's talk"}
+                    </a>
 
                     <button
                         onClick={() => setOpen((s) => !s)}

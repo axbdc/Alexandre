@@ -23,7 +23,7 @@ const Experience = () => {
         >
             <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-12 md:gap-12">
                 <div className="col-span-12 md:col-span-3 reveal">
-                    <span className="overline">— 04</span>
+                    <span className="overline !text-terracotta">— 04</span>
                     <h2 className="font-display text-4xl md:text-5xl mt-3 text-ink">
                         {t(SECTION_LABELS.experience, lang)}
                     </h2>
@@ -62,7 +62,7 @@ const Experience = () => {
                                             {localize(e.company, lang)}
                                         </span>
                                         <span
-                                            className={`shrink-0 inline-flex items-center justify-center h-9 w-9 border transition-colors duration-500 ${
+                                            className={`shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full border transition-colors duration-500 ${
                                                 isOpen
                                                     ? "bg-ink text-bone border-ink"
                                                     : "border-hairline text-ink group-hover:border-ink"

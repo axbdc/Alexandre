@@ -14,6 +14,17 @@
         --terracotta-hover: #8C4939;
         --hairline: #DCD8CF;
 
+        /* Canais RGB (para as classes do Tailwind com transparência) */
+        --c-bone: 244 242 238;
+        --c-pebble: 232 229 223;
+        --c-sand: 222 218 209;
+        --c-ink: 28 27 26;
+        --c-graphite: 92 90 86;
+        --c-mist: 143 141 136;
+        --c-accent: 168 91 72;
+        --c-accent-hover: 140 73 57;
+        --c-hairline: 220 216 207;
+
         /* shadcn tokens mapped onto our warm palette */
         --background: 42 18% 94%;
         --foreground: 30 6% 11%;
@@ -123,6 +134,8 @@
         letter-spacing: 0.22em;
         text-transform: uppercase;
         color: var(--mist);
+        /* o Tailwind também tem uma classe "overline" (risca por cima) — anula */
+        text-decoration-line: none;
     }
 
     .marquee {
@@ -157,6 +170,64 @@
     .hairline-bottom {
         border-bottom: 1px solid var(--hairline);
     }
+}
+
+
+/* =========================================================
+   TEMA NEUTRO do site público (aplicado em .App).
+   O admin fica de fora e mantém o tema antigo.
+   ========================================================= */
+.theme-neutral {
+    --c-bone: 248 247 244;       /* fundo — papel quente, quase branco */
+    --c-pebble: 240 238 233;     /* superfícies (cards) */
+    --c-sand: 232 229 223;       /* superfícies 2 */
+    --c-ink: 20 20 19;           /* texto principal */
+    --c-graphite: 88 87 83;      /* texto secundário */
+    --c-mist: 150 148 142;       /* texto discreto */
+    --c-accent: 25 39 200;       /* destaque — azul #1927C8 */
+    --c-accent-hover: 18 29 160;
+    --c-hairline: 226 223 216;   /* linhas */
+
+    --bone: rgb(var(--c-bone));
+    --pebble: rgb(var(--c-pebble));
+    --sand: rgb(var(--c-sand));
+    --ink: rgb(var(--c-ink));
+    --graphite: rgb(var(--c-graphite));
+    --mist: rgb(var(--c-mist));
+    --terracotta: rgb(var(--c-accent));
+    --terracotta-hover: rgb(var(--c-accent-hover));
+    --hairline: rgb(var(--c-hairline));
+
+    background: var(--bone);
+    color: var(--ink);
+}
+.theme-neutral.grain::before {
+    opacity: 0.25;
+}
+
+/* Disponibilidade (ponto a pulsar) */
+.pulse-dot {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #3ddc84;
+}
+.pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #3ddc84;
+    animation: pulse-ring 2s ease-out infinite;
+}
+@keyframes pulse-ring {
+    from { transform: scale(1); opacity: 0.6; }
+    to { transform: scale(3); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pulse-dot::after { animation: none; }
 }
 
 /* Escala do site em ecrãs grandes (equivale ao zoom do browser).
@@ -277,7 +348,7 @@
 .elegant-input {
     background: transparent;
     border: none;
-    border-bottom: 1px solid rgba(28, 27, 26, 0.35);
+    border-bottom: 1px solid rgb(var(--c-ink) / 0.25);
     width: 100%;
     padding: 14px 0;
     font: inherit;

@@ -62,7 +62,7 @@ const SelectedWorks = () => {
             <div className="mx-auto max-w-[1400px]">
                 <div className="flex items-end justify-between mb-12 md:mb-16 reveal">
                     <div>
-                        <span className="overline">— 01</span>
+                        <span className="overline !text-terracotta">— 01</span>
                         <h2 className="font-display text-4xl md:text-6xl mt-3 text-ink">
                             {t(SECTION_LABELS.work, lang)}
                         </h2>
@@ -98,7 +98,7 @@ const SelectedWorks = () => {
                                         onClick={() => setActive(c.id)}
                                         data-testid={`category-tab-${c.id}`}
                                         aria-pressed={isActive}
-                                        className={`group relative inline-flex items-center gap-2 px-5 py-3 border transition-colors duration-500 whitespace-nowrap ${
+                                        className={`group relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 border transition-colors duration-300 whitespace-nowrap ${
                                             isActive
                                                 ? "bg-ink text-bone border-ink"
                                                 : "border-hairline text-ink hover:border-ink"
@@ -155,14 +155,14 @@ const SelectedWorks = () => {
                                     aria-label={t(p.title, lang)}
                                     className="group block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                                 >
-                                    <div className="relative project-image-wrap aspect-[4/5]">
+                                    <div className="relative project-image-wrap aspect-square rounded-[18px] border border-hairline group-hover:border-ink/30 transition-colors duration-500">
                                         <img
                                             src={p.cover}
                                             alt={t(p.title, lang)}
                                             loading="lazy"
                                             style={{ objectFit: "contain" }}
                                         />
-                                        <span className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-full bg-bone/0 group-hover:bg-bone/95 backdrop-blur-sm flex items-center justify-center text-ink opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
+                                        <span className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-full bg-terracotta/0 group-hover:bg-terracotta text-bone backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
                                             <ArrowUpRight size={16} />
                                         </span>
                                     </div>

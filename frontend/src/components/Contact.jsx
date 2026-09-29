@@ -91,13 +91,13 @@ const Contact = () => {
             id="contact"
             ref={rootRef}
             data-testid="contact-section"
-            className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-sand"
+            className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-pebble"
         >
             <Toaster position="bottom-center" richColors closeButton />
 
             <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-16 md:gap-12">
                 <div className="col-span-12 md:col-span-5 reveal">
-                    <span className="overline">— 05</span>
+                    <span className="overline !text-terracotta">— 05</span>
                     <h2
                         className="font-display text-4xl md:text-6xl mt-3 text-ink whitespace-pre-line leading-[0.95]"
                         data-testid="contact-heading"
@@ -231,9 +231,9 @@ const Contact = () => {
                             type="submit"
                             disabled={loading}
                             data-testid="contact-form-submit"
-                            className="group inline-flex items-center justify-between gap-6 px-7 py-5 border border-ink text-ink hover:bg-ink hover:text-bone transition-colors duration-500 min-w-[280px] disabled:opacity-50 disabled:cursor-wait"
+                            className="group inline-flex items-center justify-between gap-6 rounded-full bg-terracotta px-7 py-4 text-bone hover:bg-terracotta-hover transition-colors duration-300 min-w-[260px] disabled:opacity-50 disabled:cursor-wait"
                         >
-                            <span className="text-sm tracking-[0.18em] uppercase">
+                            <span className="text-sm font-medium tracking-wide">
                                 {loading
                                     ? t(CONTACT.fields.sending, lang)
                                     : t(CONTACT.fields.submit, lang)}

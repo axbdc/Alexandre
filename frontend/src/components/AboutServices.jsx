@@ -20,7 +20,7 @@ const AboutServices = () => {
             >
                 <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-12 md:gap-12">
                     <div className="col-span-12 md:col-span-3 reveal">
-                        <span className="overline">— 02</span>
+                        <span className="overline !text-terracotta">— 02</span>
                         <h2 className="font-display text-4xl md:text-5xl mt-3 text-ink">
                             {t(SECTION_LABELS.about, lang)}
                         </h2>
@@ -50,11 +50,11 @@ const AboutServices = () => {
                             <span className="overline">
                                 {lang === "PT" ? "Ferramentas" : "Tools"}
                             </span>
-                            <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+                            <ul className="mt-5 flex flex-wrap gap-2 md:gap-3">
                                 {TOOLS.map((tool) => (
                                     <li
                                         key={tool}
-                                        className="text-base md:text-lg text-ink"
+                                        className="rounded-full border border-hairline bg-bone/40 px-4 py-2 text-sm md:text-base text-ink"
                                     >
                                         {tool}
                                     </li>
@@ -72,7 +72,7 @@ const AboutServices = () => {
             >
                 <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-12 md:gap-12">
                     <div className="col-span-12 md:col-span-3 reveal">
-                        <span className="overline">— 03</span>
+                        <span className="overline !text-terracotta">— 03</span>
                         <h2 className="font-display text-4xl md:text-5xl mt-3 text-ink">
                             {t(SECTION_LABELS.services, lang)}
                         </h2>

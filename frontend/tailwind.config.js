@@ -10,17 +10,19 @@ module.exports = {
                 serif: ['"Newsreader"', "serif"],
             },
             colors: {
-                bone: "#F4F2EE",
-                pebble: "#E8E5DF",
-                sand: "#DEDAD1",
-                ink: "#1C1B1A",
-                graphite: "#5C5A56",
-                mist: "#8F8D88",
+                // Cores ligadas a variáveis CSS (index.css). O site público usa o
+                // tema escuro (.theme-dark); o admin continua com o tema claro.
+                bone: "rgb(var(--c-bone) / <alpha-value>)",
+                pebble: "rgb(var(--c-pebble) / <alpha-value>)",
+                sand: "rgb(var(--c-sand) / <alpha-value>)",
+                ink: "rgb(var(--c-ink) / <alpha-value>)",
+                graphite: "rgb(var(--c-graphite) / <alpha-value>)",
+                mist: "rgb(var(--c-mist) / <alpha-value>)",
                 terracotta: {
-                    DEFAULT: "#A85B48",
-                    hover: "#8C4939",
+                    DEFAULT: "rgb(var(--c-accent) / <alpha-value>)",
+                    hover: "rgb(var(--c-accent-hover) / <alpha-value>)",
                 },
-                hairline: "#DCD8CF",
+                hairline: "rgb(var(--c-hairline) / <alpha-value>)",
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
                 card: {

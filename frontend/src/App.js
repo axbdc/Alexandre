@@ -5,7 +5,6 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import SelectedWorks from "@/components/SelectedWorks";
-import Marquee from "@/components/Marquee";
 import AboutServices from "@/components/AboutServices";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
@@ -24,12 +23,11 @@ const Portfolio = () => {
     }, []);
 
     return (
-        <div className="App grain site-zoom" data-testid="portfolio-root">
+        <div className="App site-zoom theme-neutral" data-testid="portfolio-root">
             <CustomCursor />
             <Navigation />
             <main>
                 <Hero />
-                <Marquee />
                 <SelectedWorks />
                 <AboutServices />
                 <Experience />

@@ -16,7 +16,24 @@ export const HERO = {
         PT: "Portfólio — Disponível para projetos 2026",
         EN: "Portfolio — Available for 2026 projects",
     },
-    role: { PT: "Multimedia & AR Specialist", EN: "Multimedia & AR Specialist" },
+    role: { PT: "Design & Multimedia Lead", EN: "Design & Multimedia Lead" },
+    // 📷 FOTO DO HERO
+    // showPhoto: true  -> mostra a coluna da foto (com placeholder enquanto "photo" estiver vazio)
+    // photo: URL da tua foto (ex.: Cloudinary), retrato vertical 4:5
+    showPhoto: false,
+    photo: "",
+    available: {
+        PT: "Aberto a novas oportunidades",
+        EN: "Open to new opportunities",
+    },
+    disciplines: [
+        { PT: "Realidade Aumentada", EN: "Augmented Reality" },
+        { PT: "3D — Blender", EN: "3D — Blender" },
+        { PT: "Design Gráfico", EN: "Graphic Design" },
+        { PT: "Web", EN: "Web" },
+        { PT: "Motion", EN: "Motion" },
+        { PT: "Fotografia", EN: "Photography" },
+    ],
     location: { PT: "Ericeira, Portugal", EN: "Ericeira, Portugal" },
     intro: {
         PT: "Design, AR e imagem para marcas que recusam o óbvio. Trabalho na fronteira entre o gráfico, o tridimensional e o que ainda não tem nome.",

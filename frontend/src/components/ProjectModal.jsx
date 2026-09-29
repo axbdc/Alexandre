@@ -97,7 +97,7 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
 // AR & 3D — render sobre "estúdio" neutro, com sombra de contacto.
 // object-contain para nunca cortar o render. overlay = botão AR (opcional).
 const StageFrame = ({ src, alt, label, overlay }) => (
-    <div className="relative border border-hairline overflow-hidden bg-gradient-to-b from-[#f4f2ee] to-[#e7e3da]">
+    <div className="relative border border-hairline overflow-hidden bg-gradient-to-b from-pebble to-sand">
         <div className="aspect-[16/9] flex items-center justify-center p-6 md:p-10">
             <img
                 src={src}
@@ -118,7 +118,7 @@ const StageFrame = ({ src, alt, label, overlay }) => (
 // DESIGN GRÁFICO — a arte como folha impressa sobre superfície neutra.
 // Respeita o rácio da imagem (object-contain), com sombra de folha.
 const PrintFrame = ({ src, alt }) => (
-    <div className="border border-hairline bg-[#e7e3da] p-6 md:p-12 flex items-center justify-center">
+    <div className="border border-hairline bg-sand p-6 md:p-12 flex items-center justify-center">
         <img
             src={src}
             alt={alt}
