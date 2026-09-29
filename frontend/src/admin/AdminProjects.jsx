@@ -240,6 +240,21 @@ const AdminProjects = () => {
         await load();
     };
 
+    // Abre o editor com uma cópia do projeto. Só é criado na base de dados
+    // quando carregas em Guardar (entra como rascunho e no fim da lista).
+    const duplicate = (it) => {
+        const { id, sort_order, ...rest } = it;
+        const copy = JSON.parse(JSON.stringify(rest));
+        setMsg("");
+        setEditing({
+            ...copy,
+            title_pt: (it.title_pt || "") + " (cópia)",
+            title_en: (it.title_en || "") + " (copy)",
+            published: false,
+        });
+        window.scrollTo(0, 0);
+    };
+
     const togglePublish = async (it) => {
         await updateDoc(doc(db, "projects", it.id), { published: !it.published });
         await load();
@@ -290,7 +305,11 @@ const AdminProjects = () => {
             <div className="min-h-screen bg-bone text-ink">
                 <header className="hairline-bottom flex items-center justify-between px-6 h-14">
                     <span className="overline">
-                        {editing.id ? "Editar projeto" : "Novo projeto"}
+                        {editing.id
+                            ? "Editar projeto"
+                            : editing.title_pt && editing.title_pt.endsWith(" (cópia)")
+                              ? "Duplicar projeto"
+                              : "Novo projeto"}
                     </span>
                     <button
                         onClick={() => setEditing(null)}
@@ -555,6 +574,12 @@ const AdminProjects = () => {
                                         className="link-underline text-ink"
                                     >
                                         Editar
+                                    </button>
+                                    <button
+                                        onClick={() => duplicate(it)}
+                                        className="text-mist hover:text-ink"
+                                    >
+                                        Duplicar
                                     </button>
                                     <button
                                         onClick={() => togglePublish(it)}
