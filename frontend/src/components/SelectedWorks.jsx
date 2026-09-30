@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLang, t } from "../context/LanguageContext";
 import { CATEGORIES, SECTION_LABELS } from "../data/content";
 import useProjects from "../hooks/useProjects";
+import { cld, cldSrcSet } from "../lib/img";
 import useReveal from "../hooks/useReveal";
 import { ArrowUpRight } from "lucide-react";
 import ProjectModal from "./ProjectModal";
@@ -158,9 +159,12 @@ const SelectedWorks = () => {
                                 >
                                     <div className="relative project-image-wrap aspect-square rounded-[18px] border border-hairline group-hover:border-ink/30 transition-colors duration-500">
                                         <img
-                                            src={p.cover}
+                                            src={cld(p.cover, 800)}
+                                            srcSet={cldSrcSet(p.cover)}
+                                            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                             alt={t(p.title, lang)}
                                             loading="lazy"
+                                            decoding="async"
                                             style={{ objectFit: "contain" }}
                                         />
                                         <span className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-full bg-terracotta/0 group-hover:bg-terracotta text-bone backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">

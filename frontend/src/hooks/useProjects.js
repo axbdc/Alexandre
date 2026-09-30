@@ -1,8 +1,13 @@
 // frontend/src/hooks/useProjects.js
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore/lite";
+import { db } from "../lib/firestoreLite";
 import { PROJECTS as FALLBACK } from "../data/content";
+import { cld } from "../lib/img";
+
+// Largura máxima das imagens dentro do modal (chega para ecrãs retina).
+const BIG = 1800;
+const big = (u) => cld(u, BIG);
 
 // Documento Firestore (plano) -> forma que os componentes esperam.
 const mapDoc = (id, d) => ({
@@ -17,23 +22,28 @@ const mapDoc = (id, d) => ({
         d.details_pt || d.details_en
             ? { PT: d.details_pt || "", EN: d.details_en || "" }
             : undefined,
-    cover: d.cover || "",
+    cover: big(d.cover || ""),
     url: d.url || undefined,
     video: d.video || undefined,
     tools: Array.isArray(d.tools) ? d.tools : [],
     gallery:
         Array.isArray(d.gallery) && d.gallery.length
-            ? d.gallery
-            : [d.cover].filter(Boolean),
+            ? d.gallery.map(big)
+            : [big(d.cover)].filter(Boolean),
     model_glb: d.model_glb || undefined,
     model_usdz: d.model_usdz || undefined,
     richmedia:
         d.category === "richmedia" || d.is_richmedia
-            ? { fit: d.rm_fit || "contain", screens: d.screens || [] }
+            ? {
+                  fit: d.rm_fit || "contain",
+                  screens: (d.screens || []).map((sc) =>
+                      sc && sc.src ? { ...sc, src: cld(sc.src, 1200) } : sc,
+                  ),
+              }
             : undefined,
     subtype: d.subtype || "",
-    posts: Array.isArray(d.posts) ? d.posts : [],
-    stories: Array.isArray(d.stories) ? d.stories : [],
+    posts: Array.isArray(d.posts) ? d.posts.map(big) : [],
+    stories: Array.isArray(d.stories) ? d.stories.map(big) : [],
     sort_order: typeof d.sort_order === "number" ? d.sort_order : 0,
 });
 

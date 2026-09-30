@@ -13,7 +13,7 @@ import {
     query,
     orderBy,
 } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebaseAdmin";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
