@@ -1,12 +1,14 @@
 // frontend/src/hooks/useProjects.js
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore/lite";
-import { db } from "../lib/firestoreLite";
+import { fetchPublishedProjects } from "../lib/projectsApi";
 import { PROJECTS as FALLBACK } from "../data/content";
 import { cld } from "../lib/img";
 
-// Largura máxima das imagens dentro do modal (chega para ecrãs retina).
-const BIG = 1800;
+// Largura máxima das imagens dentro do modal: 1000px no telemóvel (nítido em
+// retina) e 1800px em ecrãs grandes. Só estes dois tamanhos, para o Cloudinary
+// os ter sempre em cache (ver lib/warm.js).
+const BIG =
+    typeof window !== "undefined" && window.innerWidth < 768 ? 1000 : 1800;
 const big = (u) => cld(u, BIG);
 
 // Documento Firestore (plano) -> forma que os componentes esperam.
@@ -47,34 +49,56 @@ const mapDoc = (id, d) => ({
     sort_order: typeof d.sort_order === "number" ? d.sort_order : 0,
 });
 
-// Começa com o content.js (render imediato), e troca pelos dados do Firebase
-// quando chegarem. Se o Firebase falhar ou estiver vazio, mantém o content.js.
+// Cache local da última lista (visitas seguintes aparecem logo).
+const CACHE_KEY = "ptf:projects:v1";
+const readCache = () => {
+    try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+};
+const writeCache = (rows) => {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+    } catch (e) {
+        /* sem espaço / modo privado: ignora */
+    }
+};
+const toProjects = (rows) =>
+    rows
+        .map(({ id, data }) => mapDoc(id, data))
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+// Mostra logo a lista em cache (se houver) e atualiza com a do Firestore.
+// Já não mostra os projetos de exemplo do content.js enquanto carrega (evitava
+// descarregar imagens que iam ser trocadas); só os usa se o Firestore falhar.
 export default function useProjects() {
-    const [projects, setProjects] = useState(FALLBACK);
+    const [projects, setProjects] = useState(() => {
+        const cached = readCache();
+        return cached && cached.length ? toProjects(cached) : null;
+    });
 
     useEffect(() => {
         let active = true;
-        (async () => {
-            try {
-                const snap = await getDocs(
-                    query(
-                        collection(db, "projects"),
-                        where("published", "==", true),
-                    ),
-                );
-                if (!active || snap.empty) return;
-                const rows = snap.docs
-                    .map((doc) => mapDoc(doc.id, doc.data()))
-                    .sort((a, b) => a.sort_order - b.sort_order);
-                setProjects(rows);
-            } catch (e) {
-                // Mantém o fallback do content.js
-            }
-        })();
+        fetchPublishedProjects()
+            .then((rows) => {
+                if (!active) return;
+                if (rows.length) {
+                    setProjects(toProjects(rows));
+                    writeCache(rows);
+                } else {
+                    setProjects((p) => p || FALLBACK);
+                }
+            })
+            .catch(() => {
+                if (active) setProjects((p) => p || FALLBACK);
+            });
         return () => {
             active = false;
         };
     }, []);
 
-    return { projects };
+    return { projects: projects || [], loading: !projects };
 }

@@ -11,8 +11,8 @@ const firebaseConfig = {
     appId: "1:1034769508450:web:1d1e07d23b4273a290093b",
 };
 
-// Só a app. O Firestore e o login vivem em ficheiros à parte para o site
+// Só a app (usada pelo admin). O Firestore e o login vivem em ficheiros à parte para o site
 // público não carregar código que só o admin usa:
-//  - lib/firestoreLite.js -> leitura dos projetos (site público, versão leve)
+//  - lib/projectsApi.js   -> leitura dos projetos (site público, API REST, sem SDK)
 //  - lib/firebaseAdmin.js -> Firestore completo + login (só em /admin)
 export const app = initializeApp(firebaseConfig);

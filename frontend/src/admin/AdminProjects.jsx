@@ -14,6 +14,7 @@ import {
     orderBy,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebaseAdmin";
+import { warmProject } from "@/lib/warm";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
@@ -227,6 +228,7 @@ const AdminProjects = () => {
                 data.sort_order = items.length;
                 await addDoc(collection(db, "projects"), data);
             }
+            warmProject(data); // gera já as versões otimizadas no Cloudinary
             setEditing(null);
             await load();
         } catch (e) {
