@@ -552,14 +552,14 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             data-testid="modal-external-link"
-                                            className="group inline-flex items-center gap-2 text-ink text-sm"
+                                            className="group inline-flex w-full sm:w-auto items-center justify-between gap-6 rounded-full bg-terracotta px-6 py-3.5 text-bone shadow-[0_10px_24px_-12px_rgba(0,0,0,0.45)] hover:bg-terracotta-hover transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
                                         >
-                                            <span className="link-underline">
+                                            <span className="text-sm font-medium tracking-wide">
                                                 {linkLabel}
                                             </span>
                                             <ArrowUpRight
-                                                size={14}
-                                                className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                                size={18}
+                                                className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                                             />
                                         </a>
                                     ) : null}

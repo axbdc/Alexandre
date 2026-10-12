@@ -1,12 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { toast, Toaster } from "sonner";
 import { useLang, t } from "../context/LanguageContext";
 import { CONTACT, SECTION_LABELS, SOCIAL, FOOTER } from "../data/content";
 import { ArrowUpRight } from "lucide-react";
 import useReveal from "../hooks/useReveal";
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const initialForm = { name: "", email: "", subject: "", message: "" };
 
@@ -15,6 +11,8 @@ const Contact = () => {
     const rootRef = useReveal([lang]);
     const [form, setForm] = useState(initialForm);
     const [loading, setLoading] = useState(false);
+    // Mensagem por baixo do botão: { type: "ok" | "error", text }
+    const [status, setStatus] = useState(null);
 
     const onChange = (e) =>
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -23,18 +21,21 @@ const Contact = () => {
         e.preventDefault();
         if (loading) return;
         if (!form.name || !form.email || !form.message) {
-            toast.error(
-                lang === "PT"
-                    ? "Preenche nome, email e mensagem."
-                    : "Fill in name, email and message.",
-            );
+            setStatus({
+                type: "error",
+                text:
+                    lang === "PT"
+                        ? "Preenche nome, email e mensagem."
+                        : "Fill in name, email and message.",
+            });
             return;
         }
         setLoading(true);
-        const accessKey = process.env.REACT_APP_WEB3FORMS_KEY;
-        let delivered = false;
+        setStatus(null);
 
-        // 1) Try Web3Forms (client-side delivery). Failure is non-fatal.
+        // Envio por email via Web3Forms (único destino; o backend antigo foi retirado).
+        let delivered = false;
+        const accessKey = process.env.REACT_APP_WEB3FORMS_KEY;
         if (accessKey) {
             try {
                 const fd = new FormData();
@@ -58,31 +59,12 @@ const Contact = () => {
             }
         }
 
-        // 2) Always persist a backup copy on our backend.
-        let stored = false;
-        try {
-            await axios.post(`${API}/contact`, form, { timeout: 12000 });
-            stored = true;
-        } catch (_) {
-            stored = false;
-        }
-
         setLoading(false);
-
-        if (!delivered && !stored) {
-            toast.error(t(CONTACT.fields.error, lang));
+        if (!delivered) {
+            setStatus({ type: "error", text: t(CONTACT.fields.error, lang) });
             return;
         }
-
-        if (delivered) {
-            toast.success(t(CONTACT.fields.success, lang));
-        } else {
-            toast.warning(
-                lang === "PT"
-                    ? "Mensagem recebida e guardada. O envio por email ficou pendente."
-                    : "Message received and stored. Email delivery is pending.",
-            );
-        }
+        setStatus({ type: "ok", text: t(CONTACT.fields.success, lang) });
         setForm(initialForm);
     };
 
@@ -93,7 +75,6 @@ const Contact = () => {
             data-testid="contact-section"
             className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-pebble"
         >
-            <Toaster position="bottom-center" richColors closeButton />
 
             <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-16 md:gap-12">
                 <div className="col-span-12 md:col-span-5 reveal">
@@ -243,6 +224,16 @@ const Contact = () => {
                                 className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
                             />
                         </button>
+                        <p
+                            role="status"
+                            aria-live="polite"
+                            data-testid="contact-form-status"
+                            className={`mt-4 min-h-[1.25rem] text-sm ${
+                                status?.type === "error" ? "text-terracotta" : "text-ink"
+                            }`}
+                        >
+                            {status ? status.text : ""}
+                        </p>
                     </div>
                 </form>
             </div>

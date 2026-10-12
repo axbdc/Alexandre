@@ -69,7 +69,12 @@ const Hero = () => {
             {/* brilho de fundo subtil */}
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -top-40 right-[-10%] h-[520px] w-[520px] rounded-full bg-terracotta/[0.06] blur-[120px]"
+                className="pointer-events-none absolute -top-40 right-[-10%] h-[760px] w-[760px] rounded-full"
+                style={{
+                    // gradiente radial em vez de blur(120px): mesmo efeito, quase sem custo de GPU no telemóvel
+                    background:
+                        "radial-gradient(closest-side, color-mix(in srgb, var(--terracotta) 9%, transparent), transparent)",
+                }}
             />
 
             <div className="mx-auto max-w-[1400px] relative grid grid-cols-12 gap-y-12 md:gap-x-10 lg:gap-x-16 items-end">

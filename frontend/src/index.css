@@ -422,3 +422,29 @@
 .elegant-input:focus {
     border-color: var(--ink);
 }
+
+/* Painel da Experiência: abre/fecha com CSS (substitui o framer-motion) */
+.exp-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.exp-panel.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+/* Grelha de projetos: entrada suave em CSS ao trocar de categoria */
+@keyframes work-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
+}
+.work-in {
+    animation: work-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+    .exp-panel, .work-in { transition: none; animation: none; }
+}

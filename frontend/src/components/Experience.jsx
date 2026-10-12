@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
 import { EXPERIENCE, SECTION_LABELS } from "../data/content";
@@ -82,27 +81,14 @@ const Experience = () => {
                                     {localize(e.company, lang)}
                                 </div>
 
-                                <AnimatePresence initial={false}>
-                                    {isOpen && (
-                                        <motion.div
-                                            id={`exp-panel-${i}`}
-                                            data-testid={`experience-panel-${i}`}
-                                            key="panel"
-                                            initial={{
-                                                height: 0,
-                                                opacity: 0,
-                                            }}
-                                            animate={{
-                                                height: "auto",
-                                                opacity: 1,
-                                            }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{
-                                                duration: 0.45,
-                                                ease: [0.22, 1, 0.36, 1],
-                                            }}
-                                            className="overflow-hidden"
-                                        >
+                                {/* Painel: abre/fecha só com CSS (grid 0fr -> 1fr), sem framer-motion */}
+                                <div
+                                    id={`exp-panel-${i}`}
+                                    data-testid={`experience-panel-${i}`}
+                                    aria-hidden={!isOpen}
+                                    className={`exp-panel ${isOpen ? "is-open" : ""}`}
+                                >
+                                    <div className="overflow-hidden">
                                             <div className="pb-9 md:pb-12 grid grid-cols-12 gap-4">
                                                 <div className="hidden md:block md:col-span-3" />
                                                 <div className="col-span-12 md:col-span-9">
@@ -141,9 +127,8 @@ const Experience = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    </div>
+                                </div>
                             </li>
                         );
                     })}

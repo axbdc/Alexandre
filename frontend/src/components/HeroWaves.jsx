@@ -74,16 +74,32 @@ const HeroWaves = () => {
 
         resize();
         draw(performance.now());
-        if (!reduce) start();
+        // Só começa a animar depois de a página acabar de carregar (e com o
+        // browser livre), para não disputar o processador no telemóvel.
+        let started = false;
+        const begin = () => {
+            if (started || reduce) return;
+            started = true;
+            start();
+        };
+        let idleId = 0;
+        const onLoad = () => {
+            idleId =
+                "requestIdleCallback" in window
+                    ? window.requestIdleCallback(begin, { timeout: 2000 })
+                    : setTimeout(begin, 800);
+        };
+        if (document.readyState === "complete") onLoad();
+        else window.addEventListener("load", onLoad, { once: true });
 
         const io = new IntersectionObserver(([e]) => {
             visible = e.isIntersecting && !document.hidden;
-            if (visible && !reduce) start();
+            if (visible && started) start();
         });
         io.observe(canvas);
         const onVis = () => {
             visible = !document.hidden;
-            if (visible && !reduce) start();
+            if (visible && started) start();
         };
         const onResize = () => {
             resize();
@@ -94,6 +110,9 @@ const HeroWaves = () => {
 
         return () => {
             cancelAnimationFrame(raf);
+            window.removeEventListener("load", onLoad);
+            if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+            else clearTimeout(idleId);
             io.disconnect();
             document.removeEventListener("visibilitychange", onVis);
             window.removeEventListener("resize", onResize);

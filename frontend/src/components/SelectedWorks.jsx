@@ -1,12 +1,14 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useMemo, useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useLang, t } from "../context/LanguageContext";
 import { CATEGORIES, SECTION_LABELS } from "../data/content";
 import useProjects from "../hooks/useProjects";
 import { cld, cldSrcSet } from "../lib/img";
 import useReveal from "../hooks/useReveal";
 import { ArrowUpRight } from "lucide-react";
-import ProjectModal from "./ProjectModal";
+// O modal (e o framer-motion que ele usa) só é descarregado quando é preciso,
+// para não pesar no primeiro carregamento no telemóvel.
+const loadModal = () => import("./ProjectModal");
+const ProjectModal = lazy(loadModal);
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -16,6 +18,24 @@ const SelectedWorks = () => {
     const rootRef = useReveal([lang, projects]);
     const [active, setActive] = useState("all");
     const [openId, setOpenId] = useState(null);
+    const [modalReady, setModalReady] = useState(false);
+
+    // Pré-carrega o modal em segundo plano depois de a página estar pronta,
+    // para abrir sem espera quando se toca num projeto.
+    useEffect(() => {
+        const go = () => loadModal().catch(() => {});
+        const id =
+            "requestIdleCallback" in window
+                ? window.requestIdleCallback(go, { timeout: 4000 })
+                : setTimeout(go, 2500);
+        return () =>
+            "cancelIdleCallback" in window
+                ? window.cancelIdleCallback(id)
+                : clearTimeout(id);
+    }, []);
+    useEffect(() => {
+        if (openId) setModalReady(true);
+    }, [openId]);
 
     const filtered = useMemo(
         () =>
@@ -128,26 +148,16 @@ const SelectedWorks = () => {
                 </div>
 
                 {/* Filtered grid */}
-                <AnimatePresence mode="wait">
-                    <motion.ul
+                <ul
                         key={active}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                         data-testid="works-grid"
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-16 md:gap-y-24"
                     >
                         {filtered.map((p, i) => (
-                            <motion.li
+                            <li
                                 key={p.id}
-                                initial={{ opacity: 0, y: 24 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{
-                                    duration: 0.6,
-                                    delay: i * 0.04,
-                                    ease: [0.22, 1, 0.36, 1],
-                                }}
+                                className="work-in"
+                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                             >
                                 <button
                                     type="button"
@@ -193,10 +203,9 @@ const SelectedWorks = () => {
                                         {t(p.summary, lang)}
                                     </p>
                                 </button>
-                            </motion.li>
+                            </li>
                         ))}
-                    </motion.ul>
-                </AnimatePresence>
+                </ul>
 
                 {filtered.length === 0 && (
                     <p className="text-center text-graphite py-24">
@@ -207,14 +216,18 @@ const SelectedWorks = () => {
                 )}
             </div>
 
-            <ProjectModal
-                project={open}
-                index={openIndex >= 0 ? openIndex : 0}
-                total={filtered.length}
-                onClose={close}
-                onPrev={goPrev}
-                onNext={goNext}
-            />
+            {modalReady ? (
+                <Suspense fallback={null}>
+                    <ProjectModal
+                        project={open}
+                        index={openIndex >= 0 ? openIndex : 0}
+                        total={filtered.length}
+                        onClose={close}
+                        onPrev={goPrev}
+                        onNext={goNext}
+                    />
+                </Suspense>
+            ) : null}
         </section>
     );
 };
