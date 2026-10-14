@@ -22,6 +22,7 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
     const [pv, setPv] = useState(null); // pré-visualização da transição
     const [slUp, setSlUp] = useState(""); // campo do slider a carregar
     const [slRun, setSlRun] = useState(0); // repõe a pré-visualização do slider
+    const [pick, setPick] = useState([]); // frames escolhidas p/ o template slider
     const boxRef = useRef(null);
 
     const screen = screens[sel] || null;
@@ -198,13 +199,83 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
         onScreens(arr);
     };
     const enableSlider = () => setSlider({ ...SLIDER_DEFAULTS, b: "", bDone: "", overlay: "" });
-    const removeSlider = () => {
-        const arr = screens.map((s, i) => {
-            if (i !== sel) return s;
-            const { slider, ...rest } = s;
-            return rest;
+
+    // Corrige os índices (hotspots, tempo automático, slider) depois de
+    // juntar ou separar ecrãs.
+    const reindex = (list, map) =>
+        list.map((s) => {
+            const o = { ...s };
+            if (Array.isArray(o.hotspots)) {
+                o.hotspots = o.hotspots.map((h) =>
+                    typeof h.to === "number" ? { ...h, to: map(h.to) } : h,
+                );
+            }
+            if (typeof o.durationTo === "number") o.durationTo = map(o.durationTo);
+            if (o.slider && typeof o.slider.doneTo === "number") {
+                o.slider = { ...o.slider, doneTo: map(o.slider.doneTo) };
+            }
+            return o;
         });
-        onScreens(arr);
+
+    // Template: 1.ª frame = A (cima), 2.ª = B (revelada), 3.ª = B final.
+    const togglePick = (i) =>
+        setPick((p) =>
+            p.includes(i) ? p.filter((x) => x !== i) : p.length >= 3 ? p : [...p, i],
+        );
+
+    const makeSlider = () => {
+        if (pick.length < 2) return;
+        const [ia, ib, ic] = pick;
+        const A = screens[ia];
+        const B = screens[ib];
+        const C = typeof ic === "number" ? screens[ic] : null;
+        const removed = new Set([ib, ic].filter((x) => typeof x === "number"));
+
+        const list = [];
+        const pos = {};
+        screens.forEach((s, i) => {
+            if (removed.has(i)) return;
+            pos[i] = list.length;
+            list.push(s);
+        });
+        removed.forEach((i) => (pos[i] = pos[ia]));
+
+        const at = pos[ia];
+        const hasNext = at < list.length - 1;
+        list[at] = {
+            ...A,
+            slider: {
+                ...SLIDER_DEFAULTS,
+                b: B.src,
+                bDone: C ? C.src : "",
+                overlay: "",
+                doneDelay: hasNext ? 1.5 : 0,
+            },
+        };
+        onScreens(reindex(list, (k) => (typeof pos[k] === "number" ? pos[k] : 0)));
+        setSel(at);
+        setPick([]);
+        setSlRun((r) => r + 1);
+        onMsg && onMsg("Slider criado. Ajusta os detalhes no painel do ecrã.");
+    };
+
+    // Desfaz o slider: B e B final voltam a ser ecrãs normais logo a seguir.
+    const removeSlider = () => {
+        const cur = screens[sel];
+        if (!cur || !cur.slider) return;
+        const { slider, ...rest } = cur;
+        const extra = [slider.b, slider.bDone]
+            .filter(Boolean)
+            .map((src) => ({ src, hotspots: [] }));
+        const list = [
+            ...screens.slice(0, sel),
+            rest,
+            ...extra,
+            ...screens.slice(sel + 1),
+        ];
+        const n = extra.length;
+        onScreens(reindex(list, (k) => (k > sel ? k + n : k)));
+        setPick([]);
     };
     const uploadSlider = async (key, file) => {
         if (!file) return;
@@ -268,6 +339,41 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                 </label>
             </div>
 
+            {screens.length > 1 ? (
+                <div className="mb-3 flex items-center gap-2 flex-wrap text-xs border border-hairline p-2">
+                    <span className="text-mist">Template slider:</span>
+                    {pick.length === 0 ? (
+                        <span className="text-mist">
+                            marca as frames na tira pela ordem: 1 = imagem de cima (A),
+                            2 = imagem revelada (B), 3 = B final (opcional).
+                        </span>
+                    ) : (
+                        <>
+                            <span>
+                                {pick
+                                    .map((i, k) => `ecrã ${i + 1} = ${["A", "B", "B final"][k]}`)
+                                    .join(" · ")}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={makeSlider}
+                                disabled={pick.length < 2}
+                                className="border border-ink bg-ink text-bone px-2 py-1 disabled:opacity-40"
+                            >
+                                Criar slider
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPick([])}
+                                className="text-mist hover:text-ink underline"
+                            >
+                                limpar
+                            </button>
+                        </>
+                    )}
+                </div>
+            ) : null}
+
             {screens.length === 0 ? (
                 <p className="text-sm text-mist">
                     Sem ecrãs. Carrega os PNGs da campanha (pela ordem que quiseres
@@ -280,8 +386,25 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                         {screens.map((s, i) => (
                             <div
                                 key={i}
-                                className={`border ${i === sel ? "border-ink" : "border-hairline"} bg-black`}
+                                className={`relative border ${i === sel ? "border-ink" : "border-hairline"} bg-black`}
                             >
+                                <button
+                                    type="button"
+                                    onClick={() => togglePick(i)}
+                                    title="Marcar para o template slider"
+                                    className={`absolute top-1 left-1 z-10 w-5 h-5 text-[10px] leading-5 text-center border ${
+                                        pick.includes(i)
+                                            ? "bg-ink text-bone border-ink"
+                                            : "bg-bone/80 text-ink border-hairline"
+                                    }`}
+                                >
+                                    {pick.includes(i) ? ["A", "B", "F"][pick.indexOf(i)] : ""}
+                                </button>
+                                {isSliderScreen(s) ? (
+                                    <span className="absolute top-1 right-1 z-10 bg-bone/90 px-1 text-[8px] tracking-wide text-ink">
+                                        SLIDER
+                                    </span>
+                                ) : null}
                                 <button
                                     type="button"
                                     onClick={() => setSel(i)}
@@ -485,7 +608,7 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                                 onClick={removeSlider}
                                                 className="text-terracotta ml-auto"
                                             >
-                                                remover slider
+                                                desfazer slider
                                             </button>
                                         </>
                                     ) : (
