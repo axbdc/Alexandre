@@ -19,7 +19,15 @@ export function warmProject(p) {
     [p.cover, ...(p.gallery || []), ...(p.posts || []), ...(p.stories || [])].forEach((u) =>
         BIG_WIDTHS.forEach((w) => urls.push(cld(u, w))),
     );
-    (p.screens || []).forEach((s) => s && urls.push(cld(s.src, SCREEN_WIDTH)));
+    (p.screens || []).forEach((s) => {
+        if (!s) return;
+        urls.push(cld(s.src, SCREEN_WIDTH));
+        if (s.slider) {
+            [s.slider.b, s.slider.bDone, s.slider.overlay]
+                .filter(Boolean)
+                .forEach((u) => urls.push(cld(u, SCREEN_WIDTH)));
+        }
+    });
 
     const list = [...new Set(urls.filter(isCloudinaryImage))];
     let i = 0;

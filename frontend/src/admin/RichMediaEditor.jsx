@@ -1,16 +1,27 @@
 // frontend/src/admin/RichMediaEditor.jsx
 import React, { useRef, useState } from "react";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
-import { ScreenStack, TRANSITIONS, TRANSITION_DURS } from "@/components/RichMedia";
+import {
+    ScreenStack,
+    SliderScreen,
+    SLIDER_DEFAULTS,
+    isSliderScreen,
+    TRANSITIONS,
+    TRANSITION_DURS,
+} from "@/components/RichMedia";
 
 // screens: [{ src, hotspots: [{x,y,w,h,to}], duration, durationTo, transition, transitionDur }]
 // (x/y/w/h em % do ecrã; transition = como o ecrã ENTRA)
+// Opcional por ecrã: slider: { b, bDone, overlay, start, doneAt, doneDelay,
+// doneTo, hint, handleY, lineInset } -> ver SliderScreen em RichMedia.jsx
 const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMsg }) => {
     const [sel, setSel] = useState(0);
     const [drawing, setDrawing] = useState(false);
     const [draft, setDraft] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [pv, setPv] = useState(null); // pré-visualização da transição
+    const [slUp, setSlUp] = useState(""); // campo do slider a carregar
+    const [slRun, setSlRun] = useState(0); // repõe a pré-visualização do slider
     const boxRef = useRef(null);
 
     const screen = screens[sel] || null;
@@ -179,6 +190,39 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
         setTimeout(() => setPv(null), 450 + dur + 300);
     };
 
+    // ---- slider antes/depois ----
+    const setSlider = (patch) => {
+        const arr = screens.map((s, i) =>
+            i === sel ? { ...s, slider: { ...(s.slider || {}), ...patch } } : s,
+        );
+        onScreens(arr);
+    };
+    const enableSlider = () => setSlider({ ...SLIDER_DEFAULTS, b: "", bDone: "", overlay: "" });
+    const removeSlider = () => {
+        const arr = screens.map((s, i) => {
+            if (i !== sel) return s;
+            const { slider, ...rest } = s;
+            return rest;
+        });
+        onScreens(arr);
+    };
+    const uploadSlider = async (key, file) => {
+        if (!file) return;
+        if (!CLOUDINARY_CLOUD || CLOUDINARY_CLOUD.startsWith("PÕE")) {
+            onMsg && onMsg("Configura o Cloudinary primeiro em lib/cloudinary.js.");
+            return;
+        }
+        setSlUp(key);
+        try {
+            const url = await uploadToCloudinary(file);
+            setSlider({ [key]: url });
+        } catch (e) {
+            onMsg && onMsg("Upload falhou: " + e.message);
+        } finally {
+            setSlUp("");
+        }
+    };
+
     const delHotspot = (hi) => {
         const arr = screens.map((s, i) =>
             i === sel
@@ -293,6 +337,16 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                     index={pv ? pv.idx : sel}
                                     fit={fit}
                                     animate={!!(pv && pv.anim)}
+                                />
+                            ) : null}
+
+                            {screen && !pv && isSliderScreen(screen) ? (
+                                <SliderScreen
+                                    key={`${sel}-${slRun}-${JSON.stringify(screen.slider)}`}
+                                    screen={screen}
+                                    fit={fit}
+                                    animate={false}
+                                    interactive={!drawing}
                                 />
                             ) : null}
 
@@ -411,6 +465,182 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                 <span className="text-mist">(0 = desligado)</span>
                             )}
                         </div>
+
+                        {/* Slider antes/depois */}
+                        {screen ? (
+                            <div className="mt-3 text-xs border border-hairline p-2 space-y-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-mist">Slider antes/depois:</span>
+                                    {screen.slider ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSlRun((r) => r + 1)}
+                                                className="border border-hairline px-2 py-1 hover:border-ink"
+                                            >
+                                                Repor pré-visualização
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={removeSlider}
+                                                className="text-terracotta ml-auto"
+                                            >
+                                                remover slider
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={enableSlider}
+                                            className="border border-hairline px-2 py-1 hover:border-ink"
+                                        >
+                                            Tornar este ecrã num slider
+                                        </button>
+                                    )}
+                                </div>
+
+                                {screen.slider ? (
+                                    <>
+                                        <p className="text-[11px] text-mist">
+                                            A imagem deste ecrã é a de cima (à esquerda do
+                                            handle). Arrastar para a esquerda revela a B.
+                                        </p>
+
+                                        {[
+                                            ["b", "Imagem revelada (B)", true],
+                                            ["bDone", "B final (fade ao completar)", false],
+                                            ["overlay", "Overlay PNG (logo, CTA…)", false],
+                                        ].map(([key, label, required]) => (
+                                            <div key={key} className="flex items-center gap-2 flex-wrap">
+                                                <span className="w-44 text-mist">
+                                                    {label}
+                                                    {required ? " *" : ""}
+                                                </span>
+                                                {screen.slider[key] ? (
+                                                    <img
+                                                        src={screen.slider[key]}
+                                                        alt=""
+                                                        className="h-10 w-6 object-cover bg-black border border-hairline"
+                                                    />
+                                                ) : null}
+                                                <label className="cursor-pointer border border-hairline px-2 py-1 hover:border-ink">
+                                                    {slUp === key
+                                                        ? "A carregar…"
+                                                        : screen.slider[key]
+                                                          ? "Trocar"
+                                                          : "Carregar"}
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={(e) =>
+                                                            uploadSlider(key, e.target.files && e.target.files[0])
+                                                        }
+                                                    />
+                                                </label>
+                                                {!required && screen.slider[key] ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSlider({ [key]: "" })}
+                                                        className="text-mist hover:text-ink underline"
+                                                    >
+                                                        tirar
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                        ))}
+
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="w-44 text-mist">Posição inicial</span>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                value={screen.slider.start ?? SLIDER_DEFAULTS.start}
+                                                onChange={(e) => setSlider({ start: Number(e.target.value) })}
+                                            />
+                                            <span>{screen.slider.start ?? SLIDER_DEFAULTS.start}%</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="w-44 text-mist">Completa ao chegar a</span>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="40"
+                                                value={screen.slider.doneAt ?? SLIDER_DEFAULTS.doneAt}
+                                                onChange={(e) => setSlider({ doneAt: Number(e.target.value) })}
+                                            />
+                                            <span>{screen.slider.doneAt ?? SLIDER_DEFAULTS.doneAt}%</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="w-44 text-mist">Altura do handle</span>
+                                            <input
+                                                type="range"
+                                                min="5"
+                                                max="95"
+                                                value={screen.slider.handleY ?? SLIDER_DEFAULTS.handleY}
+                                                onChange={(e) => setSlider({ handleY: Number(e.target.value) })}
+                                            />
+                                            <span>{screen.slider.handleY ?? SLIDER_DEFAULTS.handleY}%</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="w-44 text-mist">Margem vertical da linha</span>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="20"
+                                                step="0.5"
+                                                value={screen.slider.lineInset ?? SLIDER_DEFAULTS.lineInset}
+                                                onChange={(e) => setSlider({ lineInset: Number(e.target.value) })}
+                                            />
+                                            <span>{screen.slider.lineInset ?? SLIDER_DEFAULTS.lineInset}%</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="w-44 text-mist">Depois de completo</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="0.5"
+                                                value={screen.slider.doneDelay || ""}
+                                                onChange={(e) => setSlider({ doneDelay: Number(e.target.value) || 0 })}
+                                                className="w-16 border border-hairline bg-bone px-2 py-1 text-ink"
+                                            />
+                                            <span className="text-mist">s</span>
+                                            {screen.slider.doneDelay ? (
+                                                <>
+                                                    <span className="text-mist">→ salta p/</span>
+                                                    <select
+                                                        value={
+                                                            typeof screen.slider.doneTo === "number"
+                                                                ? screen.slider.doneTo
+                                                                : Math.min(sel + 1, screens.length - 1)
+                                                        }
+                                                        onChange={(e) => setSlider({ doneTo: Number(e.target.value) })}
+                                                        className="border border-hairline bg-bone px-2 py-1 text-ink"
+                                                    >
+                                                        {screens.map((_, k) => (
+                                                            <option key={k} value={k}>
+                                                                ecrã {k + 1}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </>
+                                            ) : (
+                                                <span className="text-mist">(0 = fica no slider)</span>
+                                            )}
+                                        </div>
+                                        <label className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={screen.slider.hint ?? SLIDER_DEFAULTS.hint}
+                                                onChange={(e) => setSlider({ hint: e.target.checked })}
+                                            />
+                                            <span className="text-mist">Handle abana no arranque (dica)</span>
+                                        </label>
+                                    </>
+                                ) : null}
+                            </div>
+                        ) : null}
 
                         {/* lista de hotspots do ecrã */}
                         <div className="mt-3 space-y-2">

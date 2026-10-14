@@ -38,9 +38,19 @@ const mapDoc = (id, d) => ({
         d.category === "richmedia" || d.is_richmedia
             ? {
                   fit: d.rm_fit || "contain",
-                  screens: (d.screens || []).map((sc) =>
-                      sc && sc.src ? { ...sc, src: cld(sc.src, 1200) } : sc,
-                  ),
+                  screens: (d.screens || []).map((sc) => {
+                      if (!sc || !sc.src) return sc;
+                      const out = { ...sc, src: cld(sc.src, 1200) };
+                      if (sc.slider && sc.slider.b) {
+                          out.slider = {
+                              ...sc.slider,
+                              b: cld(sc.slider.b, 1200),
+                              bDone: sc.slider.bDone ? cld(sc.slider.bDone, 1200) : "",
+                              overlay: sc.slider.overlay ? cld(sc.slider.overlay, 1200) : "",
+                          };
+                      }
+                      return out;
+                  }),
               }
             : undefined,
     subtype: d.subtype || "",
