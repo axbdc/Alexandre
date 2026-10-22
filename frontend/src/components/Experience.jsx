@@ -28,7 +28,7 @@ const Experience = () => {
                             {lang === "PT" ? "Experiência" : "Experience"}
                         </h2>
                     </div>
-                    <span className="hero-meta hidden md:inline">2022 — 2026</span>
+                    <span className="hero-meta hidden md:inline">2022 · 2026</span>
                 </div>
 
                 <ul className="col-span-12 exp-list">

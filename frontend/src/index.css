@@ -461,6 +461,8 @@ html.intro-lock body {
 }
 .stretch-line {
     visibility: hidden;
+    /* as letras mexem-se para fora do sítio: não podem tapar os links por cima */
+    pointer-events: none;
 }
 .stretch-text.is-ready .stretch-line {
     visibility: visible;
@@ -507,6 +509,8 @@ html.intro-lock body {
     text-transform: uppercase;
 }
 .hero-link {
+    position: relative;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -517,6 +521,12 @@ html.intro-lock body {
     color: var(--terracotta);
     border-bottom: 2px solid currentColor;
     padding-bottom: 3px;
+}
+/* área de clique maior que o texto */
+.hero-link::after {
+    content: "";
+    position: absolute;
+    inset: -14px -10px;
 }
 .hero-word {
     padding-top: 0.15em; /* espaço para as letras esticarem */

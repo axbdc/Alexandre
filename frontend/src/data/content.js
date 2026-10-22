@@ -17,8 +17,8 @@ export const HERO = {
         EN: "Portfolio · 2026",
     },
     location_line: {
-        PT: "Ericeira, Portugal → para o mundo",
-        EN: "Ericeira, Portugal → to the world",
+        PT: "Portugal → para o mundo",
+        EN: "Portugal → to the world",
     },
     statement: {
         PT: "Design, AR, 3D, web e IA criativa para marcas. Do primeiro esboço à entrega final, onde o gráfico e o interativo se cruzam.",
@@ -513,8 +513,8 @@ export const SERVICES = [
         no: "07",
         title: { PT: "IA Criativa", EN: "Creative AI" },
         body: {
-            PT: "Imagem e vídeo gerados com IA, retoque e extensão de imagens com Generative Fill, e sites e ferramentas feitos com programação assistida por IA — mais rápido, sem perder qualidade.",
-            EN: "AI-generated images and video, retouching and image extension with Generative Fill, and websites and tools built with AI-assisted coding — faster, without losing quality.",
+            PT: "Imagem e vídeo gerados com IA, retoque e extensão de imagens com Generative Fill, e sites e ferramentas feitos com programação assistida por IA. Mais rápido, sem perder qualidade.",
+            EN: "AI-generated images and video, retouching and image extension with Generative Fill, and websites and tools built with AI-assisted coding. Faster, without losing quality.",
         },
     },
 ];
@@ -706,6 +706,7 @@ export const SOCIAL = {
     email: "alexandrexbdcosme@gmail.com",
     phone: "+351 933 059 987",
     linkedin: "https://www.linkedin.com/in/alexandre-cosme-857a59198/",
+    instagram: "https://www.instagram.com/alexandre_cosme_fotografia/",
     location: "Ribamar, Ericeira",
 };
 

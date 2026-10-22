@@ -45,7 +45,7 @@ const Contact = () => {
                 fd.append("email", form.email);
                 fd.append(
                     "subject",
-                    form.subject || `Nova mensagem de ${form.name} — Portfólio`,
+                    form.subject || `Nova mensagem de ${form.name} · Portfólio`,
                 );
                 fd.append("message", form.message);
                 fd.append("from_name", "Alexandre Cosme Portfolio");
@@ -132,8 +132,31 @@ const Contact = () => {
                                 />
                             </a>
                         </li>
-                        <li className="overline pt-4">
-                            {SOCIAL.phone} · {SOCIAL.location}
+                        <li>
+                            <a
+                                href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer"
+                                data-testid="contact-instagram"
+                                className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
+                            >
+                                <span className="link-underline">Instagram</span>
+                                <ArrowUpRight
+                                    size={16}
+                                    className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                />
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href={`tel:${SOCIAL.phone.replace(/\s/g, "")}`}
+                                data-testid="contact-phone"
+                                className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
+                            >
+                                <span className="link-underline">{SOCIAL.phone}</span>
+                                <ArrowUpRight
+                                    size={16}
+                                    className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                />
+                            </a>
                         </li>
                     </ul>
                 </div>

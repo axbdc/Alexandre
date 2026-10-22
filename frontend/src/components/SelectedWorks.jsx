@@ -116,7 +116,7 @@ const SelectedWorks = () => {
             className="pt-4 pb-20 md:pb-28"
         >
             <FeaturedStrip projects={featured} lang={lang} onOpen={openFromFeatured} />
-            <div className="mx-auto max-w-[1600px] px-4 md:px-8 pt-16 md:pt-24">
+            <div id="projetos" className="mx-auto max-w-[1600px] px-4 md:px-8 pt-16 md:pt-24 scroll-mt-16">
                 <div className="flex items-end justify-between mb-10 md:mb-14 reveal">
                     <div>
                         <span className="section-kicker">↳ {t(SECTION_LABELS.work, lang)} / {String(projects.length).padStart(2, "0")}</span>

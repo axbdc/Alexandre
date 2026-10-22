@@ -4,7 +4,7 @@ import { NAV } from "../data/content";
 import { scrollToId } from "../lib/scroll";
 
 const links = [
-    { id: "work", testid: "nav-link-work" },
+    { id: "projetos", nav: "work", testid: "nav-link-work" },
     { id: "about", testid: "nav-link-about" },
     { id: "experience", testid: "nav-link-experience" },
     { id: "services", testid: "nav-link-services" },
@@ -56,7 +56,7 @@ const Navigation = () => {
                                 data-testid={l.testid}
                                 className="link-underline text-sm tracking-wide text-ink"
                             >
-                                {t(NAV[l.id], lang)}
+                                {t(NAV[l.nav || l.id], lang)}
                             </a>
                         </li>
                     ))}
@@ -125,7 +125,7 @@ const Navigation = () => {
                                     data-testid={`nav-mobile-link-${l.id}`}
                                     className="font-display text-2xl text-ink"
                                 >
-                                    {t(NAV[l.id], lang)}
+                                    {t(NAV[l.nav || l.id], lang)}
                                 </a>
                             </li>
                         ))}

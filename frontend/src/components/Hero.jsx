@@ -39,8 +39,8 @@ const Hero = () => {
                     </p>
                     <div className="col-span-12 md:col-span-5 lg:col-span-6 flex md:justify-end gap-6">
                         <a
-                            href="#work"
-                            onClick={scrollTo("work")}
+                            href="#projetos"
+                            onClick={scrollTo("projetos")}
                             data-testid="hero-cta-work"
                             className="hero-link group"
                         >
