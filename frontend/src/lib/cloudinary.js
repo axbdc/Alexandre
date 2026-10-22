@@ -1,4 +1,3 @@
-// frontend/src/lib/cloudinary.js
 //
 // Preenche estes dois valores (não são segredo):
 //  - CLOUDINARY_CLOUD  = o teu "cloud name" (Cloudinary → Dashboard, no topo)

@@ -1,4 +1,3 @@
-// frontend/src/lib/warm.js
 // "Aquece" o Cloudinary: pede já todas as versões otimizadas das imagens de um
 // projeto (tamanhos x formatos AVIF/WebP/original). A primeira vez que o
 // Cloudinary gera uma versão demora ~1s; depois fica em cache na CDN e passa a

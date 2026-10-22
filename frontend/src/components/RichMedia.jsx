@@ -1,4 +1,3 @@
-// frontend/src/components/RichMedia.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { t } from "../context/LanguageContext";
 
@@ -271,7 +270,7 @@ export const SliderScreen = ({
                 cursor: interactive && !done ? "ew-resize" : "default",
             }}
         >
-            {/* B — revelada */}
+            {/* B, revelada */}
             <img
                 src={cfg.b}
                 alt=""
@@ -291,7 +290,7 @@ export const SliderScreen = ({
                 />
             ) : null}
 
-            {/* A — de cima, cortada pelo handle */}
+            {/* A, de cima, cortada pelo handle */}
             <img
                 src={screen.src}
                 alt=""

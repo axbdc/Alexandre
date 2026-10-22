@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import {
     X,
     ArrowLeft,
@@ -9,7 +9,8 @@ import {
     Play,
 } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
-import { launchAR, hasARAssets } from "../lib/ar";
+import { launchAR, isARProject, canLaunchAR } from "../lib/ar";
+import ARViewer from "./ARViewer";
 import { PhoneStrip } from "./RichMedia";
 import { isVideo, videoPoster } from "../lib/media";
 
@@ -41,7 +42,7 @@ const COPY = {
 //  detalhe); a grelha mantém-se limpa e uniforme.
 // =====================================================================
 
-// WEB — janela de browser. A barra mostra o domínio do `url`.
+// WEB, janela de browser. A barra mostra o domínio do `url`.
 // Se passares `srcMobile`, aparece um telemóvel sobreposto (responsivo).
 const BrowserFrame = ({ src, srcMobile, alt, url }) => {
     let domain = "";
@@ -83,7 +84,7 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
                         <div className="aspect-[9/19] overflow-hidden bg-white">
                             <img
                                 src={srcMobile}
-                                alt={`${alt} — mobile`}
+                                alt={`${alt} (mobile)`}
                                 className="w-full h-full object-cover object-top"
                                 loading="lazy"
                             />
@@ -95,7 +96,7 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
     );
 };
 
-// AR & 3D — render sobre "estúdio" neutro, com sombra de contacto.
+// AR & 3D, render sobre "estúdio" neutro, com sombra de contacto.
 // object-contain para nunca cortar o render. overlay = botão AR (opcional).
 const StageFrame = ({ src, alt, label, overlay }) => (
     <div className="relative border border-hairline overflow-hidden bg-gradient-to-b from-pebble to-sand">
@@ -116,7 +117,7 @@ const StageFrame = ({ src, alt, label, overlay }) => (
     </div>
 );
 
-// DESIGN GRÁFICO — a arte como folha impressa sobre superfície neutra.
+// DESIGN GRÁFICO, a arte como folha impressa sobre superfície neutra.
 // Respeita o rácio da imagem (object-contain), com sombra de folha.
 const PrintFrame = ({ src, alt }) => (
     <div className="border border-hairline bg-sand p-6 md:p-12 flex items-center justify-center">
@@ -129,7 +130,7 @@ const PrintFrame = ({ src, alt }) => (
     </div>
 );
 
-// FOTOGRAFIA — moldura de galeria: passe-partout fino + legenda.
+// FOTOGRAFIA, moldura de galeria: passe-partout fino + legenda.
 const PhotoFrame = ({ src, alt, caption }) => (
     <figure>
         <div className="bg-white border border-hairline p-3 md:p-4 shadow-[0_22px_50px_-30px_rgba(28,27,26,0.5)]">
@@ -137,7 +138,7 @@ const PhotoFrame = ({ src, alt, caption }) => (
                 <img
                     src={src}
                     alt={alt}
-                    className="w-full object-cover"
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                 />
             </div>
@@ -150,7 +151,7 @@ const PhotoFrame = ({ src, alt, caption }) => (
     </figure>
 );
 
-// MOTION & RICH MEDIA — chrome de leitor de vídeo. Se houver `url`, o play
+// MOTION & RICH MEDIA, chrome de leitor de vídeo. Se houver `url`, o play
 // abre o vídeo; caso contrário fica decorativo (sinaliza "isto é vídeo").
 const PlayerFrame = ({ src, alt, url, video }) => {
     // Vídeo principal carregado no admin: toca aqui mesmo.
@@ -184,7 +185,7 @@ const PlayerFrame = ({ src, alt, url, video }) => {
                 <img
                     src={src}
                     alt={alt}
-                    className="w-full h-full object-cover opacity-90"
+                    className="w-full h-full object-contain"
                     loading="lazy"
                 />
             </div>
@@ -215,8 +216,34 @@ const PlayerFrame = ({ src, alt, url, video }) => {
 };
 
 
-const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
+const NO_DRAG =
+    "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
+
+const CARD_VARIANTS = {
+    // d = 0: a abrir (sobe); 1 / -1: seguinte / anterior (desliza para o lado)
+    enter: (d) => (d === 0 ? { y: "18%", opacity: 0 } : { x: d > 0 ? 160 : -160, opacity: 0 }),
+    center: {
+        x: 0,
+        y: 0,
+        opacity: 1,
+        transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: (d) => ({
+        x: d > 0 ? -160 : 160,
+        opacity: 0,
+        transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+    }),
+};
+
+const EASE = [0.22, 1, 0.36, 1];
+const STAGGER = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } } };
+const RISE = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } } };
+const TITLE_IN = { hidden: { y: "105%" }, show: { y: 0, transition: { duration: 0.9, ease: EASE } } };
+
+const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction = 1 }) => {
     const lang = useLang().lang;
+    const dragControls = useDragControls();
+    const scrollRef = useRef(null);
     const [lightboxIndex, setLightboxIndex] = useState(null);
 
     const isPostsProject =
@@ -246,9 +273,13 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         [gallery.length],
     );
 
-    // Fecha o lightbox ao trocar de projeto
+    // Visualizador 3D (computador) aberto?
+    const [arOpen, setArOpen] = useState(false);
+
+    // Fecha o lightbox (e o visualizador 3D) ao trocar de projeto
     useEffect(() => {
         setLightboxIndex(null);
+        setArOpen(false);
     }, [project && project.id]);
 
     useEffect(() => {
@@ -269,24 +300,31 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                 }
                 return;
             }
-            if (e.key === "Escape") onClose();
+            if (e.key === "Escape") {
+                if (arOpen) setArOpen(false);
+                else onClose();
+                return;
+            }
             if (e.key === "ArrowLeft") onPrev();
             if (e.key === "ArrowRight") onNext();
         };
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+        if (window.__lenis) window.__lenis.stop();
         window.addEventListener("keydown", onKey);
         return () => {
             window.removeEventListener("keydown", onKey);
             document.body.style.overflow = prevOverflow;
+            if (window.__lenis) window.__lenis.start();
         };
-    }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext]);
+    }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext, arOpen]);
 
     if (!project) return null;
 
     const cat = project.category;
     const isWeb = cat === "web";
     const isMotion = cat === "motion";
+    const isAR = isARProject(project);
     const isRM = !!(
         cat === "richmedia" &&
         project.richmedia &&
@@ -309,32 +347,11 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         }
 
         if (cat === "ar3d") {
-            const arOverlay = hasARAssets(project) ? (
-                <button
-                    type="button"
-                    onClick={() =>
-                        launchAR({
-                            glb: project.model_glb,
-                            usdz: project.model_usdz,
-                            title,
-                            image: project.cover,
-                        })
-                    }
-                    data-testid="modal-ar-button"
-                    className="absolute bottom-3 right-3 md:bottom-4 md:right-4 inline-flex items-center gap-2 bg-ink text-bone hover:bg-terracotta transition-colors duration-500 px-4 py-2.5 shadow-lg"
-                >
-                    <Box size={14} />
-                    <span className="text-xs tracking-[0.18em] uppercase">
-                        {t(COPY.view_ar, lang)}
-                    </span>
-                </button>
-            ) : null;
             return (
                 <StageFrame
                     src={project.cover}
                     alt={title}
                     label={t(project.subtitle, lang)}
-                    overlay={arOverlay}
                 />
             );
         }
@@ -363,7 +380,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                 );
             }
             return (
-                <div className="relative project-image-wrap aspect-[16/9]">
+                <div className="pm-plain">
                     <img src={project.cover} alt={title} />
                 </div>
             );
@@ -381,7 +398,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         }
 
         return (
-            <div className="relative project-image-wrap aspect-[16/9]">
+            <div className="pm-plain">
                 <img src={project.cover} alt={title} />
             </div>
         );
@@ -394,102 +411,139 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
           : t(COPY.link, lang);
 
     return (
-        <AnimatePresence>
-            {project && (
                 <motion.div
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+                    className="fixed inset-0 z-[100] flex items-end md:items-center justify-center md:p-6"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    data-testid="project-modal"
+                    exit={{ opacity: 0, transition: { duration: 0.4, delay: 0.15 } }}
+                    transition={{ duration: 0.35 }}
+                    data-lenis-prevent
                     role="dialog"
                     aria-modal="true"
                 >
-                    {/* Blurred backdrop */}
+                    {/* Fundo desfocado */}
                     <motion.div
-                        className="absolute inset-0 bg-ink/30 backdrop-blur-md"
+                        className="absolute inset-0 pm-backdrop"
                         onClick={onClose}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
+                        transition={{ duration: 0.35 }}
                     />
 
-                    {/* Centered card */}
+                    {/* Painel do projeto */}
+                    <AnimatePresence mode="popLayout" custom={direction}>
                     <motion.div
                         key={project.id}
-                        className="relative bg-bone w-full max-w-[940px] max-h-[calc(88vh/var(--site-zoom))] flex flex-col shadow-[0_30px_80px_-20px_rgba(28,27,26,0.35)]"
-                        initial={{ y: 24, opacity: 0, scale: 0.985 }}
-                        animate={{ y: 0, opacity: 1, scale: 1 }}
-                        exit={{ y: 12, opacity: 0, scale: 0.99 }}
-                        transition={{
-                            duration: 0.4,
-                            ease: [0.22, 1, 0.36, 1],
+                        custom={direction}
+                        variants={CARD_VARIANTS}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        className="pm-sheet relative w-full flex flex-col"
+                        style={{ touchAction: "pan-y" }}
+                        drag="x"
+                        dragListener={false}
+                        dragControls={dragControls}
+                        dragDirectionLock
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.25}
+                        onPointerDown={(e) => {
+                            if (total < 2) return;
+                            if (e.target.closest(NO_DRAG)) return;
+                            dragControls.start(e);
+                        }}
+                        onDragEnd={(e, info) => {
+                            const dx = info.offset.x;
+                            const v = info.velocity.x;
+                            if (dx < -110 || v < -600) onNext();
+                            else if (dx > 110 || v > 600) onPrev();
                         }}
                     >
-                        {/* Top bar */}
-                        <div className="shrink-0 hairline-bottom flex items-center justify-between px-5 md:px-7 h-12 md:h-14 bg-bone">
-                            <span className="overline">
-                                {String(index + 1).padStart(2, "0")}{" "}
-                                <span className="text-mist">
-                                    {t(COPY.of, lang)}{" "}
-                                    {String(total).padStart(2, "0")}
-                                </span>
-                                <span className="text-mist mx-2">·</span>
-                                <span className="text-mist">
-                                    {t(project.subtitle, lang)}
-                                </span>
+                        {/* Barra de cima */}
+                        <div className="pm-bar shrink-0">
+                            <span className="pm-kicker">
+                                ({String(index + 1).padStart(2, "0")}) / {String(total).padStart(2, "0")}
+                                <span className="pm-dot" />
+                                {t(project.subtitle, lang)}
                             </span>
-
-                            <div className="flex items-center gap-1.5">
-                                <button
-                                    onClick={onPrev}
-                                    aria-label={t(COPY.prev, lang)}
-                                    data-testid="modal-prev"
-                                    className="h-8 w-8 inline-flex items-center justify-center border border-hairline text-ink hover:border-ink transition-colors"
-                                >
-                                    <ArrowLeft size={14} />
+                            <div className="flex items-center gap-2">
+                                {total > 1 ? (
+                                    <span className="pm-hint hidden md:inline">
+                                        {lang === "PT" ? "Arrasta para o lado" : "Drag sideways"}
+                                    </span>
+                                ) : null}
+                                <button onClick={onPrev} aria-label={t(COPY.prev, lang)} className="pm-btn">
+                                    <ArrowLeft size={16} />
                                 </button>
-                                <button
-                                    onClick={onNext}
-                                    aria-label={t(COPY.next, lang)}
-                                    data-testid="modal-next"
-                                    className="h-8 w-8 inline-flex items-center justify-center border border-hairline text-ink hover:border-ink transition-colors"
-                                >
-                                    <ArrowRight size={14} />
+                                <button onClick={onNext} aria-label={t(COPY.next, lang)} className="pm-btn">
+                                    <ArrowRight size={16} />
                                 </button>
-                                <button
-                                    onClick={onClose}
-                                    aria-label={t(COPY.close, lang)}
-                                    data-testid="modal-close"
-                                    className="ml-1 h-8 w-8 inline-flex items-center justify-center border border-ink text-ink hover:bg-ink hover:text-bone transition-colors"
-                                >
-                                    <X size={14} />
+                                <button onClick={onClose} aria-label={t(COPY.close, lang)} className="pm-btn pm-btn-close">
+                                    <X size={16} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Scrollable content */}
-                        <div className="flex-1 overflow-y-auto">
-                            <div className="px-5 md:px-8 pt-6 md:pt-8 pb-4">
-                                <h2
-                                    data-testid="modal-title"
-                                    className="font-display text-2xl md:text-4xl leading-[1] text-ink"
-                                >
-                                    {t(project.title, lang)}
-                                </h2>
-                                <div className="mt-2 text-sm text-graphite">
-                                    {localize(project.client, lang)}
-                                    <span className="text-mist mx-2">·</span>
-                                    {project.year}
+                        <div className="flex-1 overflow-y-auto pm-scroll" ref={scrollRef}>
+                            <motion.div className="pm-head" variants={STAGGER} initial="hidden" animate="show">
+                                <motion.div variants={RISE} className="pm-meta">
+                                    <span>{localize(project.client, lang)}</span>
+                                    {project.year ? <span>{project.year}</span> : null}
+                                </motion.div>
+                                <div className="overflow-hidden">
+                                    <motion.h2 variants={TITLE_IN} className="pm-title">
+                                        {t(project.title, lang)}
+                                    </motion.h2>
                                 </div>
-                            </div>
+                                {project.summary ? (
+                                    <motion.p variants={RISE} className="pm-lead">
+                                        {t(project.summary, lang)}
+                                    </motion.p>
+                                ) : null}
+                            </motion.div>
 
-                            {/* Cover — moldura por categoria */}
-                            <div className="px-5 md:px-8 pb-2">
+                            {/* Capa, moldura por categoria (nunca corta a imagem) */}
+                            <motion.div
+                                className="pm-cover"
+                                initial={{ opacity: 0, y: 40, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            >
                                 {renderCover()}
-                            </div>
+                            </motion.div>
+
+                            {/* Realidade aumentada: no telemóvel abre a AR; no computador abre o visualizador 3D */}
+                            {isAR ? (
+                                <div className="pm-ar-cta">
+                                    <button
+                                        type="button"
+                                        className="pm-cta group"
+                                        onClick={() => {
+                                            if (canLaunchAR()) {
+                                                launchAR({
+                                                    glb: project.model_glb,
+                                                    usdz: project.model_usdz,
+                                                    title: t(project.title, lang),
+                                                    image: project.cover,
+                                                });
+                                            } else {
+                                                setArOpen(true);
+                                            }
+                                        }}
+                                    >
+                                        <Box size={20} />
+                                        {lang === "PT" ? "Ver em realidade aumentada" : "View in augmented reality"}
+                                        <ArrowUpRight size={20} className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                                    </button>
+                                    <span className="pm-hint">
+                                        {lang === "PT"
+                                            ? "No telemóvel abre a câmara. No computador mostra o modelo 3D animado."
+                                            : "On a phone it opens the camera. On a computer it shows the animated 3D model."}
+                                    </span>
+                                </div>
+                            ) : null}
 
                             {/* CTA grande para testar o rich media */}
                             {isRM ? (
@@ -498,7 +552,6 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                         href={`/rm/${project.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        data-testid="modal-test-rm"
                                         className="group inline-flex items-center gap-3 bg-ink text-bone px-8 md:px-10 py-4 md:py-5 text-sm md:text-base tracking-[0.18em] uppercase hover:bg-terracotta transition-colors shadow-[0_18px_44px_-18px_rgba(28,27,26,0.55)]"
                                     >
                                         {t(COPY.link_test, lang)}
@@ -511,8 +564,8 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                             ) : null}
 
                             {/* Body */}
-                            <div className="px-5 md:px-8 pt-8 pb-2 grid grid-cols-12 gap-6">
-                                <aside className="col-span-12 md:col-span-4 space-y-5 text-sm">
+                            <InView root={scrollRef} className="pm-body grid grid-cols-12 gap-y-10 md:gap-x-12">
+                                <aside className="col-span-12 md:col-span-4 pm-facts">
                                     <MetaRow
                                         label={t(COPY.client, lang)}
                                         value={localize(project.client, lang)}
@@ -531,14 +584,14 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                     />
                                     {project.tools?.length ? (
                                         <div>
-                                            <div className="overline mb-2">
+                                            <div className="pm-label">
                                                 {t(COPY.tools, lang)}
                                             </div>
-                                            <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                                            <ul className="flex flex-wrap gap-1.5 mt-2">
                                                 {project.tools.map((tt) => (
                                                     <li
                                                         key={tt}
-                                                        className="text-sm text-ink"
+                                                        className="pm-chip"
                                                     >
                                                         {tt}
                                                     </li>
@@ -551,7 +604,6 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                             href={project.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            data-testid="modal-external-link"
                                             className="group inline-flex w-full sm:w-auto items-center justify-between gap-6 rounded-full bg-terracotta px-6 py-3.5 text-bone shadow-[0_10px_24px_-12px_rgba(0,0,0,0.45)] hover:bg-terracotta-hover transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
                                         >
                                             <span className="text-sm font-medium tracking-wide">
@@ -566,10 +618,10 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                 </aside>
 
                                 <div className="col-span-12 md:col-span-8">
-                                    <div className="overline mb-3">
-                                        {t(COPY.overview, lang)}
+                                    <div className="pm-label mb-4">
+                                        ↳ {t(COPY.overview, lang)}
                                     </div>
-                                    <div className="space-y-4 text-sm md:text-base text-graphite leading-relaxed">
+                                    <div className="pm-text space-y-5">
                                         {(project.details
                                             ? localize(
                                                   project.details,
@@ -581,16 +633,16 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </InView>
 
                             {/* Gallery */}
                             {isPostsProject ? (
                                 posts.length || stories.length ? (
-                                    <div className="px-5 md:px-8 pt-8 pb-8 space-y-8">
+                                    <div className="pm-gallery space-y-10">
                                         {posts.length ? (
                                             <div>
-                                                <div className="overline mb-4">
-                                                    Posts
+                                                <div className="pm-label mb-5">
+                                                    ↳ Posts
                                                 </div>
                                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                                                     {posts.map((src, i) => (
@@ -616,8 +668,8 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                         ) : null}
                                         {stories.length ? (
                                             <div>
-                                                <div className="overline mb-4">
-                                                    Stories
+                                                <div className="pm-label mb-5">
+                                                    ↳ Stories
                                                 </div>
                                                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                                                     {stories.map((src, j) => (
@@ -646,18 +698,18 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                     </div>
                                 ) : null
                             ) : project.gallery?.length ? (
-                                <div className="px-5 md:px-8 pt-8 pb-8">
-                                    <div className="overline mb-4">
-                                        {t(COPY.gallery, lang)}
+                                <div className="pm-gallery">
+                                    <div className="pm-label mb-5">
+                                        ↳ {t(COPY.gallery, lang)}
                                     </div>
-                                    <div className="columns-2 gap-3 md:gap-4">
+                                    <div className="columns-1 sm:columns-2 gap-3 md:gap-4">
                                         {project.gallery.map((src, i) => (
                                             <button
                                                 key={i}
                                                 type="button"
                                                 onClick={() => setLightboxIndex(i)}
                                                 className="block w-full mb-3 md:mb-4 cursor-pointer overflow-hidden break-inside-avoid focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-                                                aria-label={`${t(project.title, lang)} — ${i + 1}`}
+                                                aria-label={`${t(project.title, lang)} ${i + 1}`}
                                             >
                                                 {isVideo(src) ? (
                                                     <span className="relative block">
@@ -676,20 +728,45 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                                         </span>
                                                     </span>
                                                 ) : (
-                                                    <img
-                                                        src={src}
-                                                        alt={`${t(project.title, lang)} — ${i + 1}`}
-                                                        loading="lazy"
-                                                        className="w-full h-auto block"
-                                                    />
+                                                    <InView root={scrollRef} as="span" className="block pm-rise">
+                                                        <img
+                                                            src={src}
+                                                            alt={`${t(project.title, lang)} ${i + 1}`}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            className="w-full h-auto block"
+                                                        />
+                                                    </InView>
                                                 )}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                             ) : null}
+
+                            {total > 1 ? (
+                                <button type="button" onClick={onNext} className="pm-next group">
+                                    <span className="pm-label">{lang === "PT" ? "Projeto seguinte" : "Next project"}</span>
+                                    <span className="pm-next-word">
+                                        {lang === "PT" ? "Seguinte" : "Next"}
+                                        <ArrowRight className="pm-next-arrow" strokeWidth={1.5} />
+                                    </span>
+                                </button>
+                            ) : null}
                         </div>
+
+                        <AnimatePresence>
+                            {arOpen && isAR ? (
+                                <ARViewer
+                                    project={project}
+                                    title={t(project.title, lang)}
+                                    lang={lang}
+                                    onClose={() => setArOpen(false)}
+                                />
+                            ) : null}
+                        </AnimatePresence>
                     </motion.div>
+                    </AnimatePresence>
 
                     {/* Lightbox da galeria */}
                     <AnimatePresence>
@@ -701,7 +778,6 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                                 onClick={() => setLightboxIndex(null)}
-                                data-testid="gallery-lightbox"
                             >
                                 <button
                                     type="button"
@@ -743,7 +819,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                                 ) : (
                                     <img
                                         src={gallery[lightboxIndex]}
-                                        alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
+                                        alt={`${t(project.title, lang)} ${lightboxIndex + 1}`}
                                         onClick={(e) => e.stopPropagation()}
                                         className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
                                     />
@@ -773,16 +849,78 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                         ) : null}
                     </AnimatePresence>
                 </motion.div>
-            )}
+    );
+};
+
+// Abrir/fechar com animação: guarda o último projeto para a animação de saída
+// e calcula a direção (anterior/seguinte) para o cartão deslizar para o lado certo.
+const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
+    const last = useRef(null);
+    const prevIndex = useRef(index);
+    const dir = useRef(1);
+    if (project) {
+        if (!last.current) dir.current = 0;
+        else if (last.current.project.id !== project.id) {
+            const d = index - prevIndex.current;
+            // passar do último para o primeiro (ou ao contrário) conta como "seguinte"/"anterior"
+            dir.current = Math.abs(d) > 1 ? (d > 0 ? -1 : 1) : d >= 0 ? 1 : -1;
+        }
+        prevIndex.current = index;
+        last.current = { project, index, total };
+    }
+    const shown = last.current;
+    return (
+        <AnimatePresence onExitComplete={() => (last.current = null)}>
+            {project && shown ? (
+                <ModalInner
+                    key="project-modal"
+                    project={shown.project}
+                    index={shown.index}
+                    total={shown.total}
+                    direction={dir.current}
+                    onClose={onClose}
+                    onPrev={onPrev}
+                    onNext={onNext}
+                />
+            ) : null}
         </AnimatePresence>
     );
 };
 
-const MetaRow = ({ label, value }) => (
-    <div>
-        <div className="overline mb-1">{label}</div>
-        <div className="text-sm md:text-base text-ink">{value}</div>
-    </div>
-);
+const MetaRow = ({ label, value }) =>
+    value ? (
+        <div className="pm-fact">
+            <div className="pm-label">{label}</div>
+            <div className="pm-value">{value}</div>
+        </div>
+    ) : null;
+
+// Mostra os filhos com uma animação suave quando entram no ecrã
+// (dentro do painel do projeto, que tem o seu próprio scroll).
+const InView = ({ root, as = "div", className = "", children }) => {
+    const ref = useRef(null);
+    const [on, setOn] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return undefined;
+        const io = new IntersectionObserver(
+            ([e]) => {
+                if (e.isIntersecting) {
+                    setOn(true);
+                    io.disconnect();
+                }
+            },
+            { root: root && root.current ? root.current : null, threshold: 0.08 },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [root]);
+    const Tag = as;
+    return (
+        <Tag ref={ref} className={`pm-reveal ${on ? "is-in" : ""} ${className}`}>
+            {children}
+        </Tag>
+    );
+};
 
 export default ProjectModal;

@@ -3,6 +3,7 @@ import { useLang, t } from "../context/LanguageContext";
 import { CONTACT, SECTION_LABELS, SOCIAL, FOOTER } from "../data/content";
 import { ArrowUpRight } from "lucide-react";
 import useReveal from "../hooks/useReveal";
+import StretchText from "./StretchText";
 
 const initialForm = { name: "", email: "", subject: "", message: "" };
 
@@ -35,7 +36,7 @@ const Contact = () => {
 
         // Envio por email via Web3Forms (único destino; o backend antigo foi retirado).
         let delivered = false;
-        const accessKey = process.env.REACT_APP_WEB3FORMS_KEY;
+        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || import.meta.env.REACT_APP_WEB3FORMS_KEY;
         if (accessKey) {
             try {
                 const fd = new FormData();
@@ -44,7 +45,7 @@ const Contact = () => {
                 fd.append("email", form.email);
                 fd.append(
                     "subject",
-                    form.subject || `Nova mensagem de ${form.name} — Portfólio`,
+                    form.subject || `Nova mensagem de ${form.name} · Portfólio`,
                 );
                 fd.append("message", form.message);
                 fd.append("from_name", "Alexandre Cosme Portfolio");
@@ -72,28 +73,35 @@ const Contact = () => {
         <section
             id="contact"
             ref={rootRef}
-            data-testid="contact-section"
-            className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-pebble"
+            className="px-4 md:px-8 py-24 md:py-36 contact-band"
         >
+            <div className="mx-auto max-w-[1600px] mb-20 md:mb-28">
+                <div className="flex flex-wrap items-start justify-between gap-6">
+                    <span className="section-kicker !text-bone/80">↳ {lang === "PT" ? "Tens um projeto em mente?" : "Got a project in mind?"}</span>
+                    <p className="text-bone/90 text-lg md:text-xl max-w-sm leading-snug">{t(CONTACT.sub, lang)}</p>
+                </div>
+                <a
+                    href={`mailto:${SOCIAL.email}`}
+                    className="contact-big group mt-10 md:mt-14"
+                >
+                    <StretchText text={lang === "PT" ? "VAMOS FALAR" : "LET'S TALK"} className="contact-big-word" />
+                    <ArrowUpRight className="contact-big-arrow" strokeWidth={1.5} />
+                </a>
+            </div>
 
-            <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-16 md:gap-12">
+            <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-16 md:gap-12 contact-panel">
                 <div className="col-span-12 md:col-span-5 reveal">
-                    <span className="overline !text-terracotta">05</span>
+                    <span className="section-kicker">↳ {lang === "PT" ? "Ou deixa aqui a mensagem" : "Or leave a message here"}</span>
                     <h2
-                        className="font-display text-4xl md:text-6xl mt-3 text-ink whitespace-pre-line leading-[0.95]"
-                        data-testid="contact-heading"
+                        className="font-condensed uppercase text-5xl md:text-7xl mt-4 text-ink"
                     >
-                        {t(CONTACT.heading, lang)}
+                        {lang === "PT" ? "Fala comigo" : "Say hello"}
                     </h2>
-                    <p className="mt-8 text-base md:text-lg text-graphite max-w-md">
-                        {t(CONTACT.sub, lang)}
-                    </p>
 
                     <ul className="mt-12 space-y-4">
                         <li>
                             <a
                                 href={`mailto:${SOCIAL.email}`}
-                                data-testid="contact-direct-email"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">
@@ -110,7 +118,6 @@ const Contact = () => {
                                 href={SOCIAL.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                data-testid="contact-linkedin"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">LinkedIn</span>
@@ -120,15 +127,35 @@ const Contact = () => {
                                 />
                             </a>
                         </li>
-                        <li className="overline pt-4">
-                            {SOCIAL.phone} · {SOCIAL.location}
+                        <li>
+                            <a
+                                href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
+                            >
+                                <span className="link-underline">Instagram</span>
+                                <ArrowUpRight
+                                    size={16}
+                                    className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                />
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href={`tel:${SOCIAL.phone.replace(/\s/g, "")}`}
+                                className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
+                            >
+                                <span className="link-underline">{SOCIAL.phone}</span>
+                                <ArrowUpRight
+                                    size={16}
+                                    className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                                />
+                            </a>
                         </li>
                     </ul>
                 </div>
 
                 <form
                     onSubmit={onSubmit}
-                    data-testid="contact-form"
                     className="col-span-12 md:col-span-6 md:col-start-7 reveal space-y-2"
                     noValidate
                 >
@@ -146,7 +173,6 @@ const Contact = () => {
                             value={form.name}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-name"
                             required
                         />
                     </div>
@@ -165,7 +191,6 @@ const Contact = () => {
                             value={form.email}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-email"
                             required
                         />
                     </div>
@@ -184,7 +209,6 @@ const Contact = () => {
                             value={form.subject}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-subject"
                         />
                     </div>
 
@@ -202,7 +226,6 @@ const Contact = () => {
                             value={form.message}
                             onChange={onChange}
                             className="elegant-input resize-none"
-                            data-testid="contact-input-message"
                             required
                         />
                     </div>
@@ -211,7 +234,6 @@ const Contact = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            data-testid="contact-form-submit"
                             className="group inline-flex items-center justify-between gap-6 rounded-full bg-terracotta px-7 py-4 text-bone hover:bg-terracotta-hover transition-colors duration-300 min-w-[260px] disabled:opacity-50 disabled:cursor-wait"
                         >
                             <span className="text-sm font-medium tracking-wide">
@@ -227,7 +249,6 @@ const Contact = () => {
                         <p
                             role="status"
                             aria-live="polite"
-                            data-testid="contact-form-status"
                             className={`mt-4 min-h-[1.25rem] text-sm ${
                                 status?.type === "error" ? "text-terracotta" : "text-ink"
                             }`}
@@ -239,14 +260,13 @@ const Contact = () => {
             </div>
 
             {/* Footer */}
-            <footer className="mx-auto max-w-[1400px] mt-32 md:mt-48 pt-10 hairline-top flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <footer className="mx-auto max-w-[1600px] mt-24 md:mt-32 pt-10 contact-footer flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div className="font-display text-4xl md:text-6xl text-ink leading-[0.9]">
                     Alexandre Cosme
                     <span className="text-terracotta">.</span>
                 </div>
                 <div className="text-sm text-graphite md:text-right space-y-1">
                     <div>© {new Date().getFullYear()} · {t(FOOTER.rights, lang)}</div>
-                    <div className="text-mist">{t(FOOTER.colophon, lang)}</div>
                     <div className="overline pt-2">
                         <span className="inline-block h-1.5 w-1.5 rounded-full bg-terracotta mr-2 align-middle" />
                         {t(FOOTER.available, lang)}

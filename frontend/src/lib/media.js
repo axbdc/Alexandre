@@ -1,4 +1,3 @@
-// frontend/src/lib/media.js
 // Ajuda a distinguir imagens de vídeos nas galerias.
 
 export const isVideo = (url) =>

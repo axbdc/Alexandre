@@ -1,7 +1,4 @@
-// frontend/src/admin/AdminProjects.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
 import {
     collection,
     getDocs,
@@ -13,11 +10,12 @@ import {
     query,
     orderBy,
 } from "firebase/firestore";
-import { auth, db } from "@/lib/firebaseAdmin";
+import { db } from "@/lib/firebaseAdmin";
 import { warmProject } from "@/lib/warm";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
+import AdminTabs from "@/admin/AdminTabs";
 
 const CATS = [
     { id: "ar3d", label: "AR & 3D" },
@@ -111,7 +109,7 @@ const Field = ({ label, value, onChange, area }) => (
 );
 
 // Campo de lista (ferramentas, imagens). Guarda o texto tal como é escrito
-// e só converte para array por baixo — assim dá para escrever vírgulas,
+// e só converte para array por baixo, assim dá para escrever vírgulas,
 // espaços e mudanças de linha sem serem apagados a meio.
 const parseList = (text, sep) =>
     text
@@ -176,7 +174,6 @@ const ImageListField = ({ label, help, value, onChange, onUpload, uploading, acc
 );
 
 const AdminProjects = () => {
-    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("all");
@@ -221,6 +218,8 @@ const AdminProjects = () => {
         setMsg("");
         const { id, ...data } = editing;
         data.is_richmedia = data.category === "richmedia";
+        // 3D: "ar" (realidade aumentada) ou "render" (só renderização)
+        if (data.category === "ar3d") data.subtype = data.subtype === "render" ? "render" : "ar";
         try {
             if (id) {
                 await updateDoc(doc(db, "projects", id), data);
@@ -276,7 +275,7 @@ const AdminProjects = () => {
         try {
             for (const file of list) {
                 const url = await uploadToCloudinary(file);
-                if (target === "cover" || target === "video") {
+                if (target === "cover" || target === "video" || target === "model_glb" || target === "model_usdz") {
                     setEditing((e) => ({ ...e, [target]: url }));
                 } else {
                     // gallery | posts | stories
@@ -291,11 +290,6 @@ const AdminProjects = () => {
         } finally {
             setUploading(false);
         }
-    };
-
-    const logout = async () => {
-        await signOut(auth);
-        navigate("/admin/login", { replace: true });
     };
 
     const shown =
@@ -355,6 +349,63 @@ const AdminProjects = () => {
                                 <option value="print">Impressão / Outros</option>
                             </select>
                         </label>
+                    ) : null}
+
+                    {editing.category === "ar3d" ? (
+                        <div className="mb-4 border border-hairline bg-white p-4 space-y-3">
+                            <label className="block">
+                                <span className="overline text-mist">Tipo de projeto 3D</span>
+                                <select
+                                    value={editing.subtype === "render" ? "render" : "ar"}
+                                    onChange={(e) => set("subtype", e.target.value)}
+                                    className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+                                >
+                                    <option value="ar">Realidade aumentada (com botão “Ver em AR”)</option>
+                                    <option value="render">Só renderização (imagens / vídeo, sem AR)</option>
+                                </select>
+                            </label>
+                            {editing.subtype !== "render" ? (
+                                <>
+                                    <p className="text-xs text-mist">
+                                        GLB: obrigatório (Android e visualizador no computador; as animações tocam sozinhas).
+                                        USDZ: para a AR no iPhone/iPad. Mantém os ficheiros leves (idealmente abaixo de 10 MB).
+                                    </p>
+                                    {[
+                                        ["model_glb", "Modelo GLB", ".glb,model/gltf-binary"],
+                                        ["model_usdz", "Modelo USDZ (iPhone)", ".usdz,model/vnd.usdz+zip"],
+                                    ].map(([key, label, accept]) => (
+                                        <div key={key}>
+                                            <span className="overline text-mist">{label}</span>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <input
+                                                    value={editing[key] || ""}
+                                                    onChange={(e) => set(key, e.target.value)}
+                                                    placeholder="URL do ficheiro (ou carrega ao lado)"
+                                                    className="flex-1 border border-hairline bg-bone px-3 py-2 text-sm text-ink outline-none focus:border-ink"
+                                                />
+                                                <label className="shrink-0 cursor-pointer border border-ink px-3 py-2 text-xs tracking-[0.14em] uppercase hover:bg-ink hover:text-bone transition-colors">
+                                                    Carregar
+                                                    <input
+                                                        type="file"
+                                                        accept={accept}
+                                                        className="hidden"
+                                                        onChange={(e) => handleUpload(e.target.files, key)}
+                                                    />
+                                                </label>
+                                            </div>
+                                            {editing[key] ? (
+                                                <div className="text-xs text-graphite mt-1 truncate"> {editing[key].split("/").pop()}</div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                    {!editing.model_glb ? (
+                                        <div className="text-xs text-terracotta">
+                                            Sem GLB o botão de AR não aparece no site.
+                                        </div>
+                                    ) : null}
+                                </>
+                            ) : null}
+                        </div>
                     ) : null}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
@@ -467,7 +518,7 @@ const AdminProjects = () => {
                         </>
                     ) : (
                         <ImageListField
-                            label={editing.category === "motion" ? "Galeria — imagens e vídeos" : "Galeria"}
+                            label={editing.category === "motion" ? "Galeria (imagens e vídeos)" : "Galeria"}
                             help={editing.category === "motion" ? "Um URL por linha. Podes misturar imagens e vídeos (mp4, webm, mov); os vídeos são reconhecidos sozinhos." : undefined}
                             accept={editing.category === "motion" ? "image/*,video/*" : "image/*"}
                             buttonLabel={editing.category === "motion" ? "Carregar imagens / vídeos" : "Carregar imagens"}
@@ -529,15 +580,7 @@ const AdminProjects = () => {
     // ---------- LISTA ----------
     return (
         <div className="min-h-screen bg-bone text-ink">
-            <header className="hairline-bottom flex items-center justify-between px-6 h-14">
-                <span className="overline">Portfólio — Projetos</span>
-                <button
-                    onClick={logout}
-                    className="text-xs tracking-[0.18em] uppercase text-mist hover:text-ink"
-                >
-                    Sair
-                </button>
-            </header>
+            <AdminTabs />
 
             <div className="max-w-3xl mx-auto px-6 py-8">
                 {msg ? (

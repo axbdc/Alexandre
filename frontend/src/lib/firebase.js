@@ -1,7 +1,6 @@
-// frontend/src/lib/firebase.js
 import { initializeApp } from "firebase/app";
 
-// Chaves web do Firebase (públicas — a segurança é feita pelas regras do Firestore).
+// Chaves web do Firebase (públicas, a segurança é feita pelas regras do Firestore).
 const firebaseConfig = {
     apiKey: "AIzaSyDD8Ktr4ozcNj2SdwSbiz8ynHE_I_7yHYs",
     authDomain: "portfolio-5d3ee.firebaseapp.com",
