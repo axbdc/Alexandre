@@ -1,4 +1,3 @@
-// frontend/src/components/RichMediaViewer.jsx
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useLang, t } from "../context/LanguageContext";

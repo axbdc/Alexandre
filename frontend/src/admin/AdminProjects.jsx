@@ -1,4 +1,3 @@
-// frontend/src/admin/AdminProjects.jsx
 import React, { useEffect, useRef, useState } from "react";
 import {
     collection,
@@ -110,7 +109,7 @@ const Field = ({ label, value, onChange, area }) => (
 );
 
 // Campo de lista (ferramentas, imagens). Guarda o texto tal como é escrito
-// e só converte para array por baixo — assim dá para escrever vírgulas,
+// e só converte para array por baixo, assim dá para escrever vírgulas,
 // espaços e mudanças de linha sem serem apagados a meio.
 const parseList = (text, sep) =>
     text
@@ -395,7 +394,7 @@ const AdminProjects = () => {
                                                 </label>
                                             </div>
                                             {editing[key] ? (
-                                                <div className="text-xs text-graphite mt-1 truncate">✓ {editing[key].split("/").pop()}</div>
+                                                <div className="text-xs text-graphite mt-1 truncate"> {editing[key].split("/").pop()}</div>
                                             ) : null}
                                         </div>
                                     ))}
@@ -519,7 +518,7 @@ const AdminProjects = () => {
                         </>
                     ) : (
                         <ImageListField
-                            label={editing.category === "motion" ? "Galeria — imagens e vídeos" : "Galeria"}
+                            label={editing.category === "motion" ? "Galeria (imagens e vídeos)" : "Galeria"}
                             help={editing.category === "motion" ? "Um URL por linha. Podes misturar imagens e vídeos (mp4, webm, mov); os vídeos são reconhecidos sozinhos." : undefined}
                             accept={editing.category === "motion" ? "image/*,video/*" : "image/*"}
                             buttonLabel={editing.category === "motion" ? "Carregar imagens / vídeos" : "Carregar imagens"}

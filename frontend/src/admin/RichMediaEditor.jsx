@@ -1,4 +1,3 @@
-// frontend/src/admin/RichMediaEditor.jsx
 import React, { useRef, useState } from "react";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import {
@@ -421,7 +420,7 @@ const RichMediaEditor = ({ screens = [], fit = "contain", onScreens, onFit, onMs
                                     <span className="flex gap-1">
                                         <button onClick={() => move(i, -1)} title="Subir">↑</button>
                                         <button onClick={() => move(i, 1)} title="Descer">↓</button>
-                                        <button onClick={() => delScreen(i)} title="Apagar" className="text-terracotta">✕</button>
+                                        <button onClick={() => delScreen(i)} title="Apagar" className="text-terracotta"></button>
                                     </span>
                                 </div>
                             </div>

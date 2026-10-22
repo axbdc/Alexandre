@@ -107,7 +107,7 @@ const CustomCursor = () => {
     }, [lang]);
 
     return (
-        <div ref={wrapRef} className="eyes-cursor" aria-hidden="true" data-testid="custom-cursor">
+        <div ref={wrapRef} className="eyes-cursor" aria-hidden="true">
             <span className="eyes">
                 {[0, 1].map((i) => (
                     <span key={i} className="eye">

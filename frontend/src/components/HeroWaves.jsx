@@ -123,7 +123,6 @@ const HeroWaves = () => {
         <canvas
             ref={ref}
             aria-hidden="true"
-            data-testid="hero-waves"
             className="pointer-events-none absolute inset-0 h-full w-full"
             style={{
                 // desvanece em cima e em baixo, para ficar só por trás do nome

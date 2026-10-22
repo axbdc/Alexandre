@@ -17,7 +17,6 @@ const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
     <button
         type="button"
         onClick={() => onOpen(p.id)}
-        data-testid={`project-card-${p.id}`}
         data-cursor="project"
         aria-label={t(p.title, lang)}
         className={`work-card group ${className}`}

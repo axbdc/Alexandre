@@ -134,7 +134,7 @@
         letter-spacing: 0.22em;
         text-transform: uppercase;
         color: var(--mist);
-        /* o Tailwind também tem uma classe "overline" (risca por cima) — anula */
+        /* o Tailwind também tem uma classe "overline" (risca por cima), anula */
         text-decoration-line: none;
     }
 
@@ -178,13 +178,13 @@
    O admin fica de fora e mantém o tema antigo.
    ========================================================= */
 .theme-neutral {
-    --c-bone: 248 247 244;       /* fundo — papel quente, quase branco */
+    --c-bone: 248 247 244;       /* fundo, papel quente, quase branco */
     --c-pebble: 240 238 233;     /* superfícies (cards) */
     --c-sand: 232 229 223;       /* superfícies 2 */
     --c-ink: 20 20 19;           /* texto principal */
     --c-graphite: 88 87 83;      /* texto secundário */
     --c-mist: 150 148 142;       /* texto discreto */
-    --c-accent: 25 39 200;       /* destaque — azul #1927C8 */
+    --c-accent: 25 39 200;       /* destaque, azul #1927C8 */
     --c-accent-hover: 18 29 160;
     --c-hairline: 226 223 216;   /* linhas */
 
@@ -354,7 +354,7 @@
 
 
 /* =========================================================
-   REDESIGN 2026 — loader, nome que estica, cursor olhos,
+   REDESIGN 2026, loader, nome que estica, cursor olhos,
    cartões de projeto, destaques horizontais, crachá
    ========================================================= */
 
@@ -1362,4 +1362,62 @@ html.lenis body {
 .work-card-tags > span.work-card-ar {
     background: var(--terracotta);
     border-color: var(--terracotta);
+}
+
+/* ---------- Admin: mesma estética do site ---------- */
+.admin-shell {
+    min-height: 100vh;
+    background: var(--bone);
+    color: var(--ink);
+}
+.admin-shell .font-display,
+.admin-shell h1 {
+    font-family: "Anton", "Impact", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    line-height: 0.95;
+}
+.admin-shell h1.text-2xl,
+.admin-shell .font-display.text-2xl {
+    font-size: 2.4rem;
+}
+.admin-shell .overline {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--terracotta) !important;
+}
+.admin-shell .bg-ink {
+    background-color: var(--terracotta);
+    border-radius: 999px;
+}
+.admin-shell .bg-ink:hover,
+.admin-shell .hover\:bg-terracotta:hover {
+    background-color: var(--terracotta-hover);
+}
+.admin-shell .bg-white {
+    background-color: #fff;
+}
+.admin-shell .border-hairline {
+    border-color: var(--hairline);
+}
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+    border-radius: 10px;
+}
+.admin-shell input:focus,
+.admin-shell select:focus,
+.admin-shell textarea:focus {
+    border-color: var(--terracotta) !important;
+    box-shadow: 0 0 0 3px rgb(var(--c-accent) / 0.12);
+}
+.admin-shell .text-terracotta {
+    color: var(--terracotta);
+}
+.admin-shell header.hairline-bottom {
+    border-bottom: 1px solid var(--terracotta);
+}
+.admin-shell .bg-white {
+    border-radius: 16px;
 }

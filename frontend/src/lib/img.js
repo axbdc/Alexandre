@@ -1,4 +1,3 @@
-// frontend/src/lib/img.js
 // Imagens do Cloudinary otimizadas: formato automático (AVIF/WebP), qualidade
 // automática e largura máxima. Não mexe em vídeos nem em URLs de fora do Cloudinary.
 

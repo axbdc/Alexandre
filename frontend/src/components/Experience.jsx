@@ -17,7 +17,6 @@ const Experience = () => {
         <section
             id="experience"
             ref={rootRef}
-            data-testid="experience-section"
             className="px-4 md:px-8 py-24 md:py-36 bg-bone"
         >
             <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-10 md:gap-x-12">
@@ -37,7 +36,6 @@ const Experience = () => {
                         return (
                             <li
                                 key={i}
-                                data-testid={`experience-item-${i}`}
                                 className="reveal"
                             >
                                 <button
@@ -45,7 +43,6 @@ const Experience = () => {
                                     onClick={() => toggle(i)}
                                     aria-expanded={isOpen}
                                     aria-controls={`exp-panel-${i}`}
-                                    data-testid={`experience-toggle-${i}`}
                                     className="group w-full text-left py-7 md:py-9 grid grid-cols-12 gap-4 items-baseline cursor-pointer"
                                 >
                                     <span className="col-span-12 md:col-span-3 hero-meta">
@@ -87,7 +84,6 @@ const Experience = () => {
                                 {/* Painel: abre/fecha só com CSS (grid 0fr -> 1fr), sem framer-motion */}
                                 <div
                                     id={`exp-panel-${i}`}
-                                    data-testid={`experience-panel-${i}`}
                                     aria-hidden={!isOpen}
                                     className={`exp-panel ${isOpen ? "is-open" : ""}`}
                                 >

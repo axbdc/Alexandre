@@ -1,4 +1,3 @@
-// frontend/src/hooks/useProjects.js
 import { useEffect, useState } from "react";
 import { fetchPublishedProjects } from "../lib/projectsApi";
 import { PROJECTS as FALLBACK } from "../data/content";

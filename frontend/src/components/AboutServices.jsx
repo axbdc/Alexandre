@@ -12,7 +12,6 @@ const AboutServices = ({ part = "both" }) => {
     return (
         <section
             ref={rootRef}
-            data-testid={`about-services-section-${part}`}
         >
             {part !== "services" ? (
             <>
@@ -89,7 +88,6 @@ const AboutServices = ({ part = "both" }) => {
                             {SERVICES.map((s) => (
                                 <li
                                     key={s.no}
-                                    data-testid={`service-row-${s.no}`}
                                     className="reveal group py-6 md:py-8 grid grid-cols-12 gap-4 items-baseline cursor-default"
                                 >
                                     <span className="hero-meta col-span-2 md:col-span-1">

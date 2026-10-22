@@ -66,7 +66,7 @@ const IdBadge = ({ lang }) => {
     }, []);
 
     return (
-        <div className="badge-wrap" data-testid="about-badge">
+        <div className="badge-wrap">
             <div ref={swingRef} className="badge-swing">
                 <div className="badge-strap" aria-hidden="true">
                     <span>AC · AC · AC · AC · AC · AC · AC · AC</span>

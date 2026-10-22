@@ -3,7 +3,7 @@
 // - Android → Google Scene Viewer (intent://) with GLB
 // - Desktop → Scene Viewer web 3D fallback in a new tab
 //
-// Pass { glb, usdz, title, image } — provides usdz are recommended for iOS,
+// Pass { glb, usdz, title, image }, provides usdz are recommended for iOS,
 // glb for Android/desktop. Either one alone still works (with a sensible
 // fallback).
 

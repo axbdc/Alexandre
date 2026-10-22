@@ -1,4 +1,3 @@
-// frontend/src/admin/AdminLogin.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
@@ -45,7 +44,7 @@ const AdminLogin = () => {
             <div className="w-full max-w-sm border border-hairline bg-white p-8 shadow-[0_30px_70px_-30px_rgba(28,27,26,0.4)]">
                 <div className="overline text-mist mb-1">Área reservada</div>
                 <h1 className="font-display text-2xl text-ink mb-6">
-                    Portfólio — Admin
+                    Portfólio · Admin
                 </h1>
 
                 <label className="overline text-mist">Email</label>

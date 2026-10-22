@@ -112,7 +112,6 @@ const SelectedWorks = () => {
         <section
             id="work"
             ref={rootRef}
-            data-testid="works-section"
             className="pt-4 pb-20 md:pb-28"
         >
             <FeaturedStrip projects={featured} lang={lang} onOpen={openFromFeatured} />
@@ -130,7 +129,6 @@ const SelectedWorks = () => {
                         </div>
                         <div
                             className="font-display text-2xl text-ink mt-1 tabular-nums"
-                            data-testid="works-count"
                         >
                             {String(filtered.length).padStart(2, "0")}
                             <span className="text-mist mx-2">/</span>
@@ -144,7 +142,6 @@ const SelectedWorks = () => {
                 {/* Category tabs */}
                 <div
                     className="reveal -mx-6 md:mx-0 mb-12 md:mb-16 overflow-x-auto no-scrollbar"
-                    data-testid="category-tabs"
                 >
                     <ul className="flex items-center gap-2 md:gap-3 px-6 md:px-0">
                         {CATEGORIES.map((c) => {
@@ -153,7 +150,6 @@ const SelectedWorks = () => {
                                 <li key={c.id}>
                                     <button
                                         onClick={() => setActive(c.id)}
-                                        data-testid={`category-tab-${c.id}`}
                                         aria-pressed={isActive}
                                         className={`group relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 border transition-colors duration-300 whitespace-nowrap ${
                                             isActive
@@ -186,7 +182,6 @@ const SelectedWorks = () => {
                 {/* Grelha filtrada */}
                 <ul
                     key={active}
-                    data-testid="works-grid"
                     className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5"
                 >
                     {filtered.map((p, i) => (

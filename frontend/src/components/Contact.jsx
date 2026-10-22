@@ -36,7 +36,7 @@ const Contact = () => {
 
         // Envio por email via Web3Forms (único destino; o backend antigo foi retirado).
         let delivered = false;
-        const accessKey = process.env.REACT_APP_WEB3FORMS_KEY;
+        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || import.meta.env.REACT_APP_WEB3FORMS_KEY;
         if (accessKey) {
             try {
                 const fd = new FormData();
@@ -73,7 +73,6 @@ const Contact = () => {
         <section
             id="contact"
             ref={rootRef}
-            data-testid="contact-section"
             className="px-4 md:px-8 py-24 md:py-36 contact-band"
         >
             <div className="mx-auto max-w-[1600px] mb-20 md:mb-28">
@@ -84,7 +83,6 @@ const Contact = () => {
                 <a
                     href={`mailto:${SOCIAL.email}`}
                     className="contact-big group mt-10 md:mt-14"
-                    data-testid="contact-big-link"
                 >
                     <StretchText text={lang === "PT" ? "VAMOS FALAR" : "LET'S TALK"} className="contact-big-word" />
                     <ArrowUpRight className="contact-big-arrow" strokeWidth={1.5} />
@@ -96,7 +94,6 @@ const Contact = () => {
                     <span className="section-kicker">↳ {lang === "PT" ? "Ou deixa aqui a mensagem" : "Or leave a message here"}</span>
                     <h2
                         className="font-condensed uppercase text-5xl md:text-7xl mt-4 text-ink"
-                        data-testid="contact-heading"
                     >
                         {lang === "PT" ? "Fala comigo" : "Say hello"}
                     </h2>
@@ -105,7 +102,6 @@ const Contact = () => {
                         <li>
                             <a
                                 href={`mailto:${SOCIAL.email}`}
-                                data-testid="contact-direct-email"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">
@@ -122,7 +118,6 @@ const Contact = () => {
                                 href={SOCIAL.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                data-testid="contact-linkedin"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">LinkedIn</span>
@@ -135,7 +130,6 @@ const Contact = () => {
                         <li>
                             <a
                                 href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer"
-                                data-testid="contact-instagram"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">Instagram</span>
@@ -148,7 +142,6 @@ const Contact = () => {
                         <li>
                             <a
                                 href={`tel:${SOCIAL.phone.replace(/\s/g, "")}`}
-                                data-testid="contact-phone"
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">{SOCIAL.phone}</span>
@@ -163,7 +156,6 @@ const Contact = () => {
 
                 <form
                     onSubmit={onSubmit}
-                    data-testid="contact-form"
                     className="col-span-12 md:col-span-6 md:col-start-7 reveal space-y-2"
                     noValidate
                 >
@@ -181,7 +173,6 @@ const Contact = () => {
                             value={form.name}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-name"
                             required
                         />
                     </div>
@@ -200,7 +191,6 @@ const Contact = () => {
                             value={form.email}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-email"
                             required
                         />
                     </div>
@@ -219,7 +209,6 @@ const Contact = () => {
                             value={form.subject}
                             onChange={onChange}
                             className="elegant-input"
-                            data-testid="contact-input-subject"
                         />
                     </div>
 
@@ -237,7 +226,6 @@ const Contact = () => {
                             value={form.message}
                             onChange={onChange}
                             className="elegant-input resize-none"
-                            data-testid="contact-input-message"
                             required
                         />
                     </div>
@@ -246,7 +234,6 @@ const Contact = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            data-testid="contact-form-submit"
                             className="group inline-flex items-center justify-between gap-6 rounded-full bg-terracotta px-7 py-4 text-bone hover:bg-terracotta-hover transition-colors duration-300 min-w-[260px] disabled:opacity-50 disabled:cursor-wait"
                         >
                             <span className="text-sm font-medium tracking-wide">
@@ -262,7 +249,6 @@ const Contact = () => {
                         <p
                             role="status"
                             aria-live="polite"
-                            data-testid="contact-form-status"
                             className={`mt-4 min-h-[1.25rem] text-sm ${
                                 status?.type === "error" ? "text-terracotta" : "text-ink"
                             }`}
@@ -281,7 +267,6 @@ const Contact = () => {
                 </div>
                 <div className="text-sm text-graphite md:text-right space-y-1">
                     <div>© {new Date().getFullYear()} · {t(FOOTER.rights, lang)}</div>
-                    <div className="text-mist">{t(FOOTER.colophon, lang)}</div>
                     <div className="overline pt-2">
                         <span className="inline-block h-1.5 w-1.5 rounded-full bg-terracotta mr-2 align-middle" />
                         {t(FOOTER.available, lang)}

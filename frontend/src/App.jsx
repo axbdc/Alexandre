@@ -18,6 +18,9 @@ const AdminProjects = lazy(() => import("@/admin/AdminProjects"));
 const AdminHighlights = lazy(() => import("@/admin/AdminHighlights"));
 const RequireAuth = lazy(() => import("@/admin/RequireAuth"));
 
+// O admin usa as mesmas cores e letras do site
+const AdminShell = ({ children }) => <div className="theme-neutral admin-shell">{children}</div>;
+
 const Portfolio = () => {
     // Scroll suave (Lenis): a página desliza com inércia em vez de saltar.
     // Desligado com "reduzir movimento"; no telemóvel o scroll continua nativo.
@@ -62,7 +65,7 @@ const Portfolio = () => {
     }, []);
 
     return (
-        <div className="App site-zoom theme-neutral" data-testid="portfolio-root">
+        <div className="App site-zoom theme-neutral">
             <Loader />
             <CustomCursor />
             <Navigation />
@@ -85,21 +88,25 @@ function App() {
                 <Suspense fallback={null}>
                 <Routes>
                     <Route path="/" element={<Portfolio />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin/login" element={<AdminShell><AdminLogin /></AdminShell>} />
                     <Route
                         path="/admin"
                         element={
-                            <RequireAuth>
-                                <AdminProjects />
-                            </RequireAuth>
+                            <AdminShell>
+                                <RequireAuth>
+                                    <AdminProjects />
+                                </RequireAuth>
+                            </AdminShell>
                         }
                     />
                     <Route
                         path="/admin/destaques"
                         element={
-                            <RequireAuth>
-                                <AdminHighlights />
-                            </RequireAuth>
+                            <AdminShell>
+                                <RequireAuth>
+                                    <AdminHighlights />
+                                </RequireAuth>
+                            </AdminShell>
                         }
                     />
                     <Route path="/rm/:id" element={<RichMediaViewer />} />

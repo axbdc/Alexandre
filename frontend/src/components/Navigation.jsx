@@ -30,7 +30,6 @@ const Navigation = () => {
 
     return (
         <header
-            data-testid="site-nav"
             className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
                 scrolled
                     ? "backdrop-blur-md bg-bone/80 hairline-bottom"
@@ -41,7 +40,6 @@ const Navigation = () => {
                 <a
                     href="#top"
                     onClick={go("top")}
-                    data-testid="nav-logo"
                     className="font-display text-lg md:text-xl tracking-tight text-ink"
                 >
                     Alexandre Cosme<span className="text-terracotta">.</span>
@@ -53,7 +51,6 @@ const Navigation = () => {
                             <a
                                 href={`#${l.id}`}
                                 onClick={go(l.id)}
-                                data-testid={l.testid}
                                 className="link-underline text-sm tracking-wide text-ink"
                             >
                                 {t(NAV[l.nav || l.id], lang)}
@@ -65,7 +62,6 @@ const Navigation = () => {
                 <div className="flex items-center gap-4 md:gap-6">
                     <button
                         onClick={toggle}
-                        data-testid="nav-pt-en-toggle"
                         className="text-sm tracking-wider text-ink"
                         aria-label="Toggle language"
                     >
@@ -93,7 +89,6 @@ const Navigation = () => {
                     <a
                         href="#contact"
                         onClick={go("contact")}
-                        data-testid="nav-cta"
                         className="hidden lg:inline-flex items-center gap-2 rounded-full bg-ink text-bone px-5 py-2.5 text-sm font-medium hover:bg-terracotta transition-colors duration-300"
                     >
                         {lang === "PT" ? "Vamos falar" : "Let's talk"}
@@ -101,7 +96,6 @@ const Navigation = () => {
 
                     <button
                         onClick={() => setOpen((s) => !s)}
-                        data-testid="nav-mobile-toggle"
                         className="lg:hidden inline-flex flex-col items-end gap-1.5 px-2 py-2"
                         aria-label="Menu"
                     >
@@ -113,7 +107,6 @@ const Navigation = () => {
 
             {open && (
                 <div
-                    data-testid="nav-mobile-panel"
                     className="lg:hidden bg-bone hairline-top px-6 py-8"
                 >
                     <ul className="flex flex-col gap-5">
@@ -122,7 +115,6 @@ const Navigation = () => {
                                 <a
                                     href={`#${l.id}`}
                                     onClick={go(l.id)}
-                                    data-testid={`nav-mobile-link-${l.id}`}
                                     className="font-display text-2xl text-ink"
                                 >
                                     {t(NAV[l.nav || l.id], lang)}

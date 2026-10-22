@@ -51,7 +51,6 @@ const ARViewer = ({ project, title, lang, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            data-testid="ar-viewer"
             data-no-drag
         >
             <div className="ar-viewer-bar">

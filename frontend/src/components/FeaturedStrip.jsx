@@ -66,7 +66,7 @@ const FeaturedStrip = ({ projects, lang, onOpen }) => {
     if (!projects.length) return null;
 
     return (
-        <div ref={sectionRef} className="featured" data-testid="featured-strip">
+        <div ref={sectionRef} className="featured">
             <div className="featured-sticky">
                 <div className="featured-head px-4 md:px-8">
                     <span className="section-kicker">

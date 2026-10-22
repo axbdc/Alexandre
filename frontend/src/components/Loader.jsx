@@ -53,7 +53,7 @@ const Loader = () => {
     if (gone) return null;
 
     return (
-        <div className={`intro ${leaving ? "is-leaving" : ""}`} aria-hidden="true" data-testid="intro-loader">
+        <div className={`intro ${leaving ? "is-leaving" : ""}`} aria-hidden="true">
             <div className="intro-top">
                 <span>Portfólio · 2026</span>
                 <span className="tabular-nums">A carregar {String(pct).padStart(3, "0")}%</span>

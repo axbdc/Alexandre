@@ -1,4 +1,3 @@
-// frontend/src/admin/AdminHighlights.jsx
 // Aba "Destaques": as imagens que aparecem na faixa horizontal do início do site.
 // Cada destaque = uma imagem (a melhor campanha, post, 3D...) ligada a um projeto.
 // Ao clicar no destaque, o site abre esse projeto.
@@ -174,7 +173,7 @@ const AdminHighlights = () => {
                             value={editing.project_id}
                             onChange={(e) => setEditing({ ...editing, project_id: e.target.value })}
                         >
-                            <option value="">— escolhe o projeto —</option>
+                            <option value="">Escolhe o projeto</option>
                             {projects.map((p) => (
                                 <option key={p.id} value={p.id}>
                                     {p.title_pt || p.id}
@@ -186,7 +185,7 @@ const AdminHighlights = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="overline text-mist">Etiqueta (PT) — opcional</label>
+                            <label className="overline text-mist">Etiqueta PT (opcional)</label>
                             <input
                                 className={input}
                                 placeholder="ex.: Melhor campanha"
@@ -195,7 +194,7 @@ const AdminHighlights = () => {
                             />
                         </div>
                         <div>
-                            <label className="overline text-mist">Etiqueta (EN) — opcional</label>
+                            <label className="overline text-mist">Etiqueta EN (opcional)</label>
                             <input
                                 className={input}
                                 placeholder="e.g. Best campaign"

@@ -1,4 +1,3 @@
-// frontend/src/lib/projectsApi.js
 // Lê os projetos publicados pela API REST do Firestore, sem carregar o SDK do
 // Firebase no site público (poupa muito JavaScript no telemóvel).
 //

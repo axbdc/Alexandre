@@ -42,7 +42,7 @@ const COPY = {
 //  detalhe); a grelha mantém-se limpa e uniforme.
 // =====================================================================
 
-// WEB — janela de browser. A barra mostra o domínio do `url`.
+// WEB, janela de browser. A barra mostra o domínio do `url`.
 // Se passares `srcMobile`, aparece um telemóvel sobreposto (responsivo).
 const BrowserFrame = ({ src, srcMobile, alt, url }) => {
     let domain = "";
@@ -84,7 +84,7 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
                         <div className="aspect-[9/19] overflow-hidden bg-white">
                             <img
                                 src={srcMobile}
-                                alt={`${alt} — mobile`}
+                                alt={`${alt} (mobile)`}
                                 className="w-full h-full object-cover object-top"
                                 loading="lazy"
                             />
@@ -96,7 +96,7 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
     );
 };
 
-// AR & 3D — render sobre "estúdio" neutro, com sombra de contacto.
+// AR & 3D, render sobre "estúdio" neutro, com sombra de contacto.
 // object-contain para nunca cortar o render. overlay = botão AR (opcional).
 const StageFrame = ({ src, alt, label, overlay }) => (
     <div className="relative border border-hairline overflow-hidden bg-gradient-to-b from-pebble to-sand">
@@ -117,7 +117,7 @@ const StageFrame = ({ src, alt, label, overlay }) => (
     </div>
 );
 
-// DESIGN GRÁFICO — a arte como folha impressa sobre superfície neutra.
+// DESIGN GRÁFICO, a arte como folha impressa sobre superfície neutra.
 // Respeita o rácio da imagem (object-contain), com sombra de folha.
 const PrintFrame = ({ src, alt }) => (
     <div className="border border-hairline bg-sand p-6 md:p-12 flex items-center justify-center">
@@ -130,7 +130,7 @@ const PrintFrame = ({ src, alt }) => (
     </div>
 );
 
-// FOTOGRAFIA — moldura de galeria: passe-partout fino + legenda.
+// FOTOGRAFIA, moldura de galeria: passe-partout fino + legenda.
 const PhotoFrame = ({ src, alt, caption }) => (
     <figure>
         <div className="bg-white border border-hairline p-3 md:p-4 shadow-[0_22px_50px_-30px_rgba(28,27,26,0.5)]">
@@ -151,7 +151,7 @@ const PhotoFrame = ({ src, alt, caption }) => (
     </figure>
 );
 
-// MOTION & RICH MEDIA — chrome de leitor de vídeo. Se houver `url`, o play
+// MOTION & RICH MEDIA, chrome de leitor de vídeo. Se houver `url`, o play
 // abre o vídeo; caso contrário fica decorativo (sinaliza "isto é vídeo").
 const PlayerFrame = ({ src, alt, url, video }) => {
     // Vídeo principal carregado no admin: toca aqui mesmo.
@@ -417,7 +417,6 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.4, delay: 0.15 } }}
                     transition={{ duration: 0.35 }}
-                    data-testid="project-modal"
                     data-lenis-prevent
                     role="dialog"
                     aria-modal="true"
@@ -474,13 +473,13 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         {lang === "PT" ? "Arrasta para o lado" : "Drag sideways"}
                                     </span>
                                 ) : null}
-                                <button onClick={onPrev} aria-label={t(COPY.prev, lang)} data-testid="modal-prev" className="pm-btn">
+                                <button onClick={onPrev} aria-label={t(COPY.prev, lang)} className="pm-btn">
                                     <ArrowLeft size={16} />
                                 </button>
-                                <button onClick={onNext} aria-label={t(COPY.next, lang)} data-testid="modal-next" className="pm-btn">
+                                <button onClick={onNext} aria-label={t(COPY.next, lang)} className="pm-btn">
                                     <ArrowRight size={16} />
                                 </button>
-                                <button onClick={onClose} aria-label={t(COPY.close, lang)} data-testid="modal-close" className="pm-btn pm-btn-close">
+                                <button onClick={onClose} aria-label={t(COPY.close, lang)} className="pm-btn pm-btn-close">
                                     <X size={16} />
                                 </button>
                             </div>
@@ -494,7 +493,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                     {project.year ? <span>{project.year}</span> : null}
                                 </motion.div>
                                 <div className="overflow-hidden">
-                                    <motion.h2 variants={TITLE_IN} data-testid="modal-title" className="pm-title">
+                                    <motion.h2 variants={TITLE_IN} className="pm-title">
                                         {t(project.title, lang)}
                                     </motion.h2>
                                 </div>
@@ -505,7 +504,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 ) : null}
                             </motion.div>
 
-                            {/* Capa — moldura por categoria (nunca corta a imagem) */}
+                            {/* Capa, moldura por categoria (nunca corta a imagem) */}
                             <motion.div
                                 className="pm-cover"
                                 initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -520,7 +519,6 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 <div className="pm-ar-cta">
                                     <button
                                         type="button"
-                                        data-testid="modal-ar-button"
                                         className="pm-cta group"
                                         onClick={() => {
                                             if (canLaunchAR()) {
@@ -554,7 +552,6 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         href={`/rm/${project.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        data-testid="modal-test-rm"
                                         className="group inline-flex items-center gap-3 bg-ink text-bone px-8 md:px-10 py-4 md:py-5 text-sm md:text-base tracking-[0.18em] uppercase hover:bg-terracotta transition-colors shadow-[0_18px_44px_-18px_rgba(28,27,26,0.55)]"
                                     >
                                         {t(COPY.link_test, lang)}
@@ -607,7 +604,6 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                             href={project.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            data-testid="modal-external-link"
                                             className="group inline-flex w-full sm:w-auto items-center justify-between gap-6 rounded-full bg-terracotta px-6 py-3.5 text-bone shadow-[0_10px_24px_-12px_rgba(0,0,0,0.45)] hover:bg-terracotta-hover transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
                                         >
                                             <span className="text-sm font-medium tracking-wide">
@@ -713,7 +709,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                 type="button"
                                                 onClick={() => setLightboxIndex(i)}
                                                 className="block w-full mb-3 md:mb-4 cursor-pointer overflow-hidden break-inside-avoid focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-                                                aria-label={`${t(project.title, lang)} — ${i + 1}`}
+                                                aria-label={`${t(project.title, lang)} ${i + 1}`}
                                             >
                                                 {isVideo(src) ? (
                                                     <span className="relative block">
@@ -735,7 +731,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                     <InView root={scrollRef} as="span" className="block pm-rise">
                                                         <img
                                                             src={src}
-                                                            alt={`${t(project.title, lang)} — ${i + 1}`}
+                                                            alt={`${t(project.title, lang)} ${i + 1}`}
                                                             loading="lazy"
                                                             decoding="async"
                                                             className="w-full h-auto block"
@@ -749,7 +745,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             ) : null}
 
                             {total > 1 ? (
-                                <button type="button" onClick={onNext} className="pm-next group" data-testid="modal-next-big">
+                                <button type="button" onClick={onNext} className="pm-next group">
                                     <span className="pm-label">{lang === "PT" ? "Projeto seguinte" : "Next project"}</span>
                                     <span className="pm-next-word">
                                         {lang === "PT" ? "Seguinte" : "Next"}
@@ -782,7 +778,6 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                                 onClick={() => setLightboxIndex(null)}
-                                data-testid="gallery-lightbox"
                             >
                                 <button
                                     type="button"
@@ -824,7 +819,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 ) : (
                                     <img
                                         src={gallery[lightboxIndex]}
-                                        alt={`${t(project.title, lang)} — ${lightboxIndex + 1}`}
+                                        alt={`${t(project.title, lang)} ${lightboxIndex + 1}`}
                                         onClick={(e) => e.stopPropagation()}
                                         className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
                                     />
