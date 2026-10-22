@@ -31,7 +31,7 @@ const AboutServices = ({ part = "both" }) => {
                         </div>
 
                         <div className="col-span-12 md:col-span-7 lg:col-span-7 lg:col-start-6 md:pt-24">
-                            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+                            <div className="grid lg:grid-cols-2 gap-6 lg:gap-12">
                                 {ABOUT.body.map((para, i) => (
                                     <p key={i} className="reveal text-base md:text-lg leading-relaxed text-graphite">
                                         {t(para, lang)}

@@ -124,7 +124,7 @@ const SelectedWorks = () => {
                             {lang === "PT" ? "Todos os trabalhos" : "All work"}
                         </h2>
                     </div>
-                    <div className="hidden md:block text-right">
+                    <div className="hidden lg:block text-right">
                         <div className="overline">
                             {lang === "PT" ? "A mostrar" : "Showing"}
                         </div>

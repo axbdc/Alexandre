@@ -47,7 +47,7 @@ const Navigation = () => {
                     Alexandre Cosme<span className="text-terracotta">.</span>
                 </a>
 
-                <ul className="hidden md:flex items-center gap-10">
+                <ul className="hidden lg:flex items-center gap-10">
                     {links.map((l) => (
                         <li key={l.id}>
                             <a
@@ -94,7 +94,7 @@ const Navigation = () => {
                         href="#contact"
                         onClick={go("contact")}
                         data-testid="nav-cta"
-                        className="hidden md:inline-flex items-center gap-2 rounded-full bg-ink text-bone px-5 py-2.5 text-sm font-medium hover:bg-terracotta transition-colors duration-300"
+                        className="hidden lg:inline-flex items-center gap-2 rounded-full bg-ink text-bone px-5 py-2.5 text-sm font-medium hover:bg-terracotta transition-colors duration-300"
                     >
                         {lang === "PT" ? "Vamos falar" : "Let's talk"}
                     </a>
@@ -102,7 +102,7 @@ const Navigation = () => {
                     <button
                         onClick={() => setOpen((s) => !s)}
                         data-testid="nav-mobile-toggle"
-                        className="md:hidden inline-flex flex-col items-end gap-1.5 px-2 py-2"
+                        className="lg:hidden inline-flex flex-col items-end gap-1.5 px-2 py-2"
                         aria-label="Menu"
                     >
                         <span className="block h-px w-6 bg-ink" />
@@ -114,7 +114,7 @@ const Navigation = () => {
             {open && (
                 <div
                     data-testid="nav-mobile-panel"
-                    className="md:hidden bg-bone hairline-top px-6 py-8"
+                    className="lg:hidden bg-bone hairline-top px-6 py-8"
                 >
                     <ul className="flex flex-col gap-5">
                         {links.map((l) => (
