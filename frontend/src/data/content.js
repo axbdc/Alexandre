@@ -21,8 +21,8 @@ export const HERO = {
         EN: "Ericeira, Portugal → to the world",
     },
     statement: {
-        PT: "Design, AR, 3D e web para marcas. Do primeiro esboço à entrega final, onde o gráfico e o interativo se cruzam.",
-        EN: "Design, AR, 3D and web for brands. From the first sketch to final delivery, where graphic and interactive meet.",
+        PT: "Design, AR, 3D, web e IA criativa para marcas. Do primeiro esboço à entrega final, onde o gráfico e o interativo se cruzam.",
+        EN: "Design, AR, 3D, web and creative AI for brands. From the first sketch to final delivery, where graphic and interactive meet.",
     },
     role: { PT: "Design & Multimedia Lead", EN: "Design & Multimedia Lead" },
     // 📷 FOTO DO HERO
@@ -40,6 +40,7 @@ export const HERO = {
         { PT: "Design Gráfico", EN: "Graphic Design" },
         { PT: "Web", EN: "Web" },
         { PT: "Motion", EN: "Motion" },
+        { PT: "IA Criativa", EN: "Creative AI" },
         { PT: "Fotografia", EN: "Photography" },
     ],
     location: { PT: "Ericeira, Portugal", EN: "Ericeira, Portugal" },
@@ -437,10 +438,13 @@ export const ABOUT = {
         "Bayer · Clarityne",
         "Distell · Savanna",
         "Solverde Group",
-        "Natura",
-        "Becel",
-        "Metropolitan",
-        "World Sports Betting",
+        "Sonasol",
+        "Bright International School",
+        "Madeira Rústica",
+        "Bruti",
+        "Talay Thai House",
+        "BerryLab Açaí",
+        "…",
     ],
     // Crachá da secção "Sobre"
     badge: {
@@ -505,6 +509,14 @@ export const SERVICES = [
             EN: "Editing in Premiere and animation in After Effects for short videos, social media and teasers.",
         },
     },
+    {
+        no: "07",
+        title: { PT: "IA Criativa", EN: "Creative AI" },
+        body: {
+            PT: "Imagem e vídeo gerados com IA, retoque e extensão de imagens com Generative Fill, e sites e ferramentas feitos com programação assistida por IA — mais rápido, sem perder qualidade.",
+            EN: "AI-generated images and video, retouching and image extension with Generative Fill, and websites and tools built with AI-assisted coding — faster, without losing quality.",
+        },
+    },
 ];
 
 export const TOOLS = [
@@ -516,6 +528,9 @@ export const TOOLS = [
     "After Effects",
     "Premiere Pro",
     "Figma",
+    "IA generativa (imagem e vídeo)",
+    "Photoshop Generative Fill",
+    "Programação assistida por IA",
     "React / TypeScript",
     "HTML / CSS",
     "Fotografia / Vídeo",

@@ -26,11 +26,11 @@ const AboutServices = ({ part = "both" }) => {
                     />
 
                     <div className="mt-16 md:mt-24 grid grid-cols-12 gap-y-14 md:gap-x-12 items-start">
-                        <div className="col-span-12 md:col-span-5 lg:col-span-4 flex justify-center md:justify-start">
+                        <div className="col-span-12 md:col-span-5 lg:col-span-5 flex justify-center">
                             <IdBadge lang={lang} />
                         </div>
 
-                        <div className="col-span-12 md:col-span-7 lg:col-span-7 lg:col-start-6">
+                        <div className="col-span-12 md:col-span-7 lg:col-span-7 lg:col-start-6 md:pt-24">
                             <div className="grid md:grid-cols-2 gap-8 md:gap-12">
                                 {ABOUT.body.map((para, i) => (
                                     <p key={i} className="reveal text-base md:text-lg leading-relaxed text-graphite">
