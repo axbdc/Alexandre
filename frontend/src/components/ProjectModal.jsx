@@ -9,7 +9,8 @@ import {
     Play,
 } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
-import { launchAR, hasARAssets } from "../lib/ar";
+import { launchAR, isARProject, canLaunchAR } from "../lib/ar";
+import ARViewer from "./ARViewer";
 import { PhoneStrip } from "./RichMedia";
 import { isVideo, videoPoster } from "../lib/media";
 
@@ -272,9 +273,13 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         [gallery.length],
     );
 
-    // Fecha o lightbox ao trocar de projeto
+    // Visualizador 3D (computador) aberto?
+    const [arOpen, setArOpen] = useState(false);
+
+    // Fecha o lightbox (e o visualizador 3D) ao trocar de projeto
     useEffect(() => {
         setLightboxIndex(null);
+        setArOpen(false);
     }, [project && project.id]);
 
     useEffect(() => {
@@ -295,7 +300,11 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                 }
                 return;
             }
-            if (e.key === "Escape") onClose();
+            if (e.key === "Escape") {
+                if (arOpen) setArOpen(false);
+                else onClose();
+                return;
+            }
             if (e.key === "ArrowLeft") onPrev();
             if (e.key === "ArrowRight") onNext();
         };
@@ -308,13 +317,14 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
             document.body.style.overflow = prevOverflow;
             if (window.__lenis) window.__lenis.start();
         };
-    }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext]);
+    }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext, arOpen]);
 
     if (!project) return null;
 
     const cat = project.category;
     const isWeb = cat === "web";
     const isMotion = cat === "motion";
+    const isAR = isARProject(project);
     const isRM = !!(
         cat === "richmedia" &&
         project.richmedia &&
@@ -337,32 +347,11 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         }
 
         if (cat === "ar3d") {
-            const arOverlay = hasARAssets(project) ? (
-                <button
-                    type="button"
-                    onClick={() =>
-                        launchAR({
-                            glb: project.model_glb,
-                            usdz: project.model_usdz,
-                            title,
-                            image: project.cover,
-                        })
-                    }
-                    data-testid="modal-ar-button"
-                    className="absolute bottom-3 right-3 md:bottom-4 md:right-4 inline-flex items-center gap-2 bg-ink text-bone hover:bg-terracotta transition-colors duration-500 px-4 py-2.5 shadow-lg"
-                >
-                    <Box size={14} />
-                    <span className="text-xs tracking-[0.18em] uppercase">
-                        {t(COPY.view_ar, lang)}
-                    </span>
-                </button>
-            ) : null;
             return (
                 <StageFrame
                     src={project.cover}
                     alt={title}
                     label={t(project.subtitle, lang)}
-                    overlay={arOverlay}
                 />
             );
         }
@@ -525,6 +514,38 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             >
                                 {renderCover()}
                             </motion.div>
+
+                            {/* Realidade aumentada: no telemóvel abre a AR; no computador abre o visualizador 3D */}
+                            {isAR ? (
+                                <div className="pm-ar-cta">
+                                    <button
+                                        type="button"
+                                        data-testid="modal-ar-button"
+                                        className="pm-cta group"
+                                        onClick={() => {
+                                            if (canLaunchAR()) {
+                                                launchAR({
+                                                    glb: project.model_glb,
+                                                    usdz: project.model_usdz,
+                                                    title: t(project.title, lang),
+                                                    image: project.cover,
+                                                });
+                                            } else {
+                                                setArOpen(true);
+                                            }
+                                        }}
+                                    >
+                                        <Box size={20} />
+                                        {lang === "PT" ? "Ver em realidade aumentada" : "View in augmented reality"}
+                                        <ArrowUpRight size={20} className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                                    </button>
+                                    <span className="pm-hint">
+                                        {lang === "PT"
+                                            ? "No telemóvel abre a câmara. No computador mostra o modelo 3D animado."
+                                            : "On a phone it opens the camera. On a computer it shows the animated 3D model."}
+                                    </span>
+                                </div>
+                            ) : null}
 
                             {/* CTA grande para testar o rich media */}
                             {isRM ? (
@@ -737,6 +758,17 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 </button>
                             ) : null}
                         </div>
+
+                        <AnimatePresence>
+                            {arOpen && isAR ? (
+                                <ARViewer
+                                    project={project}
+                                    title={t(project.title, lang)}
+                                    lang={lang}
+                                    onClose={() => setArOpen(false)}
+                                />
+                            ) : null}
+                        </AnimatePresence>
                     </motion.div>
                     </AnimatePresence>
 

@@ -3,6 +3,7 @@ import { t } from "../context/LanguageContext";
 import { CATEGORIES } from "../data/content";
 import { cld, cldSrcSet } from "../lib/img";
 import { ArrowUpRight } from "lucide-react";
+import { isARProject } from "../lib/ar";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -37,6 +38,7 @@ const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
             <span className="work-card-no">({String(i + 1).padStart(2, "0")})</span>
             <span className="work-card-tags">
                 <span>{catLabel(p.category, lang)}</span>
+                {isARProject(p) ? <span className="work-card-ar">AR</span> : null}
                 {p.year ? <span>{p.year}</span> : null}
             </span>
             <span className="work-card-title">

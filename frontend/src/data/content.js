@@ -529,7 +529,6 @@ export const TOOLS = [
     "Premiere Pro",
     "Figma",
     "IA generativa (imagem e vídeo)",
-    "Photoshop Generative Fill",
     "Programação assistida por IA",
     "React / TypeScript",
     "HTML / CSS",

@@ -70,6 +70,19 @@ const SelectedWorks = () => {
         return out;
     }, [projects]);
 
+    // Link direto para um projeto: /?p=<id> (usado pelo QR code da AR)
+    const deepLinked = React.useRef(false);
+    useEffect(() => {
+        if (deepLinked.current || !projects.length) return;
+        const id = new URLSearchParams(window.location.search).get("p");
+        if (!id) return;
+        deepLinked.current = true;
+        if (projects.some((p) => p.id === id)) {
+            setActive("all");
+            setOpenId(id);
+        }
+    }, [projects]);
+
     const openIndex = useMemo(
         () => filtered.findIndex((p) => p.id === openId),
         [filtered, openId],
