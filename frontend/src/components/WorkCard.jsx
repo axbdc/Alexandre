@@ -22,10 +22,13 @@ const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
         className={`work-card group ${className}`}
     >
         <div className="work-card-media">
+            {/* fundo: a mesma imagem desfocada, para a imagem principal nunca ser cortada */}
+            <img className="work-card-bg" src={cld(p.cover, 200)} alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <img
-                src={cld(p.cover, 900)}
-                srcSet={cldSrcSet(p.cover)}
-                sizes="(min-width: 768px) 50vw, 100vw"
+                className="work-card-img"
+                src={cld(p.cover, 1400)}
+                srcSet={cldSrcSet(p.cover, [700, 1000, 1400, 1800, 2400])}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={t(p.title, lang)}
                 loading="lazy"
                 decoding="async"
@@ -37,7 +40,7 @@ const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
                 {p.year ? <span>{p.year}</span> : null}
             </span>
             <span className="work-card-title">
-                <span className="work-card-client">{localize(p.client, lang)}</span>
+                <span className="work-card-client">{p.highlightLabel ? t(p.highlightLabel, lang) : localize(p.client, lang)}</span>
                 <span className="font-condensed uppercase">{t(p.title, lang)}</span>
             </span>
             {/* barra por cima da imagem: aparece no hover sem mexer no tamanho do cartão */}

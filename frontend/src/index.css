@@ -543,7 +543,6 @@ html.intro-lock body {
 .eyes {
     display: flex;
     gap: 2px;
-    margin: -38px 0 0 -46px; /* ficam ao lado da seta do rato */
 }
 .eye {
     position: relative;
@@ -555,6 +554,10 @@ html.intro-lock body {
     display: grid;
     place-items: center;
     overflow: hidden;
+    transition: transform 0.12s ease;
+}
+.eyes-cursor.blink .eye {
+    transform: scaleY(0.1);
 }
 .pupil {
     width: 8px;
@@ -564,7 +567,7 @@ html.intro-lock body {
     will-change: transform;
 }
 .eyes-label {
-    margin: -38px 0 0 2px;
+    margin-left: 4px;
     background: #141413;
     color: #fff;
     font-family: "Satoshi", sans-serif;
@@ -607,15 +610,27 @@ html.intro-lock body {
     aspect-ratio: 4 / 3;
     overflow: hidden;
 }
-.work-card-media img {
+.work-card-bg {
+    position: absolute;
+    inset: -10%;
+    width: 120%;
+    height: 120%;
+    object-fit: cover;
+    filter: blur(28px) saturate(1.1);
+    opacity: 0.65;
+    transform: scale(1.05);
+}
+.work-card-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    object-fit: contain;
+    padding: 6% 6% 22%;
     transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.work-card:hover .work-card-media img {
-    transform: scale(1.05);
+.work-card:hover .work-card-img {
+    transform: scale(1.04);
 }
 .work-card-shade {
     position: absolute;
@@ -962,4 +977,263 @@ html.lenis body {
 }
 .lenis.lenis-stopped {
     overflow: hidden;
+}
+
+/* ---------- Percurso ---------- */
+.exp-list {
+    border-top: 1px solid var(--terracotta);
+}
+.exp-list > li {
+    border-bottom: 1px solid var(--hairline);
+}
+
+/* ---------- Painel do projeto ---------- */
+.pm-backdrop {
+    background: rgb(var(--c-ink) / 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.pm-sheet {
+    background: var(--bone);
+    max-width: 1240px;
+    height: calc(94vh / var(--site-zoom, 1));
+    border-radius: 18px 18px 0 0;
+    overflow: hidden;
+    box-shadow: 0 40px 100px -30px rgb(10 10 30 / 0.5);
+}
+@media (min-width: 768px) {
+    .pm-sheet { height: calc(92vh / var(--site-zoom, 1)); border-radius: 18px; }
+}
+.pm-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--hairline);
+}
+@media (min-width: 768px) {
+    .pm-bar { padding: 16px 28px; }
+}
+.pm-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pm-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 99px;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+.pm-hint {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin-right: 8px;
+}
+.pm-btn {
+    height: 38px;
+    width: 38px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(var(--c-accent) / 0.35);
+    color: var(--terracotta);
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pm-btn:hover {
+    background: var(--terracotta);
+    color: var(--bone);
+    transform: scale(1.06);
+}
+.pm-btn-close {
+    background: var(--terracotta);
+    color: var(--bone);
+    border-color: var(--terracotta);
+}
+.pm-btn-close:hover {
+    transform: rotate(90deg) scale(1.06);
+}
+.pm-scroll {
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+.pm-head {
+    padding: 28px 16px 8px;
+}
+@media (min-width: 768px) {
+    .pm-head { padding: 48px 28px 12px; }
+}
+.pm-meta {
+    display: flex;
+    gap: 16px;
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+.pm-title {
+    font-family: "Anton", "Impact", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2.8rem, 8vw, 7.5rem);
+    line-height: 0.9;
+    letter-spacing: 0;
+    color: var(--ink);
+    margin-top: 12px;
+}
+.pm-lead {
+    margin-top: 18px;
+    max-width: 46rem;
+    font-family: "Cabinet Grotesk", "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+    line-height: 1.2;
+    color: var(--graphite);
+}
+.pm-cover {
+    padding: 24px 16px 0;
+}
+@media (min-width: 768px) {
+    .pm-cover { padding: 32px 28px 0; }
+}
+.pm-plain {
+    background: var(--pebble);
+    display: flex;
+    justify-content: center;
+}
+.pm-plain img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: calc(70vh / var(--site-zoom, 1));
+    height: auto;
+    object-fit: contain;
+}
+.pm-body {
+    padding: 48px 16px 8px;
+}
+@media (min-width: 768px) {
+    .pm-body { padding: 72px 28px 12px; }
+}
+.pm-facts {
+    border-top: 1px solid var(--terracotta);
+}
+.pm-fact {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--hairline);
+}
+.pm-facts > div:not(.pm-fact) {
+    padding-top: 14px;
+}
+.pm-label {
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+.pm-value {
+    margin-top: 4px;
+    font-size: 1rem;
+    color: var(--ink);
+}
+.pm-chip {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+}
+.pm-text {
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
+    line-height: 1.65;
+    color: var(--graphite);
+    max-width: 44rem;
+}
+.pm-gallery {
+    padding: 64px 16px 16px;
+}
+@media (min-width: 768px) {
+    .pm-gallery { padding: 88px 28px 16px; }
+}
+.pm-gallery img,
+.pm-gallery video {
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pm-gallery button:hover img {
+    transform: scale(1.02);
+}
+.pm-reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pm-reveal.is-in {
+    opacity: 1;
+    transform: none;
+}
+.pm-next {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-top: 72px;
+    padding: 28px 16px 40px;
+    background: var(--terracotta);
+    color: var(--bone);
+}
+.pm-next .pm-label {
+    color: rgb(var(--c-bone) / 0.8);
+}
+@media (min-width: 768px) {
+    .pm-next { padding: 36px 28px 48px; }
+}
+.pm-next-word {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    font-family: "Anton", "Impact", sans-serif;
+    text-transform: uppercase;
+    font-size: clamp(3rem, 10vw, 9rem);
+    line-height: 0.88;
+    margin-top: 10px;
+}
+.pm-next-arrow {
+    width: 0.7em;
+    height: 0.7em;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pm-next:hover .pm-next-arrow {
+    transform: translateX(0.12em);
+}
+@media (prefers-reduced-motion: reduce) {
+    .pm-reveal { opacity: 1; transform: none; transition: none; }
+}
+/* imagens dos projetos nunca cortadas */
+.project-image-wrap img {
+    object-fit: contain;
+}
+
+/* sem seta do rato quando o cursor de olhos está ativo (só com rato) */
+@media (hover: hover) and (pointer: fine) {
+    body.has-custom-cursor,
+    body.has-custom-cursor * {
+        cursor: none !important;
+    }
 }

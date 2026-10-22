@@ -79,7 +79,7 @@ const FeaturedStrip = ({ projects, lang, onOpen }) => {
                 <div className="featured-viewport no-scrollbar">
                     <ul ref={trackRef} className="featured-track">
                         {projects.map((p, i) => (
-                            <li key={p.id} className="featured-item">
+                            <li key={p._key || p.id} className="featured-item">
                                 <WorkCard p={p} i={i} lang={lang} onOpen={onOpen} />
                             </li>
                         ))}

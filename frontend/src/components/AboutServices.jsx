@@ -5,16 +5,17 @@ import useReveal from "../hooks/useReveal";
 import WordReveal from "./WordReveal";
 import IdBadge from "./IdBadge";
 
-const AboutServices = () => {
+const AboutServices = ({ part = "both" }) => {
     const { lang } = useLang();
     const rootRef = useReveal([lang]);
 
     return (
         <section
             ref={rootRef}
-            className="hairline-top"
-            data-testid="about-services-section"
+            data-testid={`about-services-section-${part}`}
         >
+            {part !== "services" ? (
+            <>
             {/* Sobre */}
             <div id="about" className="px-4 md:px-8 py-24 md:py-36">
                 <div className="mx-auto max-w-[1600px]">
@@ -65,25 +66,33 @@ const AboutServices = () => {
                 </div>
             </div>
 
+            </>
+            ) : null}
+
+            {part !== "about" ? (
+            <>
             {/* Services */}
             <div
                 id="services"
                 className="px-4 md:px-8 py-24 md:py-36"
             >
                 <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-12 md:gap-12">
-                    <div className="col-span-12 md:col-span-3 reveal">
+                    <div className="col-span-12 reveal">
                         <span className="section-kicker">↳ {t(SECTION_LABELS.services, lang)}</span>
+                        <h2 className="font-condensed uppercase text-6xl md:text-8xl mt-4 text-ink leading-[0.9]">
+                            {lang === "PT" ? "O que faço" : "What I do"}
+                        </h2>
                     </div>
 
-                    <div className="col-span-12 md:col-span-9 md:pl-8">
-                        <ul className="divide-y divide-hairline border-y border-hairline">
+                    <div className="col-span-12">
+                        <ul className="exp-list">
                             {SERVICES.map((s) => (
                                 <li
                                     key={s.no}
                                     data-testid={`service-row-${s.no}`}
                                     className="reveal group py-6 md:py-8 grid grid-cols-12 gap-4 items-baseline cursor-default"
                                 >
-                                    <span className="overline col-span-2 md:col-span-1">
+                                    <span className="hero-meta col-span-2 md:col-span-1">
                                         {s.no}
                                     </span>
                                     <h3 className="font-condensed uppercase text-3xl md:text-5xl text-ink col-span-10 md:col-span-5 group-hover:text-terracotta transition-colors duration-500">
@@ -98,6 +107,8 @@ const AboutServices = () => {
                     </div>
                 </div>
             </div>
+            </>
+            ) : null}
         </section>
     );
 };

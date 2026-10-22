@@ -6,8 +6,8 @@ import { scrollToId } from "../lib/scroll";
 const links = [
     { id: "work", testid: "nav-link-work" },
     { id: "about", testid: "nav-link-about" },
-    { id: "services", testid: "nav-link-services" },
     { id: "experience", testid: "nav-link-experience" },
+    { id: "services", testid: "nav-link-services" },
     { id: "contact", testid: "nav-link-contact" },
 ];
 

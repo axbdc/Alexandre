@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback, useEffect, lazy, Suspense } from
 import { useLang, t } from "../context/LanguageContext";
 import { CATEGORIES, SECTION_LABELS } from "../data/content";
 import useProjects from "../hooks/useProjects";
+import useHighlights from "../hooks/useHighlights";
 import useReveal from "../hooks/useReveal";
 import FeaturedStrip from "./FeaturedStrip";
 import WorkCard from "./WorkCard";
@@ -14,6 +15,22 @@ const ProjectModal = lazy(loadModal);
 const SelectedWorks = () => {
     const { lang } = useLang();
     const { projects } = useProjects();
+    const highlights = useHighlights();
+
+    // Destaques: imagens escolhidas no admin, cada uma ligada a um projeto.
+    // Sem destaques publicados, mostra os 6 primeiros projetos.
+    const featured = useMemo(() => {
+        const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
+        const list = highlights
+            .filter((h) => h.image && byId[h.project_id])
+            .map((h) => ({
+                ...byId[h.project_id],
+                cover: h.image,
+                _key: h.id,
+                highlightLabel: h.label_pt || h.label_en ? { PT: h.label_pt || h.label_en, EN: h.label_en || h.label_pt } : null,
+            }));
+        return list.length ? list : projects.slice(0, 6);
+    }, [highlights, projects]);
     const rootRef = useReveal([lang, projects]);
     const [active, setActive] = useState("all");
     const [openId, setOpenId] = useState(null);
@@ -85,7 +102,7 @@ const SelectedWorks = () => {
             data-testid="works-section"
             className="pt-4 pb-20 md:pb-28"
         >
-            <FeaturedStrip projects={projects.slice(0, 6)} lang={lang} onOpen={openFromFeatured} />
+            <FeaturedStrip projects={featured} lang={lang} onOpen={openFromFeatured} />
             <div className="mx-auto max-w-[1600px] px-4 md:px-8 pt-16 md:pt-24">
                 <div className="flex items-end justify-between mb-10 md:mb-14 reveal">
                     <div>

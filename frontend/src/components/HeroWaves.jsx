@@ -5,8 +5,8 @@ import React, { useEffect, useRef } from "react";
 // separador fica escondido, e fica parado para quem tem "reduzir movimento".
 const WAVES = {
     lines: 16, // número de linhas
-    color: "214, 199, 170", // creme (RGB)
-    opacity: 0.55, // intensidade máxima das linhas
+    color: "25, 39, 200", // azul do site (RGB)
+    opacity: 0.13, // bem transparente, para não fazer ruído atrás do nome
     speed: 0.00018, // velocidade (mais alto = mais rápido)
     amplitude: 52, // altura das ondas (px)
 };
@@ -126,11 +126,11 @@ const HeroWaves = () => {
             data-testid="hero-waves"
             className="pointer-events-none absolute inset-0 h-full w-full"
             style={{
-                // mais visível à direita, desvanece por trás do texto
+                // desvanece em cima e em baixo, para ficar só por trás do nome
                 WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 35%, #000 70%)",
+                    "linear-gradient(to bottom, transparent 0%, #000 35%, #000 75%, transparent 100%)",
                 maskImage:
-                    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 35%, #000 70%)",
+                    "linear-gradient(to bottom, transparent 0%, #000 35%, #000 75%, transparent 100%)",
             }}
         />
     );

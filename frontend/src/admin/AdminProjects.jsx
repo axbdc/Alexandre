@@ -1,7 +1,5 @@
 // frontend/src/admin/AdminProjects.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
 import {
     collection,
     getDocs,
@@ -13,11 +11,12 @@ import {
     query,
     orderBy,
 } from "firebase/firestore";
-import { auth, db } from "@/lib/firebaseAdmin";
+import { db } from "@/lib/firebaseAdmin";
 import { warmProject } from "@/lib/warm";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
+import AdminTabs from "@/admin/AdminTabs";
 
 const CATS = [
     { id: "ar3d", label: "AR & 3D" },
@@ -176,7 +175,6 @@ const ImageListField = ({ label, help, value, onChange, onUpload, uploading, acc
 );
 
 const AdminProjects = () => {
-    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("all");
@@ -291,11 +289,6 @@ const AdminProjects = () => {
         } finally {
             setUploading(false);
         }
-    };
-
-    const logout = async () => {
-        await signOut(auth);
-        navigate("/admin/login", { replace: true });
     };
 
     const shown =
@@ -529,15 +522,7 @@ const AdminProjects = () => {
     // ---------- LISTA ----------
     return (
         <div className="min-h-screen bg-bone text-ink">
-            <header className="hairline-bottom flex items-center justify-between px-6 h-14">
-                <span className="overline">Portfólio — Projetos</span>
-                <button
-                    onClick={logout}
-                    className="text-xs tracking-[0.18em] uppercase text-mist hover:text-ink"
-                >
-                    Sair
-                </button>
-            </header>
+            <AdminTabs />
 
             <div className="max-w-3xl mx-auto px-6 py-8">
                 {msg ? (

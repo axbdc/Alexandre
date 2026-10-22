@@ -49,3 +49,21 @@ export async function fetchPublishedProjects() {
             data: fields(row.document.fields || {}),
         }));
 }
+
+// Destaques (faixa horizontal do início): imagem + projeto que abre.
+const HIGHLIGHTS_BODY =
+    '{"structuredQuery":{"from":[{"collectionId":"highlights"}],"where":{"fieldFilter":{"field":{"fieldPath":"published"},"op":"EQUAL","value":{"booleanValue":true}}}}}';
+
+export async function fetchPublishedHighlights() {
+    const res = await fetch(RUNQUERY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: HIGHLIGHTS_BODY,
+    });
+    if (!res.ok) throw new Error("Firestore " + res.status);
+    const json = await res.json();
+    return (Array.isArray(json) ? json : [])
+        .filter((row) => row && row.document)
+        .map((row) => ({ id: row.document.name.split("/").pop(), ...fields(row.document.fields || {}) }))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+}

@@ -137,7 +137,7 @@ const PhotoFrame = ({ src, alt, caption }) => (
                 <img
                     src={src}
                     alt={alt}
-                    className="w-full object-cover"
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                 />
             </div>
@@ -184,7 +184,7 @@ const PlayerFrame = ({ src, alt, url, video }) => {
                 <img
                     src={src}
                     alt={alt}
-                    className="w-full h-full object-cover opacity-90"
+                    className="w-full h-full object-contain"
                     loading="lazy"
                 />
             </div>
@@ -220,25 +220,29 @@ const NO_DRAG =
 
 const CARD_VARIANTS = {
     // d = 0: a abrir (sobe); 1 / -1: seguinte / anterior (desliza para o lado)
-    enter: (d) => (d === 0 ? { y: 60, opacity: 0, scale: 0.97 } : { x: d > 0 ? 120 : -120, opacity: 0, scale: 0.98 }),
+    enter: (d) => (d === 0 ? { y: "18%", opacity: 0 } : { x: d > 0 ? 160 : -160, opacity: 0 }),
     center: {
         x: 0,
         y: 0,
         opacity: 1,
-        scale: 1,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
     },
     exit: (d) => ({
-        x: d > 0 ? -120 : 120,
+        x: d > 0 ? -160 : 160,
         opacity: 0,
-        scale: 0.98,
         transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
     }),
 };
 
+const EASE = [0.22, 1, 0.36, 1];
+const STAGGER = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } } };
+const RISE = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } } };
+const TITLE_IN = { hidden: { y: "105%" }, show: { y: 0, transition: { duration: 0.9, ease: EASE } } };
+
 const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction = 1 }) => {
     const lang = useLang().lang;
     const dragControls = useDragControls();
+    const scrollRef = useRef(null);
     const [lightboxIndex, setLightboxIndex] = useState(null);
 
     const isPostsProject =
@@ -387,7 +391,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                 );
             }
             return (
-                <div className="relative project-image-wrap aspect-[16/9]">
+                <div className="pm-plain">
                     <img src={project.cover} alt={title} />
                 </div>
             );
@@ -405,7 +409,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         }
 
         return (
-            <div className="relative project-image-wrap aspect-[16/9]">
+            <div className="pm-plain">
                 <img src={project.cover} alt={title} />
             </div>
         );
@@ -419,27 +423,27 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
 
     return (
                 <motion.div
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+                    className="fixed inset-0 z-[100] flex items-end md:items-center justify-center md:p-6"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, transition: { duration: 0.35, delay: 0.1 } }}
-                    transition={{ duration: 0.3 }}
+                    exit={{ opacity: 0, transition: { duration: 0.4, delay: 0.15 } }}
+                    transition={{ duration: 0.35 }}
                     data-testid="project-modal"
                     data-lenis-prevent
                     role="dialog"
                     aria-modal="true"
                 >
-                    {/* Blurred backdrop */}
+                    {/* Fundo desfocado */}
                     <motion.div
-                        className="absolute inset-0 bg-ink/30 backdrop-blur-md"
+                        className="absolute inset-0 pm-backdrop"
                         onClick={onClose}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
+                        transition={{ duration: 0.35 }}
                     />
 
-                    {/* Centered card */}
+                    {/* Painel do projeto */}
                     <AnimatePresence mode="popLayout" custom={direction}>
                     <motion.div
                         key={project.id}
@@ -448,7 +452,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                         initial="enter"
                         animate="center"
                         exit="exit"
-                        className="relative bg-bone w-full max-w-[940px] max-h-[calc(88vh/var(--site-zoom))] flex flex-col shadow-[0_30px_80px_-20px_rgba(28,27,26,0.35)]"
+                        className="pm-sheet relative w-full flex flex-col"
                         style={{ touchAction: "pan-y" }}
                         drag="x"
                         dragListener={false}
@@ -468,68 +472,59 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             else if (dx > 110 || v > 600) onPrev();
                         }}
                     >
-                        {/* Top bar */}
-                        <div className="shrink-0 hairline-bottom flex items-center justify-between px-5 md:px-7 h-12 md:h-14 bg-bone">
-                            <span className="overline">
-                                {String(index + 1).padStart(2, "0")}{" "}
-                                <span className="text-mist">
-                                    {t(COPY.of, lang)}{" "}
-                                    {String(total).padStart(2, "0")}
-                                </span>
-                                <span className="text-mist mx-2">·</span>
-                                <span className="text-mist">
-                                    {t(project.subtitle, lang)}
-                                </span>
+                        {/* Barra de cima */}
+                        <div className="pm-bar shrink-0">
+                            <span className="pm-kicker">
+                                ({String(index + 1).padStart(2, "0")}) / {String(total).padStart(2, "0")}
+                                <span className="pm-dot" />
+                                {t(project.subtitle, lang)}
                             </span>
-
-                            <div className="flex items-center gap-1.5">
-                                <button
-                                    onClick={onPrev}
-                                    aria-label={t(COPY.prev, lang)}
-                                    data-testid="modal-prev"
-                                    className="h-8 w-8 inline-flex items-center justify-center border border-hairline text-ink hover:border-ink transition-colors"
-                                >
-                                    <ArrowLeft size={14} />
+                            <div className="flex items-center gap-2">
+                                {total > 1 ? (
+                                    <span className="pm-hint hidden md:inline">
+                                        {lang === "PT" ? "Arrasta para o lado" : "Drag sideways"}
+                                    </span>
+                                ) : null}
+                                <button onClick={onPrev} aria-label={t(COPY.prev, lang)} data-testid="modal-prev" className="pm-btn">
+                                    <ArrowLeft size={16} />
                                 </button>
-                                <button
-                                    onClick={onNext}
-                                    aria-label={t(COPY.next, lang)}
-                                    data-testid="modal-next"
-                                    className="h-8 w-8 inline-flex items-center justify-center border border-hairline text-ink hover:border-ink transition-colors"
-                                >
-                                    <ArrowRight size={14} />
+                                <button onClick={onNext} aria-label={t(COPY.next, lang)} data-testid="modal-next" className="pm-btn">
+                                    <ArrowRight size={16} />
                                 </button>
-                                <button
-                                    onClick={onClose}
-                                    aria-label={t(COPY.close, lang)}
-                                    data-testid="modal-close"
-                                    className="ml-1 h-8 w-8 inline-flex items-center justify-center border border-ink text-ink hover:bg-ink hover:text-bone transition-colors"
-                                >
-                                    <X size={14} />
+                                <button onClick={onClose} aria-label={t(COPY.close, lang)} data-testid="modal-close" className="pm-btn pm-btn-close">
+                                    <X size={16} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Scrollable content */}
-                        <div className="flex-1 overflow-y-auto">
-                            <div className="px-5 md:px-8 pt-6 md:pt-8 pb-4">
-                                <h2
-                                    data-testid="modal-title"
-                                    className="font-display text-2xl md:text-4xl leading-[1] text-ink"
-                                >
-                                    {t(project.title, lang)}
-                                </h2>
-                                <div className="mt-2 text-sm text-graphite">
-                                    {localize(project.client, lang)}
-                                    <span className="text-mist mx-2">·</span>
-                                    {project.year}
+                        <div className="flex-1 overflow-y-auto pm-scroll" ref={scrollRef}>
+                            <motion.div className="pm-head" variants={STAGGER} initial="hidden" animate="show">
+                                <motion.div variants={RISE} className="pm-meta">
+                                    <span>{localize(project.client, lang)}</span>
+                                    {project.year ? <span>{project.year}</span> : null}
+                                </motion.div>
+                                <div className="overflow-hidden">
+                                    <motion.h2 variants={TITLE_IN} data-testid="modal-title" className="pm-title">
+                                        {t(project.title, lang)}
+                                    </motion.h2>
                                 </div>
-                            </div>
+                                {project.summary ? (
+                                    <motion.p variants={RISE} className="pm-lead">
+                                        {t(project.summary, lang)}
+                                    </motion.p>
+                                ) : null}
+                            </motion.div>
 
-                            {/* Cover — moldura por categoria */}
-                            <div className="px-5 md:px-8 pb-2">
+                            {/* Capa — moldura por categoria (nunca corta a imagem) */}
+                            <motion.div
+                                className="pm-cover"
+                                initial={{ opacity: 0, y: 40, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            >
                                 {renderCover()}
-                            </div>
+                            </motion.div>
 
                             {/* CTA grande para testar o rich media */}
                             {isRM ? (
@@ -551,8 +546,8 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             ) : null}
 
                             {/* Body */}
-                            <div className="px-5 md:px-8 pt-8 pb-2 grid grid-cols-12 gap-6">
-                                <aside className="col-span-12 md:col-span-4 space-y-5 text-sm">
+                            <InView root={scrollRef} className="pm-body grid grid-cols-12 gap-y-10 md:gap-x-12">
+                                <aside className="col-span-12 md:col-span-4 pm-facts">
                                     <MetaRow
                                         label={t(COPY.client, lang)}
                                         value={localize(project.client, lang)}
@@ -571,14 +566,14 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                     />
                                     {project.tools?.length ? (
                                         <div>
-                                            <div className="overline mb-2">
+                                            <div className="pm-label">
                                                 {t(COPY.tools, lang)}
                                             </div>
-                                            <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                                            <ul className="flex flex-wrap gap-1.5 mt-2">
                                                 {project.tools.map((tt) => (
                                                     <li
                                                         key={tt}
-                                                        className="text-sm text-ink"
+                                                        className="pm-chip"
                                                     >
                                                         {tt}
                                                     </li>
@@ -606,10 +601,10 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 </aside>
 
                                 <div className="col-span-12 md:col-span-8">
-                                    <div className="overline mb-3">
-                                        {t(COPY.overview, lang)}
+                                    <div className="pm-label mb-4">
+                                        ↳ {t(COPY.overview, lang)}
                                     </div>
-                                    <div className="space-y-4 text-sm md:text-base text-graphite leading-relaxed">
+                                    <div className="pm-text space-y-5">
                                         {(project.details
                                             ? localize(
                                                   project.details,
@@ -621,16 +616,16 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </InView>
 
                             {/* Gallery */}
                             {isPostsProject ? (
                                 posts.length || stories.length ? (
-                                    <div className="px-5 md:px-8 pt-8 pb-8 space-y-8">
+                                    <div className="pm-gallery space-y-10">
                                         {posts.length ? (
                                             <div>
-                                                <div className="overline mb-4">
-                                                    Posts
+                                                <div className="pm-label mb-5">
+                                                    ↳ Posts
                                                 </div>
                                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                                                     {posts.map((src, i) => (
@@ -656,8 +651,8 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         ) : null}
                                         {stories.length ? (
                                             <div>
-                                                <div className="overline mb-4">
-                                                    Stories
+                                                <div className="pm-label mb-5">
+                                                    ↳ Stories
                                                 </div>
                                                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                                                     {stories.map((src, j) => (
@@ -686,11 +681,11 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                     </div>
                                 ) : null
                             ) : project.gallery?.length ? (
-                                <div className="px-5 md:px-8 pt-8 pb-8">
-                                    <div className="overline mb-4">
-                                        {t(COPY.gallery, lang)}
+                                <div className="pm-gallery">
+                                    <div className="pm-label mb-5">
+                                        ↳ {t(COPY.gallery, lang)}
                                     </div>
-                                    <div className="columns-2 gap-3 md:gap-4">
+                                    <div className="columns-1 sm:columns-2 gap-3 md:gap-4">
                                         {project.gallery.map((src, i) => (
                                             <button
                                                 key={i}
@@ -716,17 +711,30 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                         </span>
                                                     </span>
                                                 ) : (
-                                                    <img
-                                                        src={src}
-                                                        alt={`${t(project.title, lang)} — ${i + 1}`}
-                                                        loading="lazy"
-                                                        className="w-full h-auto block"
-                                                    />
+                                                    <InView root={scrollRef} as="span" className="block pm-rise">
+                                                        <img
+                                                            src={src}
+                                                            alt={`${t(project.title, lang)} — ${i + 1}`}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            className="w-full h-auto block"
+                                                        />
+                                                    </InView>
                                                 )}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
+                            ) : null}
+
+                            {total > 1 ? (
+                                <button type="button" onClick={onNext} className="pm-next group" data-testid="modal-next-big">
+                                    <span className="pm-label">{lang === "PT" ? "Projeto seguinte" : "Next project"}</span>
+                                    <span className="pm-next-word">
+                                        {lang === "PT" ? "Seguinte" : "Next"}
+                                        <ArrowRight className="pm-next-arrow" strokeWidth={1.5} />
+                                    </span>
+                                </button>
                             ) : null}
                         </div>
                     </motion.div>
@@ -852,11 +860,40 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
     );
 };
 
-const MetaRow = ({ label, value }) => (
-    <div>
-        <div className="overline mb-1">{label}</div>
-        <div className="text-sm md:text-base text-ink">{value}</div>
-    </div>
-);
+const MetaRow = ({ label, value }) =>
+    value ? (
+        <div className="pm-fact">
+            <div className="pm-label">{label}</div>
+            <div className="pm-value">{value}</div>
+        </div>
+    ) : null;
+
+// Mostra os filhos com uma animação suave quando entram no ecrã
+// (dentro do painel do projeto, que tem o seu próprio scroll).
+const InView = ({ root, as = "div", className = "", children }) => {
+    const ref = useRef(null);
+    const [on, setOn] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return undefined;
+        const io = new IntersectionObserver(
+            ([e]) => {
+                if (e.isIntersecting) {
+                    setOn(true);
+                    io.disconnect();
+                }
+            },
+            { root: root && root.current ? root.current : null, threshold: 0.08 },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [root]);
+    const Tag = as;
+    return (
+        <Tag ref={ref} className={`pm-reveal ${on ? "is-in" : ""} ${className}`}>
+            {children}
+        </Tag>
+    );
+};
 
 export default ProjectModal;

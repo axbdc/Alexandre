@@ -9,11 +9,13 @@ import AboutServices from "@/components/AboutServices";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import Loader from "@/components/Loader";
+import CustomCursor from "@/components/CustomCursor";
 // Páginas que o visitante normal não abre: carregadas só quando são precisas,
 // para não pesarem no site público (admin + login do Firebase).
 const RichMediaViewer = lazy(() => import("@/components/RichMediaViewer"));
 const AdminLogin = lazy(() => import("@/admin/AdminLogin"));
 const AdminProjects = lazy(() => import("@/admin/AdminProjects"));
+const AdminHighlights = lazy(() => import("@/admin/AdminHighlights"));
 const RequireAuth = lazy(() => import("@/admin/RequireAuth"));
 
 const Portfolio = () => {
@@ -62,12 +64,14 @@ const Portfolio = () => {
     return (
         <div className="App site-zoom theme-neutral" data-testid="portfolio-root">
             <Loader />
+            <CustomCursor />
             <Navigation />
             <main>
                 <Hero />
                 <SelectedWorks />
-                <AboutServices />
+                <AboutServices part="about" />
                 <Experience />
+                <AboutServices part="services" />
                 <Contact />
             </main>
         </div>
@@ -87,6 +91,14 @@ function App() {
                         element={
                             <RequireAuth>
                                 <AdminProjects />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/admin/destaques"
+                        element={
+                            <RequireAuth>
+                                <AdminHighlights />
                             </RequireAuth>
                         }
                     />

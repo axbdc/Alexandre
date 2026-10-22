@@ -3,6 +3,7 @@ import { useLang, t } from "../context/LanguageContext";
 import { HERO } from "../data/content";
 import { ArrowDownRight } from "lucide-react";
 import StretchText from "./StretchText";
+import HeroWaves from "./HeroWaves";
 import { scrollToId } from "../lib/scroll";
 
 const Hero = () => {
@@ -19,7 +20,9 @@ const Hero = () => {
             data-testid="hero-section"
             className="relative overflow-hidden pt-28 md:pt-36 pb-10 md:pb-14 px-4 md:px-8"
         >
-            <div className="mx-auto max-w-[1600px]">
+            {/* ondas finas, bem transparentes, por trás do nome */}
+            <HeroWaves />
+            <div className="mx-auto max-w-[1600px] relative">
                 {/* linha de cima */}
                 <div className="hero-meta flex flex-wrap items-center justify-between gap-3">
                     <span data-testid="hero-overline">{t(HERO.overline, lang)}</span>
