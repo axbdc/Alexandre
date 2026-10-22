@@ -13,6 +13,7 @@ import { launchAR, isARProject, canLaunchAR } from "../lib/ar";
 import ARViewer from "./ARViewer";
 import { PhoneStrip } from "./RichMedia";
 import { isVideo, videoPoster } from "../lib/media";
+import { cld, cldSrcSet } from "../lib/img";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -71,7 +72,9 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
                 </div>
                 <div className="aspect-[16/10] overflow-hidden bg-white">
                     <img
-                        src={src}
+                        src={cld(src, 1600)}
+                        srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                        sizes="(min-width: 1024px) 50vw, 100vw"
                         alt={alt}
                         className="w-full h-full object-cover object-top"
                         loading="lazy"
@@ -83,7 +86,9 @@ const BrowserFrame = ({ src, srcMobile, alt, url }) => {
                     <div className="border border-hairline bg-white rounded-[16px] overflow-hidden shadow-[0_18px_40px_-18px_rgba(28,27,26,0.5)]">
                         <div className="aspect-[9/19] overflow-hidden bg-white">
                             <img
-                                src={srcMobile}
+                                src={cld(srcMobile, 1600)}
+                                srcSet={cldSrcSet(srcMobile, [600, 1000, 1600, 2200])}
+                                sizes="(min-width: 1024px) 50vw, 100vw"
                                 alt={`${alt} (mobile)`}
                                 className="w-full h-full object-cover object-top"
                                 loading="lazy"
@@ -102,7 +107,9 @@ const StageFrame = ({ src, alt, label, overlay }) => (
     <div className="relative border border-hairline overflow-hidden bg-gradient-to-b from-pebble to-sand">
         <div className="aspect-[16/9] flex items-center justify-center p-6 md:p-10">
             <img
-                src={src}
+                src={cld(src, 1600)}
+                srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={alt}
                 className="max-h-full max-w-full object-contain drop-shadow-[0_28px_36px_rgba(28,27,26,0.28)]"
                 loading="lazy"
@@ -122,7 +129,9 @@ const StageFrame = ({ src, alt, label, overlay }) => (
 const PrintFrame = ({ src, alt }) => (
     <div className="border border-hairline bg-sand p-6 md:p-12 flex items-center justify-center">
         <img
-            src={src}
+            src={cld(src, 1600)}
+            srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+            sizes="(min-width: 1024px) 50vw, 100vw"
             alt={alt}
             className="max-w-full max-h-[calc(58vh/var(--site-zoom))] object-contain bg-white shadow-[0_30px_60px_-25px_rgba(28,27,26,0.55)]"
             loading="lazy"
@@ -136,7 +145,9 @@ const PhotoFrame = ({ src, alt, caption }) => (
         <div className="bg-white border border-hairline p-3 md:p-4 shadow-[0_22px_50px_-30px_rgba(28,27,26,0.5)]">
             <div className="overflow-hidden">
                 <img
-                    src={src}
+                    src={cld(src, 1600)}
+                    srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     alt={alt}
                     className="w-full h-auto object-contain"
                     loading="lazy"
@@ -183,7 +194,9 @@ const PlayerFrame = ({ src, alt, url, video }) => {
         <div className="relative border border-hairline bg-ink overflow-hidden group">
             <div className="aspect-[16/9] overflow-hidden">
                 <img
-                    src={src}
+                    src={cld(src, 1600)}
+                    srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     alt={alt}
                     className="w-full h-full object-contain"
                     loading="lazy"
@@ -381,7 +394,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
             }
             return (
                 <div className="pm-plain">
-                    <img src={project.cover} alt={title} />
+                    <img src={cld(project.cover, 1600)} alt={title} />
                 </div>
             );
         }
@@ -399,7 +412,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
 
         return (
             <div className="pm-plain">
-                <img src={project.cover} alt={title} />
+                <img src={cld(project.cover, 1600)} alt={title} />
             </div>
         );
     };
@@ -656,7 +669,9 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                             aria-label={`Post ${i + 1}`}
                                                         >
                                                             <img
-                                                                src={src}
+                                                                src={cld(src, 1600)}
+                                                                srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                                                                sizes="(min-width: 1024px) 50vw, 100vw"
                                                                 alt={`Post ${i + 1}`}
                                                                 loading="lazy"
                                                                 className="w-full h-auto block"
@@ -685,7 +700,9 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                             aria-label={`Story ${j + 1}`}
                                                         >
                                                             <img
-                                                                src={src}
+                                                                src={cld(src, 1600)}
+                                                                srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                                                                sizes="(min-width: 1024px) 50vw, 100vw"
                                                                 alt={`Story ${j + 1}`}
                                                                 loading="lazy"
                                                                 className="w-full h-auto block"
@@ -730,7 +747,9 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                 ) : (
                                                     <InView root={scrollRef} as="span" className="block pm-rise">
                                                         <img
-                                                            src={src}
+                                                            src={cld(src, 1600)}
+                                                            srcSet={cldSrcSet(src, [600, 1000, 1600, 2200])}
+                                                            sizes="(min-width: 1024px) 50vw, 100vw"
                                                             alt={`${t(project.title, lang)} ${i + 1}`}
                                                             loading="lazy"
                                                             decoding="async"
@@ -818,7 +837,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                     />
                                 ) : (
                                     <img
-                                        src={gallery[lightboxIndex]}
+                                        src={cld(gallery[lightboxIndex], 2400)}
                                         alt={`${t(project.title, lang)} ${lightboxIndex + 1}`}
                                         onClick={(e) => e.stopPropagation()}
                                         className="max-h-[calc(85vh/var(--site-zoom))] max-w-[calc(90vw/var(--site-zoom))] object-contain shadow-2xl"
@@ -910,10 +929,17 @@ const InView = ({ root, as = "div", className = "", children }) => {
                     io.disconnect();
                 }
             },
-            { root: root && root.current ? root.current : null, threshold: 0.08 },
+            // threshold 0 + margem: uma imagem ainda sem altura (a carregar)
+            // também conta, senão a animação e o carregamento ficavam presos.
+            { root: root && root.current ? root.current : null, threshold: 0, rootMargin: "0px 0px 200px 0px" },
         );
         io.observe(el);
-        return () => io.disconnect();
+        // segurança: nunca deixar conteúdo escondido
+        const safety = setTimeout(() => setOn(true), 2500);
+        return () => {
+            io.disconnect();
+            clearTimeout(safety);
+        };
     }, [root]);
     const Tag = as;
     return (
