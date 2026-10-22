@@ -13,8 +13,16 @@ export const NAV = {
 
 export const HERO = {
     overline: {
-        PT: "Portfólio 2026",
-        EN: "Portfolio 2026",
+        PT: "Portfólio · 2026",
+        EN: "Portfolio · 2026",
+    },
+    location_line: {
+        PT: "Ericeira, Portugal → para o mundo",
+        EN: "Ericeira, Portugal → to the world",
+    },
+    statement: {
+        PT: "Design, AR, 3D e web para marcas. Do primeiro esboço à entrega final, onde o gráfico e o interativo se cruzam.",
+        EN: "Design, AR, 3D and web for brands. From the first sketch to final delivery, where graphic and interactive meet.",
     },
     role: { PT: "Design & Multimedia Lead", EN: "Design & Multimedia Lead" },
     // 📷 FOTO DO HERO
@@ -23,8 +31,8 @@ export const HERO = {
     showPhoto: false,
     photo: "",
     available: {
-        PT: "Aberto a novas oportunidades",
-        EN: "Open to new opportunities",
+        PT: "Baseado em Portugal",
+        EN: "Based in Portugal",
     },
     disciplines: [
         { PT: "Realidade Aumentada", EN: "Augmented Reality" },
@@ -420,6 +428,28 @@ export const ABOUT = {
             EN: "I work on print campaigns as much as on AR experiences and websites. Whatever the format, what I care about is that it's well made and works for the people who use it.",
         },
     ],
+    // Marcas com que já trabalhei (aparecem na secção "Sobre")
+    clients: [
+        "Danone · Blédina · Aptamil",
+        "Burger King",
+        "Carglass",
+        "Deloitte",
+        "Bayer · Clarityne",
+        "Distell · Savanna",
+        "Solverde Group",
+        "Natura",
+        "Becel",
+        "Metropolitan",
+        "World Sports Betting",
+    ],
+    // Crachá da secção "Sobre"
+    badge: {
+        photo: "/alexandre-badge.jpg",
+        dept: { PT: "Design Department", EN: "Design Department" },
+        name: "Alexandre Cosme",
+        role: "Design & Multimedia Lead",
+        note: { PT: "Uso pessoal e intransmissível", EN: "Personal and non-transferable use" },
+    },
     pull: {
         PT: "Aprendo depressa e gosto de entregar trabalho bem acabado.",
         EN: "I learn fast and I like to hand over work that is properly finished.",
@@ -649,12 +679,12 @@ export const FOOTER = {
         EN: "All rights reserved",
     },
     colophon: {
-        PT: "Cabinet Grotesk · Satoshi · Newsreader",
-        EN: "Cabinet Grotesk · Satoshi · Newsreader",
+        PT: "Anton · Cabinet Grotesk · Satoshi",
+        EN: "Anton · Cabinet Grotesk · Satoshi",
     },
     available: {
-        PT: "Aberto a novas oportunidades",
-        EN: "Open to new opportunities",
+        PT: "Baseado em Portugal",
+        EN: "Based in Portugal",
     },
 };
 

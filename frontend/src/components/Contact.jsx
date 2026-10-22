@@ -3,6 +3,7 @@ import { useLang, t } from "../context/LanguageContext";
 import { CONTACT, SECTION_LABELS, SOCIAL, FOOTER } from "../data/content";
 import { ArrowUpRight } from "lucide-react";
 import useReveal from "../hooks/useReveal";
+import StretchText from "./StretchText";
 
 const initialForm = { name: "", email: "", subject: "", message: "" };
 
@@ -73,21 +74,32 @@ const Contact = () => {
             id="contact"
             ref={rootRef}
             data-testid="contact-section"
-            className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-pebble"
+            className="px-4 md:px-8 py-24 md:py-36 contact-band"
         >
+            <div className="mx-auto max-w-[1600px] mb-20 md:mb-28">
+                <div className="flex flex-wrap items-start justify-between gap-6">
+                    <span className="section-kicker !text-bone/80">↳ {lang === "PT" ? "Tens um projeto em mente?" : "Got a project in mind?"}</span>
+                    <p className="text-bone/90 text-lg md:text-xl max-w-sm leading-snug">{t(CONTACT.sub, lang)}</p>
+                </div>
+                <a
+                    href={`mailto:${SOCIAL.email}`}
+                    className="contact-big group mt-10 md:mt-14"
+                    data-testid="contact-big-link"
+                >
+                    <StretchText text={lang === "PT" ? "VAMOS FALAR" : "LET'S TALK"} className="contact-big-word" />
+                    <ArrowUpRight className="contact-big-arrow" strokeWidth={1.5} />
+                </a>
+            </div>
 
-            <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-16 md:gap-12">
+            <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-16 md:gap-12 contact-panel">
                 <div className="col-span-12 md:col-span-5 reveal">
-                    <span className="overline !text-terracotta">05</span>
+                    <span className="section-kicker">↳ {lang === "PT" ? "Ou deixa aqui a mensagem" : "Or leave a message here"}</span>
                     <h2
-                        className="font-display text-4xl md:text-6xl mt-3 text-ink whitespace-pre-line leading-[0.95]"
+                        className="font-condensed uppercase text-5xl md:text-7xl mt-4 text-ink"
                         data-testid="contact-heading"
                     >
-                        {t(CONTACT.heading, lang)}
+                        {lang === "PT" ? "Fala comigo" : "Say hello"}
                     </h2>
-                    <p className="mt-8 text-base md:text-lg text-graphite max-w-md">
-                        {t(CONTACT.sub, lang)}
-                    </p>
 
                     <ul className="mt-12 space-y-4">
                         <li>
@@ -239,7 +251,7 @@ const Contact = () => {
             </div>
 
             {/* Footer */}
-            <footer className="mx-auto max-w-[1400px] mt-32 md:mt-48 pt-10 hairline-top flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <footer className="mx-auto max-w-[1600px] mt-24 md:mt-32 pt-10 contact-footer flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div className="font-display text-4xl md:text-6xl text-ink leading-[0.9]">
                     Alexandre Cosme
                     <span className="text-terracotta">.</span>

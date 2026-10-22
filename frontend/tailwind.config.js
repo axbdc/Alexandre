@@ -6,6 +6,7 @@ module.exports = {
         extend: {
             fontFamily: {
                 display: ['"Cabinet Grotesk"', '"Satoshi"', "sans-serif"],
+                condensed: ['"Anton"', '"Impact"', '"Arial Narrow"', "sans-serif"],
                 sans: ['"Satoshi"', "system-ui", "sans-serif"],
                 serif: ['"Newsreader"', "serif"],
             },

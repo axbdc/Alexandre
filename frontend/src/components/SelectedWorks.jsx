@@ -2,15 +2,14 @@ import React, { useMemo, useState, useCallback, useEffect, lazy, Suspense } from
 import { useLang, t } from "../context/LanguageContext";
 import { CATEGORIES, SECTION_LABELS } from "../data/content";
 import useProjects from "../hooks/useProjects";
-import { cld, cldSrcSet } from "../lib/img";
 import useReveal from "../hooks/useReveal";
-import { ArrowUpRight } from "lucide-react";
+import FeaturedStrip from "./FeaturedStrip";
+import WorkCard from "./WorkCard";
 // O modal (e o framer-motion que ele usa) só é descarregado quando é preciso,
 // para não pesar no primeiro carregamento no telemóvel.
 const loadModal = () => import("./ProjectModal");
 const ProjectModal = lazy(loadModal);
 
-const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
 const SelectedWorks = () => {
     const { lang } = useLang();
@@ -61,6 +60,12 @@ const SelectedWorks = () => {
 
     const open = filtered[openIndex] || null;
 
+    // abrir a partir dos destaques: garante que o projeto está na lista atual
+    const openFromFeatured = useCallback((id) => {
+        setActive("all");
+        setOpenId(id);
+    }, []);
+
     const close = useCallback(() => setOpenId(null), []);
     const goPrev = useCallback(() => {
         if (!filtered.length) return;
@@ -78,14 +83,15 @@ const SelectedWorks = () => {
             id="work"
             ref={rootRef}
             data-testid="works-section"
-            className="px-6 md:px-12 py-24 md:py-40 hairline-top"
+            className="pt-4 pb-20 md:pb-28"
         >
-            <div className="mx-auto max-w-[1400px]">
-                <div className="flex items-end justify-between mb-12 md:mb-16 reveal">
+            <FeaturedStrip projects={projects.slice(0, 6)} lang={lang} onOpen={openFromFeatured} />
+            <div className="mx-auto max-w-[1600px] px-4 md:px-8 pt-16 md:pt-24">
+                <div className="flex items-end justify-between mb-10 md:mb-14 reveal">
                     <div>
-                        <span className="overline !text-terracotta">01</span>
-                        <h2 className="font-display text-4xl md:text-6xl mt-3 text-ink">
-                            {t(SECTION_LABELS.work, lang)}
+                        <span className="section-kicker">↳ {t(SECTION_LABELS.work, lang)} / {String(projects.length).padStart(2, "0")}</span>
+                        <h2 className="font-condensed uppercase text-6xl md:text-8xl mt-4 text-ink leading-[0.9]">
+                            {lang === "PT" ? "Todos os trabalhos" : "All work"}
                         </h2>
                     </div>
                     <div className="hidden md:block text-right">
@@ -147,64 +153,21 @@ const SelectedWorks = () => {
                     </ul>
                 </div>
 
-                {/* Filtered grid */}
+                {/* Grelha filtrada */}
                 <ul
-                        key={active}
-                        data-testid="works-grid"
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-16 md:gap-y-24"
-                    >
-                        {filtered.map((p, i) => (
-                            <li
-                                key={p.id}
-                                className="work-in"
-                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() => setOpenId(p.id)}
-                                    data-testid={`project-card-${p.id}`}
-                                    data-cursor="project"
-                                    aria-label={t(p.title, lang)}
-                                    className="group block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-                                >
-                                    <div className="relative project-image-wrap aspect-square rounded-[18px] border border-hairline group-hover:border-ink/30 transition-colors duration-500">
-                                        <img
-                                            src={cld(p.cover, 800)}
-                                            srcSet={cldSrcSet(p.cover)}
-                                            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                                            alt={t(p.title, lang)}
-                                            loading="lazy"
-                                            decoding="async"
-                                            style={{ objectFit: "contain" }}
-                                        />
-                                        <span className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-full bg-terracotta/0 group-hover:bg-terracotta text-bone backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
-                                            <ArrowUpRight size={16} />
-                                        </span>
-                                    </div>
-                                    <div className="mt-5 flex items-start justify-between gap-4">
-                                        <div className="min-w-0">
-                                            <div className="overline mb-2 truncate">
-                                                {t(p.subtitle, lang)}
-                                            </div>
-                                            <h3 className="font-display text-xl md:text-2xl text-ink truncate group-hover:text-terracotta transition-colors duration-500">
-                                                {t(p.title, lang)}
-                                            </h3>
-                                        </div>
-                                        <div className="text-right shrink-0">
-                                            <div className="text-xs md:text-sm text-graphite truncate max-w-[140px]">
-                                                {localize(p.client, lang)}
-                                            </div>
-                                            <div className="text-xs md:text-sm text-mist">
-                                                {p.year}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p className="mt-3 text-sm text-graphite line-clamp-3">
-                                        {t(p.summary, lang)}
-                                    </p>
-                                </button>
-                            </li>
-                        ))}
+                    key={active}
+                    data-testid="works-grid"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5"
+                >
+                    {filtered.map((p, i) => (
+                        <li
+                            key={p.id}
+                            className="work-in"
+                            style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
+                        >
+                            <WorkCard p={p} i={i} lang={lang} onOpen={setOpenId} />
+                        </li>
+                    ))}
                 </ul>
 
                 {filtered.length === 0 && (

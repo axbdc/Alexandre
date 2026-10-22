@@ -244,103 +244,6 @@
     zoom: var(--site-zoom);
 }
 
-/* Custom cursor: ponto + anel (ver CustomCursor.jsx) */
-.cursor-dot,
-.cursor-ring {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0;
-    will-change: transform;
-    /* anula o zoom do site: o cursor fica sempre com o tamanho real */
-    zoom: calc(1 / var(--site-zoom, 1));
-}
-.cursor-dot.on,
-.cursor-ring.on {
-    opacity: 1;
-}
-.cursor-dot {
-    width: 7px;
-    height: 7px;
-    margin: -3.5px 0 0 -3.5px;
-    border-radius: 999px;
-    background: var(--ink);
-    box-shadow: 0 0 0 1.5px var(--bone);
-    transition: opacity 0.2s ease;
-}
-.cursor-dot.is-project {
-    opacity: 0;
-}
-.cursor-ring {
-    width: 34px;
-    height: 34px;
-    margin: -17px 0 0 -17px;
-    border-radius: 999px;
-    border: 1.5px solid rgb(var(--c-ink) / 0.5);
-    display: grid;
-    place-items: center;
-    transition:
-        width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-        height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-        margin 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-        border-color 0.25s ease,
-        background 0.25s ease,
-        opacity 0.2s ease;
-}
-.cursor-ring.is-hover {
-    width: 56px;
-    height: 56px;
-    margin: -28px 0 0 -28px;
-    border-color: rgb(var(--c-accent));
-    background: rgb(var(--c-accent) / 0.08);
-}
-.cursor-ring.is-project {
-    width: 104px;
-    height: 104px;
-    margin: -52px 0 0 -52px;
-    border-color: rgb(var(--c-accent));
-    background: rgb(var(--c-accent));
-}
-.cursor-ring.is-down {
-    width: 26px;
-    height: 26px;
-    margin: -13px 0 0 -13px;
-}
-.cursor-ring.is-project.is-down {
-    width: 92px;
-    height: 92px;
-    margin: -46px 0 0 -46px;
-}
-.cursor-ring-label {
-    font-family: "Satoshi", sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: #fff;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-.cursor-ring.is-project .cursor-ring-label {
-    opacity: 1;
-}
-@media (hover: none), (pointer: coarse) {
-    .cursor-dot,
-    .cursor-ring {
-        display: none;
-    }
-}
-
-/* Hide default cursor when custom is active */
-@media (hover: hover) and (pointer: fine) {
-    body.has-custom-cursor,
-    body.has-custom-cursor * {
-        cursor: none !important;
-    }
-}
-
 /* Link underline animation */
 .link-underline {
     position: relative;
@@ -447,4 +350,581 @@
 }
 @media (prefers-reduced-motion: reduce) {
     .exp-panel, .work-in { transition: none; animation: none; }
+}
+
+
+/* =========================================================
+   REDESIGN 2026 — loader, nome que estica, cursor olhos,
+   cartões de projeto, destaques horizontais, crachá
+   ========================================================= */
+
+.font-condensed {
+    font-family: "Anton", "Impact", "Arial Narrow", sans-serif;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 0.9;
+}
+
+.section-kicker {
+    font-family: "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+
+/* ---------- Loader ---------- */
+html.intro-lock,
+html.intro-lock body {
+    overflow: hidden;
+}
+.intro {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: var(--terracotta);
+    color: var(--bone);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18px 20px;
+    transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+    zoom: calc(1 / var(--site-zoom, 1));
+}
+.intro.is-leaving {
+    transform: translateY(-100%);
+}
+.intro-top,
+.intro-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-family: "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.intro-name {
+    font-family: "Anton", "Impact", sans-serif;
+    text-transform: uppercase;
+    line-height: 0.84;
+    font-size: min(24vw, 34vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.intro-row {
+    display: block;
+    animation: intro-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.intro-row + .intro-row {
+    animation-delay: 0.08s;
+}
+@keyframes intro-rise {
+    from { transform: translateY(105%); }
+    to { transform: none; }
+}
+.intro-bar {
+    position: relative;
+    display: block;
+    width: min(260px, 40vw);
+    height: 2px;
+    background: rgb(var(--c-bone) / 0.3);
+    overflow: hidden;
+}
+.intro-bar > span {
+    position: absolute;
+    inset: 0;
+    background: var(--bone);
+    transform-origin: left center;
+}
+
+/* ---------- Texto que estica ---------- */
+.stretch-text {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    user-select: none;
+}
+.stretch-line {
+    display: inline-flex;
+    align-items: flex-end;
+    white-space: nowrap;
+    font-family: "Anton", "Impact", "Arial Narrow", sans-serif;
+    font-weight: 400;
+    line-height: 0.82;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+}
+.stretch-letter {
+    display: inline-block;
+    transform-origin: 50% 100%;
+    will-change: transform;
+    animation: letter-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stretch-space {
+    display: inline-block;
+    width: 0.22em;
+}
+@keyframes letter-in {
+    from { transform: translateY(40%) scaleY(0.4); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .stretch-letter, .intro-row { animation: none; }
+}
+
+/* ---------- Hero ---------- */
+.hero-meta {
+    font-family: "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+.hero-statement {
+    font-family: "Cabinet Grotesk", "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.35rem, 2.3vw, 2.2rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    color: var(--terracotta);
+    text-transform: uppercase;
+}
+.hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 3px;
+}
+.hero-word {
+    padding-top: 0.15em; /* espaço para as letras esticarem */
+}
+
+/* ---------- Cursor olhos ---------- */
+.eyes-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    will-change: transform;
+    zoom: calc(1 / var(--site-zoom, 1));
+}
+.eyes-cursor.on {
+    opacity: 1;
+}
+.eyes {
+    display: flex;
+    gap: 2px;
+    margin: -38px 0 0 -46px; /* ficam ao lado da seta do rato */
+}
+.eye {
+    position: relative;
+    width: 18px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.6px solid #141413;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    transition: transform 0.12s ease;
+}
+.eyes-cursor.blink .eye {
+    transform: scaleY(0.12);
+}
+.pupil {
+    width: 8px;
+    height: 9px;
+    border-radius: 50%;
+    background: #141413;
+    will-change: transform;
+}
+.eyes-label {
+    margin: -38px 0 0 2px;
+    background: #141413;
+    color: #fff;
+    font-family: "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.6);
+    transform-origin: left center;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.eyes-cursor.has-label .eyes-label {
+    opacity: 1;
+    transform: none;
+}
+@media (hover: none), (pointer: coarse) {
+    .eyes-cursor { display: none; }
+}
+
+/* ---------- Cartões de projeto ---------- */
+.work-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+    overflow: hidden;
+    background: var(--pebble);
+}
+.work-card:focus-visible {
+    outline: 2px solid var(--terracotta);
+    outline-offset: 3px;
+}
+.work-card-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
+.work-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.work-card:hover .work-card-media img {
+    transform: scale(1.05);
+}
+.work-card-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.1) 42%, rgb(0 0 0 / 0) 60%, rgb(0 0 0 / 0.22) 100%);
+    pointer-events: none;
+}
+.work-card-no {
+    position: absolute;
+    left: 18px;
+    top: 16px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.35);
+}
+.work-card-tags {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    display: flex;
+    gap: 6px;
+}
+.work-card-tags > span {
+    border: 1px solid rgb(255 255 255 / 0.85);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    backdrop-filter: blur(4px);
+    background: rgb(0 0 0 / 0.12);
+}
+.work-card-title {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 16px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.work-card-title > .font-condensed {
+    font-size: clamp(1.9rem, 3.4vw, 3.6rem);
+    line-height: 0.92;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.25);
+}
+.work-card-client {
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+.work-card-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--terracotta);
+    color: var(--bone);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0 18px;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.work-card:hover .work-card-bar,
+.work-card:focus-visible .work-card-bar {
+    height: 48px;
+}
+@media (hover: none) {
+    .work-card-bar { height: 44px; }
+}
+
+/* ---------- Destaques horizontais ---------- */
+.featured {
+    position: relative;
+}
+.featured-sticky {
+    padding-top: 24px;
+}
+.featured-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    margin: 0 auto;
+    border-top: 1px solid var(--terracotta);
+    padding-top: 12px;
+}
+.featured-viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+.featured-track {
+    display: flex;
+    gap: 12px;
+    padding: 0 16px;
+    width: max-content;
+    will-change: transform;
+}
+.featured-item {
+    width: 82vw;
+    scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+    .featured-item { width: 58vw; }
+}
+@media (min-width: 1024px) {
+    .featured-sticky {
+        position: sticky;
+        top: 0;
+        /* 100vh "reais" mesmo com o zoom do site */
+        height: calc(100vh / var(--site-zoom, 1));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .featured-head { width: calc(100% - 64px); }
+    .featured-viewport { overflow: visible; scroll-snap-type: none; }
+    .featured-track { padding: 0 32px; gap: 16px; }
+    /* cartão cabe na altura do ecrã */
+    .featured-item { width: min(46vw, calc((100vh / var(--site-zoom, 1) - 220px) * 4 / 3)); }
+}
+
+/* ---------- Sobre: frase que acende + crachá ---------- */
+.about-heading {
+    font-family: "Cabinet Grotesk", "Satoshi", sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 4.6vw, 4.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+}
+.wr-word {
+    color: rgb(var(--c-accent) / 0.16);
+    transition: color 0.35s ease;
+}
+.wr-word.lit {
+    color: var(--terracotta);
+}
+.list-caps li {
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    line-height: 1.75;
+}
+
+.badge-wrap {
+    perspective: 1000px;
+    padding-top: 10px;
+}
+.badge-swing {
+    transform-origin: 50% 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.badge-strap {
+    width: 34px;
+    height: 120px;
+    background: var(--terracotta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.badge-strap > span {
+    writing-mode: vertical-rl;
+    font-family: "Anton", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: var(--bone);
+    white-space: nowrap;
+}
+.badge-clip {
+    width: 46px;
+    height: 22px;
+    margin-top: -4px;
+    border-radius: 6px 6px 10px 10px;
+    background: linear-gradient(#cfd2d6, #9da2a8);
+    box-shadow: inset 0 -2px 3px rgb(0 0 0 / 0.25);
+    position: relative;
+    z-index: 2;
+}
+.badge-card {
+    margin-top: -8px;
+    width: 280px;
+    border-radius: 16px;
+    padding: 14px 14px 16px;
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.75), rgb(225 230 236 / 0.55));
+    border: 1px solid rgb(255 255 255 / 0.9);
+    box-shadow:
+        0 30px 60px -25px rgb(20 20 40 / 0.35),
+        inset 0 0 0 6px rgb(255 255 255 / 0.35);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+.badge-holes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.badge-holes span {
+    width: 26px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1.5px solid rgb(120 130 140 / 0.55);
+    background: rgb(255 255 255 / 0.5);
+}
+.badge-inner {
+    background: #fff;
+    border-radius: 4px;
+    padding: 16px 16px 12px;
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.04);
+}
+.badge-dept {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 30px;
+    line-height: 0.95;
+    color: #141413;
+    margin-bottom: 12px;
+}
+.badge-photo {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #e9e9e9;
+    margin-bottom: 12px;
+}
+.badge-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.05);
+}
+.badge-field {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px dashed #9a9a9a;
+    padding: 4px 0 2px;
+}
+.badge-field > span {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #141413;
+}
+.badge-field > em {
+    font-family: "Caveat", cursive;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1;
+    color: #1a1aa8;
+}
+.badge-note {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #555;
+}
+
+/* ---------- Contacto ---------- */
+.contact-band {
+    background: var(--terracotta);
+}
+.contact-big {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 2vw;
+    color: rgb(var(--c-bone) / 0.92);
+}
+.contact-big-word {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-top: 0.2em;
+}
+.contact-big-arrow {
+    flex: 0 0 auto;
+    width: 10vw;
+    height: 10vw;
+    max-width: 140px;
+    max-height: 140px;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-big:hover .contact-big-arrow {
+    transform: translate(10px, -10px);
+}
+.contact-panel {
+    background: var(--bone);
+    padding: 40px 24px;
+}
+@media (min-width: 768px) {
+    .contact-panel { padding: 64px 56px; }
+}
+.contact-footer,
+.contact-footer * {
+    color: var(--bone) !important;
+}
+.contact-footer {
+    border-top: 1px solid rgb(var(--c-bone) / 0.35);
+}
+.contact-footer .bg-terracotta {
+    background: var(--bone) !important;
 }

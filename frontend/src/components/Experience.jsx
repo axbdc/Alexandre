@@ -18,14 +18,11 @@ const Experience = () => {
             id="experience"
             ref={rootRef}
             data-testid="experience-section"
-            className="px-6 md:px-12 py-24 md:py-40 hairline-top bg-bone"
+            className="px-4 md:px-8 py-24 md:py-36 bg-bone"
         >
-            <div className="mx-auto max-w-[1400px] grid grid-cols-12 gap-y-12 md:gap-12">
+            <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-12 md:gap-12">
                 <div className="col-span-12 md:col-span-3 reveal">
-                    <span className="overline !text-terracotta">04</span>
-                    <h2 className="font-display text-4xl md:text-5xl mt-3 text-ink">
-                        {t(SECTION_LABELS.experience, lang)}
-                    </h2>
+                    <span className="section-kicker">↳ {t(SECTION_LABELS.experience, lang)}</span>
                 </div>
 
                 <ul className="col-span-12 md:col-span-9 md:pl-8 divide-y divide-hairline border-y border-hairline">
