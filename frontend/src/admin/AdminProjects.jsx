@@ -384,12 +384,15 @@ const AdminProjects = () => {
                                                     className="flex-1 border border-hairline bg-bone px-3 py-2 text-sm text-ink outline-none focus:border-ink"
                                                 />
                                                 <label className="shrink-0 cursor-pointer border border-ink px-3 py-2 text-xs tracking-[0.14em] uppercase hover:bg-ink hover:text-bone transition-colors">
-                                                    Carregar
+                                                    {uploading ? "A carregar…" : "Carregar"}
                                                     <input
                                                         type="file"
                                                         accept={accept}
                                                         className="hidden"
-                                                        onChange={(e) => handleUpload(e.target.files, key)}
+                                                        onChange={(e) => {
+                                                            handleUpload(e.target.files, key);
+                                                            e.target.value = "";
+                                                        }}
                                                     />
                                                 </label>
                                             </div>

@@ -5,6 +5,9 @@ import { ArrowUpRight } from "lucide-react";
 import useReveal from "../hooks/useReveal";
 import StretchText from "./StretchText";
 
+// Chave pública do Web3Forms (web3forms.com). Não é segredo: fica no site.
+const WEB3FORMS_KEY = "";
+
 const initialForm = { name: "", email: "", subject: "", message: "" };
 
 const Contact = () => {
@@ -49,33 +52,51 @@ const Contact = () => {
         setLoading(true);
         setStatus(null);
 
-        // Envio por email via FormSubmit (sem backend nem chave).
+        // Envio por email via Web3Forms. Sem chave (ou se falhar) abre a app de
+        // email da pessoa com a mensagem já escrita, para nunca se perder nada.
         let delivered = false;
-        try {
-            const resp = await fetch(`https://formsubmit.co/ajax/${SOCIAL.email}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body: JSON.stringify({
-                    name: form.name,
-                    email: form.email,
-                    _replyto: form.email,
-                    _subject: form.subject || `Nova mensagem de ${form.name} · Portfólio`,
-                    message: form.message,
-                    _template: "table",
-                    _captcha: "false",
-                }),
+        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || WEB3FORMS_KEY;
+        if (accessKey) {
+            try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 15000);
+                const resp = await fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Accept: "application/json" },
+                    signal: ctrl.signal,
+                    body: JSON.stringify({
+                        access_key: accessKey,
+                        name: form.name,
+                        email: form.email,
+                        subject: form.subject || `Nova mensagem de ${form.name} · Portfólio`,
+                        message: form.message,
+                        from_name: "Portfólio alexandrecosme.com",
+                    }),
+                });
+                clearTimeout(timer);
+                const data = await resp.json();
+                delivered = !!data.success;
+            } catch (_) {
+                delivered = false;
+            }
+        }
+
+        if (!delivered) {
+            setLoading(false);
+            const subject = form.subject || (lang === "PT" ? "Contacto pelo portfólio" : "Contact from your portfolio");
+            const body = `${form.message}\n\n${form.name}\n${form.email}`;
+            window.location.href = `mailto:${SOCIAL.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            setStatus({
+                type: "ok",
+                text:
+                    lang === "PT"
+                        ? `Abri a tua app de email com a mensagem pronta. Se não abriu, escreve para ${SOCIAL.email}.`
+                        : `Your email app should open with the message ready. If not, write to ${SOCIAL.email}.`,
             });
-            const data = await resp.json();
-            delivered = String(data.success) === "true";
-        } catch (_) {
-            delivered = false;
+            return;
         }
 
         setLoading(false);
-        if (!delivered) {
-            setStatus({ type: "error", text: t(CONTACT.fields.error, lang) });
-            return;
-        }
         setStatus({ type: "ok", text: t(CONTACT.fields.success, lang) });
         setForm(initialForm);
     };
