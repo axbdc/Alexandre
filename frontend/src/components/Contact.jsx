@@ -15,6 +15,21 @@ const Contact = () => {
     // Mensagem por baixo do botão: { type: "ok" | "error", text }
     const [status, setStatus] = useState(null);
 
+    const [copied, setCopied] = useState(false);
+    const mailHref = `mailto:${SOCIAL.email}?subject=${encodeURIComponent(
+        lang === "PT" ? "Contacto pelo portfólio" : "Contact from your portfolio",
+    )}&body=${encodeURIComponent(lang === "PT" ? "Olá Alexandre,\n\n" : "Hi Alexandre,\n\n")}`;
+    // Abre a app de email; se o computador não tiver nenhuma, o email fica copiado.
+    const onMailClick = () => {
+        try {
+            navigator.clipboard?.writeText(SOCIAL.email);
+        } catch (_) {
+            /* ignora */
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 4000);
+    };
+
     const onChange = (e) =>
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -34,30 +49,26 @@ const Contact = () => {
         setLoading(true);
         setStatus(null);
 
-        // Envio por email via Web3Forms (único destino; o backend antigo foi retirado).
+        // Envio por email via FormSubmit (sem backend nem chave).
         let delivered = false;
-        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || import.meta.env.REACT_APP_WEB3FORMS_KEY;
-        if (accessKey) {
-            try {
-                const fd = new FormData();
-                fd.append("access_key", accessKey);
-                fd.append("name", form.name);
-                fd.append("email", form.email);
-                fd.append(
-                    "subject",
-                    form.subject || `Nova mensagem de ${form.name} · Portfólio`,
-                );
-                fd.append("message", form.message);
-                fd.append("from_name", "Alexandre Cosme Portfolio");
-                const resp = await fetch("https://api.web3forms.com/submit", {
-                    method: "POST",
-                    body: fd,
-                });
-                const data = await resp.json();
-                delivered = !!data.success;
-            } catch (_) {
-                delivered = false;
-            }
+        try {
+            const resp = await fetch(`https://formsubmit.co/ajax/${SOCIAL.email}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify({
+                    name: form.name,
+                    email: form.email,
+                    _replyto: form.email,
+                    _subject: form.subject || `Nova mensagem de ${form.name} · Portfólio`,
+                    message: form.message,
+                    _template: "table",
+                    _captcha: "false",
+                }),
+            });
+            const data = await resp.json();
+            delivered = String(data.success) === "true";
+        } catch (_) {
+            delivered = false;
         }
 
         setLoading(false);
@@ -81,12 +92,18 @@ const Contact = () => {
                     <p className="text-bone/90 text-lg md:text-xl max-w-sm leading-snug">{t(CONTACT.sub, lang)}</p>
                 </div>
                 <a
-                    href={`mailto:${SOCIAL.email}`}
+                    href={mailHref}
+                    onClick={onMailClick}
                     className="contact-big group mt-10 md:mt-14"
                 >
                     <StretchText text={lang === "PT" ? "VAMOS FALAR" : "LET'S TALK"} className="contact-big-word" />
                     <ArrowUpRight className="contact-big-arrow" strokeWidth={1.5} />
                 </a>
+                <p role="status" aria-live="polite" className={`mt-4 text-bone/90 text-sm md:text-base transition-opacity duration-300 ${copied ? "opacity-100" : "opacity-0"}`}>
+                    {lang === "PT"
+                        ? `Se a tua app de email não abriu, o endereço ${SOCIAL.email} já está copiado.`
+                        : `If your email app didn't open, ${SOCIAL.email} is already copied.`}
+                </p>
             </div>
 
             <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-y-16 md:gap-12 contact-panel">
@@ -101,7 +118,8 @@ const Contact = () => {
                     <ul className="mt-12 space-y-4">
                         <li>
                             <a
-                                href={`mailto:${SOCIAL.email}`}
+                                href={mailHref}
+                                onClick={onMailClick}
                                 className="group inline-flex items-center gap-3 text-lg md:text-xl text-ink"
                             >
                                 <span className="link-underline">
