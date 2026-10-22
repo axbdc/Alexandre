@@ -470,7 +470,10 @@ html.intro-lock body {
     transform-origin: 50% 100%;
     will-change: transform;
 }
-.stretch-text.is-ready .stretch-letter {
+.stretch-in {
+    display: inline-block;
+}
+.stretch-text.is-ready .stretch-in {
     animation: letter-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .stretch-space {
@@ -482,7 +485,7 @@ html.intro-lock body {
     to { transform: none; opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .stretch-letter, .intro-row { animation: none; }
+    .stretch-in, .intro-row { animation: none; }
 }
 
 /* ---------- Hero ---------- */
@@ -670,6 +673,11 @@ html.intro-lock body {
     opacity: 0.85;
 }
 .work-card-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -680,16 +688,24 @@ html.intro-lock body {
     letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 0 18px;
-    height: 0;
-    overflow: hidden;
-    transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(101%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+}
+.work-card-title {
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .work-card:hover .work-card-bar,
 .work-card:focus-visible .work-card-bar {
-    height: 48px;
+    transform: none;
+}
+.work-card:hover .work-card-title,
+.work-card:focus-visible .work-card-title {
+    transform: translateY(-48px);
 }
 @media (hover: none) {
-    .work-card-bar { height: 44px; }
+    .work-card-bar { transform: none; height: 42px; }
+    .work-card-title { transform: translateY(-42px); }
 }
 
 /* ---------- Destaques horizontais ---------- */

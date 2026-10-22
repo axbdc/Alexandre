@@ -40,11 +40,12 @@ const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
                 <span className="work-card-client">{localize(p.client, lang)}</span>
                 <span className="font-condensed uppercase">{t(p.title, lang)}</span>
             </span>
+            {/* barra por cima da imagem: aparece no hover sem mexer no tamanho do cartão */}
+            <span className="work-card-bar" aria-hidden="true">
+                <span>{lang === "PT" ? "Ver o projeto" : "View project"}</span>
+                <ArrowUpRight size={18} />
+            </span>
         </div>
-        <span className="work-card-bar">
-            <span>{lang === "PT" ? "Ver o projeto" : "View project"}</span>
-            <ArrowUpRight size={18} />
-        </span>
     </button>
 );
 

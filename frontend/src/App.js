@@ -8,7 +8,6 @@ import SelectedWorks from "@/components/SelectedWorks";
 import AboutServices from "@/components/AboutServices";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
-import CustomCursor from "@/components/CustomCursor";
 import Loader from "@/components/Loader";
 // Páginas que o visitante normal não abre: carregadas só quando são precisas,
 // para não pesarem no site público (admin + login do Firebase).
@@ -63,7 +62,6 @@ const Portfolio = () => {
     return (
         <div className="App site-zoom theme-neutral" data-testid="portfolio-root">
             <Loader />
-            <CustomCursor />
             <Navigation />
             <main>
                 <Hero />

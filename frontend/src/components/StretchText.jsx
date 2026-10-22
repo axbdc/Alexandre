@@ -1,10 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-// Texto gigante em que as letras "esticam" na vertical quando o rato passa
-// por cima (a letra mais perto do rato cresce mais e as vizinhas um pouco).
+// Texto gigante animado: quando o rato se aproxima, as letras fogem do cursor,
+// esticam e inclinam, e voltam ao sítio com efeito de mola.
 // - fit: ajusta o tamanho da letra para ocupar a largura toda do contentor.
 // - Em ecrãs táteis ou com "reduzir movimento" fica estático.
-const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "div", ...rest }) => {
+const StretchText = ({ text, className = "", fit = true, max = 1.4, as: Tag = "div", ...rest }) => {
     const boxRef = useRef(null);
     const lineRef = useRef(null);
     const lettersRef = useRef([]);
@@ -46,6 +46,8 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
         };
     }, [fit, text]);
 
+    // Física das letras: perto do rato as letras "fogem" (afastam-se do cursor),
+    // esticam na vertical e inclinam; quando o rato sai voltam com efeito de mola.
     useEffect(() => {
         const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
         const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -53,17 +55,46 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
         if (!fine || reduce || !box) return undefined;
 
         const letters = lettersRef.current.filter(Boolean);
-        const cur = letters.map(() => 1);
-        const target = letters.map(() => 1);
+        const st = letters.map(() => ({ x: 0, y: 0, s: 1, r: 0, vx: 0, vy: 0, vs: 0, vr: 0, tx: 0, ty: 0, ts: 1, tr: 0 }));
+        let centers = [];
         let raf = 0;
         let running = false;
+        let px = -1e5;
+        let py = -1e5;
+        let inside = false;
+
+        // centros das letras (sem transformações), medidos só quando é preciso
+        const measure = () => {
+            centers = letters.map((el) => {
+                const prev = el.style.transform;
+                el.style.transform = "none";
+                const r = el.getBoundingClientRect();
+                el.style.transform = prev;
+                return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height };
+            });
+        };
+
+        const K = 0.09; // rigidez da mola
+        const D = 0.8; // amortecimento (menor = mais "gelatina")
 
         const tick = () => {
             let moving = false;
             for (let i = 0; i < letters.length; i++) {
-                cur[i] += (target[i] - cur[i]) * 0.18;
-                if (Math.abs(target[i] - cur[i]) > 0.002) moving = true;
-                letters[i].style.transform = `scaleY(${cur[i].toFixed(3)})`;
+                const a = st[i];
+                a.vx = (a.vx + (a.tx - a.x) * K) * D;
+                a.vy = (a.vy + (a.ty - a.y) * K) * D;
+                a.vs = (a.vs + (a.ts - a.s) * K) * D;
+                a.vr = (a.vr + (a.tr - a.r) * K) * D;
+                a.x += a.vx;
+                a.y += a.vy;
+                a.s += a.vs;
+                a.r += a.vr;
+                if (
+                    Math.abs(a.vx) + Math.abs(a.vy) + Math.abs(a.vs) * 50 + Math.abs(a.vr) > 0.02 ||
+                    Math.abs(a.tx - a.x) + Math.abs(a.ty - a.y) > 0.2
+                )
+                    moving = true;
+                letters[i].style.transform = `translate(${a.x.toFixed(2)}px, ${a.y.toFixed(2)}px) rotate(${a.r.toFixed(2)}deg) scaleY(${a.s.toFixed(3)})`;
             }
             if (moving) raf = requestAnimationFrame(tick);
             else running = false;
@@ -75,27 +106,53 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
             }
         };
 
-        const onMove = (e) => {
-            const x = e.clientX;
-            letters.forEach((el, i) => {
-                const r = el.getBoundingClientRect();
-                const cx = r.left + r.width / 2;
-                const d = Math.abs(x - cx) / Math.max(r.width, 1);
-                target[i] = 1 + (max - 1) * Math.exp(-(d * d) / 1.6);
-            });
-            kick();
-        };
-        const onLeave = () => {
-            for (let i = 0; i < target.length; i++) target[i] = 1;
+        const setTargets = () => {
+            for (let i = 0; i < letters.length; i++) {
+                const c = centers[i];
+                const a = st[i];
+                if (!c || !inside) {
+                    a.tx = 0;
+                    a.ty = 0;
+                    a.ts = 1;
+                    a.tr = 0;
+                    continue;
+                }
+                const dx = c.x - px;
+                const dy = c.y - py;
+                const dist = Math.hypot(dx, dy) || 1;
+                const R = c.h * 0.9; // raio de influência
+                const f = Math.exp(-(dist * dist) / (2 * R * R));
+                const push = c.h * 0.32 * f; // quanto foge
+                a.tx = (dx / dist) * push;
+                a.ty = (dy / dist) * push * 0.6;
+                a.ts = 1 + (max - 1) * f;
+                a.tr = (dx / dist) * 7 * f;
+            }
             kick();
         };
 
-        box.addEventListener("pointermove", onMove);
-        box.addEventListener("pointerleave", onLeave);
+        const onMove = (e) => {
+            px = e.clientX;
+            py = e.clientY;
+            const r = box.getBoundingClientRect();
+            const pad = r.height * 0.25;
+            const now = px > r.left - pad && px < r.right + pad && py > r.top - pad && py < r.bottom + pad;
+            if (now && !inside) measure();
+            inside = now;
+            setTargets();
+        };
+        const remeasure = () => {
+            if (inside) measure();
+        };
+
+        window.addEventListener("pointermove", onMove, { passive: true });
+        window.addEventListener("scroll", remeasure, { passive: true });
+        window.addEventListener("resize", remeasure);
         return () => {
             cancelAnimationFrame(raf);
-            box.removeEventListener("pointermove", onMove);
-            box.removeEventListener("pointerleave", onLeave);
+            window.removeEventListener("pointermove", onMove);
+            window.removeEventListener("scroll", remeasure);
+            window.removeEventListener("resize", remeasure);
         };
     }, [text, max]);
 
@@ -109,13 +166,12 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
                     ch === " " ? (
                         <span key={i} className="stretch-space"> </span>
                     ) : (
-                        <span
-                            key={i}
-                            ref={(el) => (lettersRef.current[i] = el)}
-                            className="stretch-letter"
-                            style={{ animationDelay: `${i * 35}ms` }}
-                        >
-                            {ch}
+                        <span key={i} ref={(el) => (lettersRef.current[i] = el)} className="stretch-letter">
+                            {/* a animação de entrada fica num span interior, para não
+                                bloquear o transform da física (as animações CSS ganham ao style) */}
+                            <span className="stretch-in" style={{ animationDelay: `${i * 35}ms` }}>
+                                {ch}
+                            </span>
                         </span>
                     ),
                 )}
