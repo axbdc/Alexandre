@@ -54,10 +54,17 @@ const Contact = () => {
 
         // Envio por email via FormSubmit (código do formulário, sem expor o email).
         // Se falhar, abre a app de email da pessoa com a mensagem já escrita.
+        // O FormSubmit às vezes demora muito a responder mas entrega na mesma:
+        // passados 10 s sem resposta conta como enviado. Só um erro real
+        // (sem rede, recusa) faz abrir a app de email.
         let delivered = false;
+        let timedOut = false;
         try {
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 30000);
+            const timer = setTimeout(() => {
+                timedOut = true;
+                ctrl.abort();
+            }, 10000);
             const resp = await fetch(`https://formsubmit.co/ajax/${FORM_ID}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -76,7 +83,7 @@ const Contact = () => {
             const data = await resp.json();
             delivered = String(data.success) === "true";
         } catch (_) {
-            delivered = false;
+            delivered = timedOut;
         }
 
         if (!delivered) {
