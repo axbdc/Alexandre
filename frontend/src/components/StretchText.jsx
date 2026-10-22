@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 // Texto gigante em que as letras "esticam" na vertical quando o rato passa
 // por cima (a letra mais perto do rato cresce mais e as vizinhas um pouco).
@@ -8,10 +8,15 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
     const boxRef = useRef(null);
     const lineRef = useRef(null);
     const lettersRef = useRef([]);
+    // só aparece quando a fonte final já chegou e o tamanho está certo (sem saltos)
+    const [ready, setReady] = useState(false);
 
     // Ajustar à largura
     useLayoutEffect(() => {
-        if (!fit) return undefined;
+        if (!fit) {
+            setReady(true);
+            return undefined;
+        }
         const box = boxRef.current;
         const line = lineRef.current;
         if (!box || !line) return undefined;
@@ -24,9 +29,21 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
         resize();
         const ro = new ResizeObserver(resize);
         ro.observe(box);
-        // as fontes chegam depois: voltar a medir
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize).catch(() => {});
-        return () => ro.disconnect();
+        let done = false;
+        const show = () => {
+            if (done) return;
+            done = true;
+            resize();
+            setReady(true);
+        };
+        const fallback = setTimeout(show, 1500);
+        if (document.fonts && document.fonts.load) {
+            document.fonts.load('400 100px "Anton"').then(show).catch(show);
+        } else show();
+        return () => {
+            ro.disconnect();
+            clearTimeout(fallback);
+        };
     }, [fit, text]);
 
     useEffect(() => {
@@ -86,7 +103,7 @@ const StretchText = ({ text, className = "", fit = true, max = 1.45, as: Tag = "
     const chars = Array.from(text);
 
     return (
-        <Tag ref={boxRef} className={`stretch-text ${className}`} aria-label={text} {...rest}>
+        <Tag ref={boxRef} className={`stretch-text ${ready ? "is-ready" : ""} ${className}`} aria-label={text} {...rest}>
             <span ref={lineRef} className="stretch-line" aria-hidden="true">
                 {chars.map((ch, i) =>
                     ch === " " ? (

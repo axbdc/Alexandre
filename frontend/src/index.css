@@ -459,10 +459,18 @@ html.intro-lock body {
     letter-spacing: -0.005em;
     text-transform: uppercase;
 }
+.stretch-line {
+    visibility: hidden;
+}
+.stretch-text.is-ready .stretch-line {
+    visibility: visible;
+}
 .stretch-letter {
     display: inline-block;
     transform-origin: 50% 100%;
     will-change: transform;
+}
+.stretch-text.is-ready .stretch-letter {
     animation: letter-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .stretch-space {
@@ -544,10 +552,6 @@ html.intro-lock body {
     display: grid;
     place-items: center;
     overflow: hidden;
-    transition: transform 0.12s ease;
-}
-.eyes-cursor.blink .eye {
-    transform: scaleY(0.12);
 }
 .pupil {
     width: 8px;
@@ -927,4 +931,19 @@ html.intro-lock body {
 }
 .contact-footer .bg-terracotta {
     background: var(--bone) !important;
+}
+
+/* ---------- Lenis (scroll suave) ---------- */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+    overflow: hidden;
 }

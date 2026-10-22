@@ -18,10 +18,45 @@ const AdminProjects = lazy(() => import("@/admin/AdminProjects"));
 const RequireAuth = lazy(() => import("@/admin/RequireAuth"));
 
 const Portfolio = () => {
+    // Scroll suave (Lenis): a página desliza com inércia em vez de saltar.
+    // Desligado com "reduzir movimento"; no telemóvel o scroll continua nativo.
     useEffect(() => {
-        document.documentElement.style.scrollBehavior = "smooth";
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+        let lenis = null;
+        let raf = 0;
+        let cancelled = false;
+        import("lenis").then(({ default: Lenis }) => {
+            if (cancelled) return;
+            lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true });
+            window.__lenis = lenis;
+            // durante o ecrã de entrada o scroll fica parado
+            const html = document.documentElement;
+            let locked = html.classList.contains("intro-lock");
+            if (locked) lenis.stop();
+            const sync = () => {
+                const now = html.classList.contains("intro-lock");
+                if (now === locked) return; // só reage quando o ecrã de entrada abre/fecha
+                locked = now;
+                if (now) lenis.stop();
+                else lenis.start();
+            };
+            const mo = new MutationObserver(sync);
+            mo.observe(html, { attributes: true, attributeFilter: ["class"] });
+            lenis.__mo = mo;
+            const loop = (time) => {
+                lenis.raf(time);
+                raf = requestAnimationFrame(loop);
+            };
+            raf = requestAnimationFrame(loop);
+        });
         return () => {
-            document.documentElement.style.scrollBehavior = "";
+            cancelled = true;
+            cancelAnimationFrame(raf);
+            if (lenis) {
+                if (lenis.__mo) lenis.__mo.disconnect();
+                lenis.destroy();
+            }
+            window.__lenis = null;
         };
     }, []);
 

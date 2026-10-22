@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useLang } from "../context/LanguageContext";
 
 // Cursor "olhos": dois olhos seguem o rato com um pequeno atraso e as pupilas
-// olham para onde o rato se está a mexer. O cursor normal continua visível.
+// olham para onde o rato se está a mexer (sem piscar). O cursor normal continua visível.
 // - Links e botões: aparece a etiqueta "Clicar".
 // - Capas de projeto (data-cursor="project"): etiqueta "Ver projeto".
 // Só com rato; em ecrãs táteis não aparece.
@@ -64,35 +64,31 @@ const CustomCursor = () => {
         const onOver = (e) => {
             const project = e.target.closest("[data-cursor='project']");
             const hover = !project && e.target.closest(HOVER_SEL);
-            wrap.classList.toggle("has-label", !!(project || hover));
-            label.textContent = project
-                ? lang === "PT" ? "Ver projeto" : "View project"
-                : lang === "PT" ? "Clicar" : "Click";
+            const has = !!(project || hover);
+            if (has !== wrap.classList.contains("has-label")) wrap.classList.toggle("has-label", has);
+            if (has) {
+                const txt = project
+                    ? lang === "PT" ? "Ver projeto" : "View project"
+                    : lang === "PT" ? "Clicar" : "Click";
+                if (label.textContent !== txt) label.textContent = txt;
+            }
         };
-        const onLeave = () => {
+        // só esconde quando o rato sai mesmo da janela (evita o "piscar")
+        const onOut = (e) => {
+            if (e.relatedTarget || e.toElement) return;
             shown = false;
             wrap.classList.remove("on");
         };
 
-        // piscar os olhos de vez em quando
-        let blinkT = 0;
-        const blink = () => {
-            wrap.classList.add("blink");
-            setTimeout(() => wrap.classList.remove("blink"), 140);
-            blinkT = setTimeout(blink, 2600 + Math.random() * 3200);
-        };
-        if (!reduce) blinkT = setTimeout(blink, 2500);
-
         window.addEventListener("mousemove", onMove);
         window.addEventListener("mouseover", onOver);
-        document.documentElement.addEventListener("mouseleave", onLeave);
+        window.addEventListener("mouseout", onOut);
         raf = requestAnimationFrame(tick);
         return () => {
             cancelAnimationFrame(raf);
-            clearTimeout(blinkT);
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("mouseover", onOver);
-            document.documentElement.removeEventListener("mouseleave", onLeave);
+            window.removeEventListener("mouseout", onOut);
         };
     }, [lang]);
 

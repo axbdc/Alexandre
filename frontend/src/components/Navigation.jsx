@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLang, t } from "../context/LanguageContext";
 import { NAV } from "../data/content";
+import { scrollToId } from "../lib/scroll";
 
 const links = [
     { id: "work", testid: "nav-link-work" },
@@ -23,11 +24,8 @@ const Navigation = () => {
 
     const go = (id) => (e) => {
         e.preventDefault();
-        const el = document.getElementById(id);
-        if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-            setOpen(false);
-        }
+        scrollToId(id);
+        setOpen(false);
     };
 
     return (

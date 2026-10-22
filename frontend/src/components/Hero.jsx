@@ -3,14 +3,14 @@ import { useLang, t } from "../context/LanguageContext";
 import { HERO } from "../data/content";
 import { ArrowDownRight } from "lucide-react";
 import StretchText from "./StretchText";
+import { scrollToId } from "../lib/scroll";
 
 const Hero = () => {
     const { lang } = useLang();
 
     const scrollTo = (id) => (e) => {
         e.preventDefault();
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToId(id);
     };
 
     return (

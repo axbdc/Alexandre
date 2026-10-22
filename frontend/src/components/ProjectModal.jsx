@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import {
     X,
     ArrowLeft,
@@ -215,8 +215,30 @@ const PlayerFrame = ({ src, alt, url, video }) => {
 };
 
 
-const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
+const NO_DRAG =
+    "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
+
+const CARD_VARIANTS = {
+    // d = 0: a abrir (sobe); 1 / -1: seguinte / anterior (desliza para o lado)
+    enter: (d) => (d === 0 ? { y: 60, opacity: 0, scale: 0.97 } : { x: d > 0 ? 120 : -120, opacity: 0, scale: 0.98 }),
+    center: {
+        x: 0,
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: (d) => ({
+        x: d > 0 ? -120 : 120,
+        opacity: 0,
+        scale: 0.98,
+        transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+    }),
+};
+
+const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction = 1 }) => {
     const lang = useLang().lang;
+    const dragControls = useDragControls();
     const [lightboxIndex, setLightboxIndex] = useState(null);
 
     const isPostsProject =
@@ -275,10 +297,12 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
         };
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+        if (window.__lenis) window.__lenis.stop();
         window.addEventListener("keydown", onKey);
         return () => {
             window.removeEventListener("keydown", onKey);
             document.body.style.overflow = prevOverflow;
+            if (window.__lenis) window.__lenis.start();
         };
     }, [project, onClose, onPrev, onNext, lightboxIndex, lbPrev, lbNext]);
 
@@ -394,15 +418,14 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
           : t(COPY.link, lang);
 
     return (
-        <AnimatePresence>
-            {project && (
                 <motion.div
                     className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
+                    exit={{ opacity: 0, transition: { duration: 0.35, delay: 0.1 } }}
+                    transition={{ duration: 0.3 }}
                     data-testid="project-modal"
+                    data-lenis-prevent
                     role="dialog"
                     aria-modal="true"
                 >
@@ -417,15 +440,32 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                     />
 
                     {/* Centered card */}
+                    <AnimatePresence mode="popLayout" custom={direction}>
                     <motion.div
                         key={project.id}
+                        custom={direction}
+                        variants={CARD_VARIANTS}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
                         className="relative bg-bone w-full max-w-[940px] max-h-[calc(88vh/var(--site-zoom))] flex flex-col shadow-[0_30px_80px_-20px_rgba(28,27,26,0.35)]"
-                        initial={{ y: 24, opacity: 0, scale: 0.985 }}
-                        animate={{ y: 0, opacity: 1, scale: 1 }}
-                        exit={{ y: 12, opacity: 0, scale: 0.99 }}
-                        transition={{
-                            duration: 0.4,
-                            ease: [0.22, 1, 0.36, 1],
+                        style={{ touchAction: "pan-y" }}
+                        drag="x"
+                        dragListener={false}
+                        dragControls={dragControls}
+                        dragDirectionLock
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.25}
+                        onPointerDown={(e) => {
+                            if (total < 2) return;
+                            if (e.target.closest(NO_DRAG)) return;
+                            dragControls.start(e);
+                        }}
+                        onDragEnd={(e, info) => {
+                            const dx = info.offset.x;
+                            const v = info.velocity.x;
+                            if (dx < -110 || v < -600) onNext();
+                            else if (dx > 110 || v > 600) onPrev();
                         }}
                     >
                         {/* Top bar */}
@@ -690,6 +730,7 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                             ) : null}
                         </div>
                     </motion.div>
+                    </AnimatePresence>
 
                     {/* Lightbox da galeria */}
                     <AnimatePresence>
@@ -773,7 +814,40 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                         ) : null}
                     </AnimatePresence>
                 </motion.div>
-            )}
+    );
+};
+
+// Abrir/fechar com animação: guarda o último projeto para a animação de saída
+// e calcula a direção (anterior/seguinte) para o cartão deslizar para o lado certo.
+const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
+    const last = useRef(null);
+    const prevIndex = useRef(index);
+    const dir = useRef(1);
+    if (project) {
+        if (!last.current) dir.current = 0;
+        else if (last.current.project.id !== project.id) {
+            const d = index - prevIndex.current;
+            // passar do último para o primeiro (ou ao contrário) conta como "seguinte"/"anterior"
+            dir.current = Math.abs(d) > 1 ? (d > 0 ? -1 : 1) : d >= 0 ? 1 : -1;
+        }
+        prevIndex.current = index;
+        last.current = { project, index, total };
+    }
+    const shown = last.current;
+    return (
+        <AnimatePresence onExitComplete={() => (last.current = null)}>
+            {project && shown ? (
+                <ModalInner
+                    key="project-modal"
+                    project={shown.project}
+                    index={shown.index}
+                    total={shown.total}
+                    direction={dir.current}
+                    onClose={onClose}
+                    onPrev={onPrev}
+                    onNext={onNext}
+                />
+            ) : null}
         </AnimatePresence>
     );
 };
