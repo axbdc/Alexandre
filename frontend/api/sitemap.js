@@ -28,7 +28,7 @@ export default async function handler(req, res) {
             const id = row.document.name.split("/").pop();
             const f = row.document.fields || {};
             const title = (f.title_pt && f.title_pt.stringValue) || (f.title_en && f.title_en.stringValue) || "";
-            const s = slugify(title);
+            const s = /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(id) ? "" : slugify(title);
             const lastmod = (row.document.updateTime || "").slice(0, 10);
             urls.push(
                 `<url><loc>${SITE}/projeto/${s ? s + "-" : ""}${id}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}<priority>0.7</priority></url>`,

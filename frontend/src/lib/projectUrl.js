@@ -13,14 +13,23 @@ export const slugify = (s) =>
 const titleOf = (p) =>
     (p && p.title && (p.title.PT || p.title.EN)) || (p && p.title_pt) || "";
 
+// Ids legíveis (ex.: "red-panda-ar3d-02") já servem de endereço; os ids
+// automáticos do Firestore levam o título à frente para ficarem legíveis.
+const readableId = (id) => /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(id);
+
 export const projectPath = (p) => {
+    if (readableId(p.id)) return `/projeto/${p.id}`;
     const s = slugify(titleOf(p));
     return `/projeto/${s ? s + "-" : ""}${p.id}`;
 };
 
-// Lê o id a partir de /projeto/... ou do formato antigo /?p=<id>
-export const idFromLocation = (loc = window.location) => {
-    const m = loc.pathname.match(/^\/projeto\/(?:.*-)?([A-Za-z0-9]{10,})\/?$/);
-    if (m) return m[1];
+// Segmento do endereço: /projeto/<isto> (ou o antigo /?p=<id>)
+export const segmentFromLocation = (loc = window.location) => {
+    const m = loc.pathname.match(/^\/projeto\/([^/]+)\/?$/);
+    if (m) return decodeURIComponent(m[1]);
     return new URLSearchParams(loc.search).get("p");
 };
+
+// Encontra o projeto a que o segmento pertence (id inteiro ou "titulo-<id>").
+export const findBySegment = (projects, seg) =>
+    seg ? projects.find((p) => p.id === seg) || projects.find((p) => seg.endsWith("-" + p.id)) || null : null;

@@ -6,7 +6,7 @@ import useHighlights from "../hooks/useHighlights";
 import useReveal from "../hooks/useReveal";
 import FeaturedStrip from "./FeaturedStrip";
 import WorkCard from "./WorkCard";
-import { projectPath, idFromLocation } from "../lib/projectUrl";
+import { projectPath, segmentFromLocation, findBySegment } from "../lib/projectUrl";
 
 const DEFAULT_TITLE = typeof document !== "undefined" ? document.title : "";
 // O modal (e o framer-motion que ele usa) só é descarregado quando é preciso,
@@ -76,17 +76,20 @@ const SelectedWorks = () => {
     // Link direto para um projeto: /projeto/<slug>-<id> (ou o antigo /?p=<id>)
     const deepLinked = React.useRef(false);
     const pushedRef = React.useRef(false);
+    const projectsRef = React.useRef(projects);
+    projectsRef.current = projects;
     useEffect(() => {
         if (deepLinked.current || !projects.length) return;
         deepLinked.current = true;
-        const id = idFromLocation();
-        if (!id) return;
+        const seg = segmentFromLocation();
+        if (!seg) return;
         if (new URLSearchParams(window.location.search).get("p")) {
             window.history.replaceState(null, "", "/");
         }
-        if (projects.some((p) => p.id === id)) {
+        const found = findBySegment(projects, seg);
+        if (found) {
             setActive("all");
-            setOpenId(id);
+            setOpenId(found.id);
         }
     }, [projects]);
 
@@ -126,8 +129,8 @@ const SelectedWorks = () => {
                 pushedRef.current = false;
                 setOpenId(null);
             } else {
-                const id = idFromLocation();
-                if (id) setOpenId(id);
+                const found = findBySegment(projectsRef.current, segmentFromLocation());
+                if (found) setOpenId(found.id);
             }
         };
         window.addEventListener("popstate", onPop);

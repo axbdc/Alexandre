@@ -25,7 +25,9 @@ const setMeta = (html, attr, name, value) => {
 
 export default async function handler(req, res) {
     const slug = String(req.query.slug || "");
-    const m = slug.match(/(?:^|-)([A-Za-z0-9]{10,})$/);
+    // id inteiro (ex.: "red-panda-ar3d-02") ou "titulo-<id automático>"
+    const tail = (slug.match(/-([A-Za-z0-9]{15,})$/) || [])[1];
+    const candidates = [slug, tail].filter(Boolean);
     const host = req.headers["x-forwarded-host"] || req.headers.host || "www.alexandrecosme.com";
     const proto = req.headers["x-forwarded-proto"] || "https";
 
@@ -38,25 +40,25 @@ export default async function handler(req, res) {
     }
 
     let data = null;
-    if (m) {
+    for (const id of candidates) {
+        if (data) break;
         try {
-            const r = await fetch(`${DOC}${m[1]}?key=${KEY}`);
-            if (r.ok) {
-                const j = await r.json();
-                const f = j.fields || {};
-                const s = (k) => (f[k] && f[k].stringValue) || "";
-                if (f.published && f.published.booleanValue) {
-                    data = {
-                        id: m[1],
-                        title: s("title_pt") || s("title_en"),
-                        summary: s("summary_pt") || s("subtitle_pt") || s("summary_en"),
-                        client: s("client"),
-                        cover: s("cover"),
-                    };
-                }
+            const r = await fetch(`${DOC}${encodeURIComponent(id)}?key=${KEY}`);
+            if (!r.ok) continue;
+            const j = await r.json();
+            const f = j.fields || {};
+            const s = (k) => (f[k] && f[k].stringValue) || "";
+            if (f.published && f.published.booleanValue) {
+                data = {
+                    id,
+                    title: s("title_pt") || s("title_en"),
+                    summary: s("summary_pt") || s("subtitle_pt") || s("summary_en"),
+                    client: s("client"),
+                    cover: s("cover"),
+                };
             }
         } catch (e) {
-            data = null;
+            /* tenta o próximo */
         }
     }
 
