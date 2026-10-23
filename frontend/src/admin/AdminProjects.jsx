@@ -9,6 +9,7 @@ import {
     deleteDoc,
     query,
     orderBy,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "@/lib/firebaseAdmin";
 import { warmProject } from "@/lib/warm";
@@ -294,6 +295,43 @@ const AdminProjects = () => {
 
     const shown =
         filter === "all" ? items : items.filter((i) => i.category === filter);
+
+    // Ordem dos projetos no site: troca com o vizinho da lista visível
+    // (com um filtro ativo troca dentro dessa categoria) e regrava a ordem toda.
+    const [ordering, setOrdering] = useState(false);
+    const saveOrder = async (next) => {
+        setItems(next);
+        setOrdering(true);
+        try {
+            const batch = writeBatch(db);
+            next.forEach((x, i) => batch.update(doc(db, "projects", x.id), { sort_order: i }));
+            await batch.commit();
+            setMsg("");
+        } catch (e) {
+            setMsg("Erro a guardar a ordem: " + e.message);
+            await load();
+        } finally {
+            setOrdering(false);
+        }
+    };
+    const move = (it, dir) => {
+        const pos = shown.findIndex((x) => x.id === it.id);
+        const other = shown[pos + dir];
+        if (!other || ordering) return;
+        const next = [...items];
+        const a = next.findIndex((x) => x.id === it.id);
+        const b = next.findIndex((x) => x.id === other.id);
+        [next[a], next[b]] = [next[b], next[a]];
+        saveOrder(next);
+    };
+    const moveToTop = (it) => {
+        if (ordering) return;
+        const first = shown[0];
+        if (!first || first.id === it.id) return;
+        const next = items.filter((x) => x.id !== it.id);
+        next.splice(next.findIndex((x) => x.id === first.id), 0, it);
+        saveOrder(next);
+    };
 
     // ---------- EDITOR ----------
     if (editing) {
@@ -606,6 +644,10 @@ const AdminProjects = () => {
                     </div>
                 ) : null}
 
+                <p className="text-xs text-mist mb-3">
+                    A ordem desta lista é a ordem dos projetos no site. Usa as setas para mudar; com um filtro ativo, as setas mexem só dentro dessa categoria.
+                    {ordering ? " A guardar…" : ""}
+                </p>
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex flex-wrap gap-2 text-xs">
                         <button
@@ -636,12 +678,43 @@ const AdminProjects = () => {
                     <div className="text-sm text-mist">A carregar…</div>
                 ) : (
                     <ul className="divide-y divide-hairline border border-hairline bg-white">
-                        {shown.map((it) => (
+                        {shown.map((it, idx) => (
                             <li
                                 key={it.id}
-                                className="flex items-center justify-between px-4 py-3"
+                                className="flex items-center justify-between px-4 py-3 gap-4"
                             >
-                                <div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <span className="w-7 text-right text-[11px] tabular-nums text-mist">
+                                        {String(idx + 1).padStart(2, "0")}
+                                    </span>
+                                    <button
+                                        onClick={() => move(it, -1)}
+                                        disabled={idx === 0 || ordering}
+                                        className="h-7 w-7 border border-hairline text-ink hover:border-ink disabled:opacity-30"
+                                        aria-label="Subir"
+                                        title="Subir"
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        onClick={() => move(it, 1)}
+                                        disabled={idx === shown.length - 1 || ordering}
+                                        className="h-7 w-7 border border-hairline text-ink hover:border-ink disabled:opacity-30"
+                                        aria-label="Descer"
+                                        title="Descer"
+                                    >
+                                        ↓
+                                    </button>
+                                    <button
+                                        onClick={() => moveToTop(it)}
+                                        disabled={idx === 0 || ordering}
+                                        className="h-7 px-2 border border-hairline text-[10px] tracking-[0.12em] uppercase text-ink hover:border-ink disabled:opacity-30"
+                                        title="Pôr em primeiro"
+                                    >
+                                        Topo
+                                    </button>
+                                </div>
+                                <div className="flex-1 min-w-0">
                                     <div className="text-sm text-ink">
                                         {it.title_pt || "(sem título)"}
                                         {!it.published ? (
