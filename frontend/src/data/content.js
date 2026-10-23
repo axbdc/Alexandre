@@ -104,7 +104,7 @@ export const ABOUT = {
     ],
     // Crachá da secção "Sobre"
     badge: {
-        photo: "/alexandre-badge.jpg",
+        photo: "/alexandre-badge.jpg?v=2",
         dept: { PT: "Design Department", EN: "Design Department" },
         name: "Alexandre Cosme",
         role: "Design & Multimedia Lead",
