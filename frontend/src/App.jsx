@@ -16,6 +16,7 @@ const RichMediaViewer = lazy(() => import("@/components/RichMediaViewer"));
 const AdminLogin = lazy(() => import("@/admin/AdminLogin"));
 const AdminProjects = lazy(() => import("@/admin/AdminProjects"));
 const AdminHighlights = lazy(() => import("@/admin/AdminHighlights"));
+const AdminMessages = lazy(() => import("@/admin/AdminMessages"));
 const RequireAuth = lazy(() => import("@/admin/RequireAuth"));
 
 // O admin usa as mesmas cores e letras do site
@@ -87,7 +88,6 @@ function App() {
             <BrowserRouter>
                 <Suspense fallback={null}>
                 <Routes>
-                    <Route path="/" element={<Portfolio />} />
                     <Route path="/admin/login" element={<AdminShell><AdminLogin /></AdminShell>} />
                     <Route
                         path="/admin"
@@ -110,7 +110,18 @@ function App() {
                         }
                     />
                     <Route path="/rm/:id" element={<RichMediaViewer />} />
-                    <Route path="*" element={<Portfolio />} />
+                    <Route
+                        path="/admin/mensagens"
+                        element={
+                            <AdminShell>
+                                <RequireAuth>
+                                    <AdminMessages />
+                                </RequireAuth>
+                            </AdminShell>
+                        }
+                    />
+                    {/* uma única rota para "/" e "/projeto/...": abrir/fechar um projeto não recarrega a página */}
+                    <Route path="/*" element={<Portfolio />} />
                 </Routes>
                 </Suspense>
             </BrowserRouter>

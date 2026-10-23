@@ -6,6 +6,9 @@ import useHighlights from "../hooks/useHighlights";
 import useReveal from "../hooks/useReveal";
 import FeaturedStrip from "./FeaturedStrip";
 import WorkCard from "./WorkCard";
+import { projectPath, idFromLocation } from "../lib/projectUrl";
+
+const DEFAULT_TITLE = typeof document !== "undefined" ? document.title : "";
 // O modal (e o framer-motion que ele usa) só é descarregado quando é preciso,
 // para não pesar no primeiro carregamento no telemóvel.
 const loadModal = () => import("./ProjectModal");
@@ -70,18 +73,66 @@ const SelectedWorks = () => {
         return out;
     }, [projects]);
 
-    // Link direto para um projeto: /?p=<id> (usado pelo QR code da AR)
+    // Link direto para um projeto: /projeto/<slug>-<id> (ou o antigo /?p=<id>)
     const deepLinked = React.useRef(false);
+    const pushedRef = React.useRef(false);
     useEffect(() => {
         if (deepLinked.current || !projects.length) return;
-        const id = new URLSearchParams(window.location.search).get("p");
-        if (!id) return;
         deepLinked.current = true;
+        const id = idFromLocation();
+        if (!id) return;
+        if (new URLSearchParams(window.location.search).get("p")) {
+            window.history.replaceState(null, "", "/");
+        }
         if (projects.some((p) => p.id === id)) {
             setActive("all");
             setOpenId(id);
         }
     }, [projects]);
+
+    // O endereço acompanha o projeto aberto, para se poder copiar e partilhar.
+    useEffect(() => {
+        if (!deepLinked.current) return;
+        const onProject = window.location.pathname.startsWith("/projeto/");
+        const p = openId ? projects.find((x) => x.id === openId) : null;
+        if (p) {
+            const path = projectPath(p);
+            if (window.location.pathname !== path) {
+                if (!onProject) {
+                    window.history.pushState({ ptf: 1 }, "", path);
+                    pushedRef.current = true;
+                } else {
+                    window.history.replaceState(window.history.state, "", path);
+                }
+            }
+            document.title = `${t(p.title, lang)} | Alexandre Cosme`;
+        } else if (!openId) {
+            if (onProject) {
+                if (pushedRef.current) {
+                    pushedRef.current = false;
+                    window.history.back();
+                } else {
+                    window.history.replaceState(null, "", "/");
+                }
+            }
+            document.title = DEFAULT_TITLE;
+        }
+    }, [openId, projects, lang]);
+
+    // Botão "voltar" do telemóvel/browser fecha o projeto (ou volta a abri-lo).
+    useEffect(() => {
+        const onPop = () => {
+            if (!window.location.pathname.startsWith("/projeto/")) {
+                pushedRef.current = false;
+                setOpenId(null);
+            } else {
+                const id = idFromLocation();
+                if (id) setOpenId(id);
+            }
+        };
+        window.addEventListener("popstate", onPop);
+        return () => window.removeEventListener("popstate", onPop);
+    }, []);
 
     const openIndex = useMemo(
         () => filtered.findIndex((p) => p.id === openId),

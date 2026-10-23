@@ -7,6 +7,8 @@ import {
     ArrowUpRight,
     Box,
     Play,
+    Link2,
+    Check,
 } from "lucide-react";
 import { useLang, t } from "../context/LanguageContext";
 import { launchAR, isARProject, canLaunchAR } from "../lib/ar";
@@ -14,6 +16,7 @@ import ARViewer from "./ARViewer";
 import { PhoneStrip } from "./RichMedia";
 import { isVideo, videoPoster } from "../lib/media";
 import { cld, cldSrcSet } from "../lib/img";
+import { projectPath } from "../lib/projectUrl";
 
 const localize = (v, lang) => (typeof v === "string" ? v : t(v, lang));
 
@@ -486,6 +489,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         {lang === "PT" ? "Arrasta para o lado" : "Drag sideways"}
                                     </span>
                                 ) : null}
+                                <ShareButton project={project} lang={lang} />
                                 <button onClick={onPrev} aria-label={t(COPY.prev, lang)} className="pm-btn">
                                     <ArrowLeft size={16} />
                                 </button>
@@ -916,6 +920,34 @@ const MetaRow = ({ label, value }) =>
 
 // Mostra os filhos com uma animação suave quando entram no ecrã
 // (dentro do painel do projeto, que tem o seu próprio scroll).
+// Partilhar o projeto: no telemóvel abre o menu de partilha, no computador copia o link.
+const ShareButton = ({ project, lang }) => {
+    const [done, setDone] = useState(false);
+    const onShare = async () => {
+        const url = `${window.location.origin}${projectPath(project)}`;
+        const title = t(project.title, lang);
+        try {
+            if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+                await navigator.share({ title, url });
+                return;
+            }
+            await navigator.clipboard.writeText(url);
+            setDone(true);
+            setTimeout(() => setDone(false), 2000);
+        } catch (_) {
+            /* cancelado */
+        }
+    };
+    const label = done
+        ? lang === "PT" ? "Link copiado" : "Link copied"
+        : lang === "PT" ? "Partilhar projeto" : "Share project";
+    return (
+        <button type="button" onClick={onShare} aria-label={label} title={label} className="pm-btn">
+            {done ? <Check size={16} /> : <Link2 size={16} />}
+        </button>
+    );
+};
+
 const InView = ({ root, as = "div", className = "", children }) => {
     const ref = useRef(null);
     const [on, setOn] = useState(false);

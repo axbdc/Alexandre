@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { projectPath } from "../lib/projectUrl";
 import { motion } from "framer-motion";
 import { X, Smartphone, RotateCcw } from "lucide-react";
 import { loadModelViewer } from "../lib/ar";
@@ -23,7 +24,7 @@ const ARViewer = ({ project, title, lang, onClose }) => {
         import("qrcode-generator")
             .then(({ default: qrcode }) => {
                 if (!on) return;
-                const url = `${window.location.origin}/?p=${encodeURIComponent(project.id)}`;
+                const url = `${window.location.origin}${projectPath(project)}`;
                 const q = qrcode(0, "M");
                 q.addData(url);
                 q.make();

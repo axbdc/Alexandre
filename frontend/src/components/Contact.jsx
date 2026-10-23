@@ -7,6 +7,10 @@ import StretchText from "./StretchText";
 
 // Código do formulário no FormSubmit (substitui o email no endereço de envio).
 const FORM_ID = "c8fda687cf0f54383876a22863911d25";
+// Cópia das mensagens no Firestore (aba Mensagens do admin). Só dá para criar;
+// ler e apagar fica reservado ao dono (regras do Firestore).
+const MESSAGES_URL =
+    "https://firestore.googleapis.com/v1/projects/portfolio-5d3ee/databases/(default)/documents/messages?key=AIzaSyDD8Ktr4ozcNj2SdwSbiz8ynHE_I_7yHYs";
 
 const initialForm = { name: "", email: "", subject: "", message: "" };
 
@@ -52,39 +56,65 @@ const Contact = () => {
         setLoading(true);
         setStatus(null);
 
-        // Envio por email via FormSubmit (código do formulário, sem expor o email).
-        // Se falhar, abre a app de email da pessoa com a mensagem já escrita.
+        // Duas vias em paralelo: cópia guardada no admin (Firestore) e email
+        // pelo FormSubmit. Basta uma correr bem para a mensagem não se perder.
+        const payload = {
+            name: form.name.slice(0, 120),
+            email: form.email.slice(0, 200),
+            subject: (form.subject || "").slice(0, 200),
+            message: form.message.slice(0, 5000),
+        };
+        const saveCopy = fetch(MESSAGES_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                fields: {
+                    name: { stringValue: payload.name },
+                    email: { stringValue: payload.email },
+                    subject: { stringValue: payload.subject },
+                    message: { stringValue: payload.message },
+                    created_at: { timestampValue: new Date().toISOString() },
+                    read: { booleanValue: false },
+                },
+            }),
+        })
+            .then((r) => r.ok)
+            .catch(() => false);
+
         // O FormSubmit às vezes demora muito a responder mas entrega na mesma:
-        // passados 10 s sem resposta conta como enviado. Só um erro real
-        // (sem rede, recusa) faz abrir a app de email.
-        let delivered = false;
-        let timedOut = false;
-        try {
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => {
-                timedOut = true;
-                ctrl.abort();
-            }, 10000);
-            const resp = await fetch(`https://formsubmit.co/ajax/${FORM_ID}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                signal: ctrl.signal,
-                body: JSON.stringify({
-                    name: form.name,
-                    email: form.email,
-                    _replyto: form.email,
-                    _subject: form.subject || `Nova mensagem de ${form.name} · Portfólio`,
-                    message: form.message,
-                    _template: "table",
-                    _captcha: "false",
-                }),
-            });
-            clearTimeout(timer);
-            const data = await resp.json();
-            delivered = String(data.success) === "true";
-        } catch (_) {
-            delivered = timedOut;
-        }
+        // passados 10 s sem resposta conta como enviado.
+        const sendEmail = (async () => {
+            let timedOut = false;
+            try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => {
+                    timedOut = true;
+                    ctrl.abort();
+                }, 10000);
+                const resp = await fetch(`https://formsubmit.co/ajax/${FORM_ID}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Accept: "application/json" },
+                    signal: ctrl.signal,
+                    body: JSON.stringify({
+                        name: payload.name,
+                        email: payload.email,
+                        _replyto: payload.email,
+                        _subject: payload.subject || `Nova mensagem de ${payload.name} · Portfólio`,
+                        message: payload.message,
+                        _template: "table",
+                        _captcha: "false",
+                    }),
+                });
+                clearTimeout(timer);
+                const data = await resp.json();
+                return String(data.success) === "true";
+            } catch (_) {
+                return timedOut;
+            }
+        })();
+
+        const [saved, emailed] = await Promise.all([saveCopy, sendEmail]);
+        const delivered = saved || emailed;
 
         if (!delivered) {
             setLoading(false);

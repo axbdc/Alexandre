@@ -4,7 +4,15 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!assets/|.*\\.).*)",
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/projeto/:slug",
+      "destination": "/api/projeto?slug=:slug"
+    },
+    {
+      "source": "/((?!assets/|api/|.*\\.).*)",
       "destination": "/index.html"
     }
   ],

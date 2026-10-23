@@ -7,6 +7,7 @@ import { auth } from "@/lib/firebaseAdmin";
 const TABS = [
     { to: "/admin", label: "Projetos" },
     { to: "/admin/destaques", label: "Destaques" },
+    { to: "/admin/mensagens", label: "Mensagens" },
 ];
 
 const AdminTabs = () => {
