@@ -101,7 +101,7 @@ export const ScreenStack = ({
             <style>{RM_CSS}</style>
             {p ? (
                 <img
-                    src={cld(prevSrc, 1400)}
+                    src={cld(prevSrc, 1200)}
                     alt=""
                     draggable={false}
                     className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
@@ -110,7 +110,7 @@ export const ScreenStack = ({
             {s.src ? (
                 <img
                     key={index}
-                    src={cld(s.src, 1400)}
+                    src={cld(s.src, 1200)}
                     alt={`${index + 1}`}
                     draggable={false}
                     onClick={onClick}
@@ -273,14 +273,14 @@ export const SliderScreen = ({
         >
             {/* B, revelada */}
             <img
-                src={cld(cfg.b, 1400)}
+                src={cld(cfg.b, 1200)}
                 alt=""
                 draggable={false}
                 className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
             />
             {cfg.bDone ? (
                 <img
-                    src={cld(cfg.bDone, 1400)}
+                    src={cld(cfg.bDone, 1200)}
                     alt=""
                     draggable={false}
                     className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
@@ -293,7 +293,7 @@ export const SliderScreen = ({
 
             {/* A, de cima, cortada pelo handle */}
             <img
-                src={cld(screen.src, 1400)}
+                src={cld(screen.src, 1200)}
                 alt=""
                 draggable={false}
                 className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
@@ -320,7 +320,7 @@ export const SliderScreen = ({
             {/* Overlay fixo (logo, fechar, CTA) */}
             {cfg.overlay ? (
                 <img
-                    src={cld(cfg.overlay, 1400)}
+                    src={cld(cfg.overlay, 1200)}
                     alt=""
                     draggable={false}
                     className={`absolute inset-0 w-full h-full ${fitCls} pointer-events-none`}
@@ -496,7 +496,7 @@ export const PhoneStrip = ({ screens = [], fit = "contain" }) => {
                 <div key={i} className="shrink-0">
                     <PhoneMock width={148}>
                         <img
-                            src={cld(s.src, 1400)}
+                            src={cld(s.src, 1200)}
                             alt={`${i + 1}`}
                             draggable={false}
                             className={`w-full h-full ${
