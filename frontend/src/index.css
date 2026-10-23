@@ -642,6 +642,11 @@ html.intro-lock body {
 .work-card:hover .work-card-img {
     transform: scale(1.04);
 }
+/* destaques: imagem a ocupar o cartão todo */
+.work-card--fill .work-card-img {
+    object-fit: cover;
+    padding: 0;
+}
 .work-card-shade {
     position: absolute;
     inset: 0;

@@ -13,17 +13,20 @@ const catLabel = (id, lang) => {
 };
 
 // Cartão de projeto: número, etiquetas, título gigante e barra "Ver projeto" no hover.
-const WorkCard = ({ p, i, lang, onOpen, className = "" }) => (
+// fill: a imagem ocupa o cartão todo (destaques); sem fill fica inteira sobre fundo desfocado (grelha).
+const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => (
     <button
         type="button"
         onClick={() => onOpen(p.id)}
         data-cursor="project"
         aria-label={t(p.title, lang)}
-        className={`work-card group ${className}`}
+        className={`work-card group ${fill ? "work-card--fill" : ""} ${className}`}
     >
         <div className="work-card-media">
             {/* fundo: a mesma imagem desfocada, para a imagem principal nunca ser cortada */}
-            <img className="work-card-bg" src={cld(p.cover, 200)} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            {fill ? null : (
+                <img className="work-card-bg" src={cld(p.cover, 200)} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            )}
             <img
                 className="work-card-img"
                 src={cld(p.cover, 1400)}

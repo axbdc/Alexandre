@@ -80,7 +80,7 @@ const FeaturedStrip = ({ projects, lang, onOpen }) => {
                     <ul ref={trackRef} className="featured-track">
                         {projects.map((p, i) => (
                             <li key={p._key || p.id} className="featured-item">
-                                <WorkCard p={p} i={i} lang={lang} onOpen={onOpen} />
+                                <WorkCard p={p} i={i} lang={lang} onOpen={onOpen} fill />
                             </li>
                         ))}
                     </ul>
