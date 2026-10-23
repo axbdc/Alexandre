@@ -642,7 +642,10 @@ html.intro-lock body {
 .work-card:hover .work-card-img {
     transform: scale(1.04);
 }
-/* destaques: imagem a ocupar o cartão todo */
+/* destaques: cartão quadrado (tamanho de post) e imagem a ocupar o cartão todo */
+.work-card--fill .work-card-media {
+    aspect-ratio: 1 / 1;
+}
 .work-card--fill .work-card-img {
     object-fit: cover;
     padding: 0;
@@ -766,11 +769,11 @@ html.intro-lock body {
     will-change: transform;
 }
 .featured-item {
-    width: 82vw;
+    width: 78vw;
     scroll-snap-align: start;
 }
 @media (min-width: 768px) {
-    .featured-item { width: 58vw; }
+    .featured-item { width: 46vw; }
 }
 @media (min-width: 1024px) {
     .featured-sticky {
@@ -787,7 +790,7 @@ html.intro-lock body {
     .featured-viewport { overflow: visible; scroll-snap-type: none; }
     .featured-track { padding: 0 32px; gap: 16px; }
     /* cartão cabe na altura do ecrã */
-    .featured-item { width: min(46vw, calc((100vh / var(--site-zoom, 1) - 220px) * 4 / 3)); }
+    .featured-item { width: min(40vw, calc(100vh / var(--site-zoom, 1) - 220px)); }
 }
 
 /* ---------- Sobre: frase que acende + crachá ---------- */

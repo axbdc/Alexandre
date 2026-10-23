@@ -151,10 +151,10 @@ const AdminHighlights = () => {
                     <div>
                         <label className="overline text-mist">Imagem do destaque</label>
                         <p className="text-xs text-mist mt-1">
-                            A tua melhor campanha, post, 3D... Fica inteira (não é cortada). Ideal: 1600px ou mais, horizontal 4:3.
+                            A tua melhor campanha, post, 3D... Tem de ser quadrada, tamanho de post (1080x1080 ou maior). Ocupa o cartão todo; se não for quadrada, as pontas ficam cortadas.
                         </p>
                         {editing.image ? (
-                            <img src={editing.image} alt="" className="mt-3 w-full max-h-[360px] object-contain bg-pebble border border-hairline" />
+                            <img src={editing.image} alt="" className="mt-3 w-full max-w-[360px] aspect-square object-cover bg-pebble border border-hairline" />
                         ) : null}
                         <input type="file" accept="image/*,video/*" onChange={onUpload} className="mt-3 text-sm" />
                         {uploading ? <div className="text-xs text-mist mt-1">A carregar imagem…</div> : null}
