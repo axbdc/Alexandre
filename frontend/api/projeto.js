@@ -68,7 +68,8 @@ export default async function handler(req, res) {
     }
 
     const url = `${SITE}${req.url.split("?")[0]}`;
-    const title = `${data.title}${data.client ? " · " + data.client : ""} | Alexandre Cosme`;
+    const showClient = data.client && data.client.toLowerCase() !== data.title.toLowerCase() && !data.title.toLowerCase().includes(data.client.toLowerCase());
+    const title = `${data.title}${showClient ? " · " + data.client : ""} | Alexandre Cosme`;
     const desc = (data.summary || `Projeto de Alexandre Cosme${data.client ? " para " + data.client : ""}.`)
         .replace(/\s+/g, " ")
         .slice(0, 200);

@@ -708,7 +708,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                                                 srcSet={cldSrcSet(src, [1000, 1800])}
                                                                 sizes="(min-width: 1024px) 50vw, 100vw"
                                                                 alt={`Story ${j + 1}`}
-                                                                loading={i < 4 ? "eager" : "lazy"}
+                                                                loading={j < 4 ? "eager" : "lazy"}
                                                                 className="w-full h-auto block"
                                                             />
                                                         </button>
