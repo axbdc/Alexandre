@@ -13,12 +13,7 @@ export const slugify = (s) =>
 const titleOf = (p) =>
     (p && p.title && (p.title.PT || p.title.EN)) || (p && p.title_pt) || "";
 
-// Ids legíveis (ex.: "red-panda-ar3d-02") já servem de endereço; os ids
-// automáticos do Firestore levam o título à frente para ficarem legíveis.
-const readableId = (id) => /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(id);
-
 export const projectPath = (p) => {
-    if (readableId(p.id)) return `/projeto/${p.id}`;
     const s = slugify(titleOf(p));
     return `/projeto/${s ? s + "-" : ""}${p.id}`;
 };

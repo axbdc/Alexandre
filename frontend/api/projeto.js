@@ -26,8 +26,9 @@ const setMeta = (html, attr, name, value) => {
 export default async function handler(req, res) {
     const slug = String(req.query.slug || "");
     // id inteiro (ex.: "red-panda-ar3d-02") ou "titulo-<id automático>"
-    const tail = (slug.match(/-([A-Za-z0-9]{15,})$/) || [])[1];
-    const candidates = [slug, tail].filter(Boolean);
+    // tenta o segmento inteiro e depois cada final depois de um hífen
+    const parts = slug.split("-");
+    const candidates = parts.map((_, i) => parts.slice(i).join("-")).filter((c) => c.length >= 3).slice(0, 8);
     const host = req.headers["x-forwarded-host"] || req.headers.host || "www.alexandrecosme.com";
     const proto = req.headers["x-forwarded-proto"] || "https";
 
