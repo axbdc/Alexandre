@@ -410,6 +410,98 @@ const MotionWall = ({ videos, alt, lang, onOpen, root }) => {
     );
 };
 
+// DESIGN GRÁFICO / POSTS: primeiro os posts, depois as stories, cada grupo
+// com o mesmo formato de cartão. Posts quadrados ficam inteiros sobre o
+// fundo desfocado da própria imagem, para a grelha não ficar desalinhada.
+const PostTile = ({ src, i, label, ratio, onOpen, eager }) => {
+    const [r, setR] = useState(null);
+    const fits = r === null || Math.abs(r - ratio) < 0.04;
+    return (
+        <button
+            type="button"
+            onClick={onOpen}
+            className="group block text-left focus:outline-none"
+            aria-label={label}
+        >
+            <span
+                className="relative block overflow-hidden rounded-[12px] bg-pebble shadow-[0_18px_40px_-24px_rgba(28,27,26,0.55)] ring-1 ring-black/5"
+                style={{ aspectRatio: String(ratio) }}
+            >
+                {!fits ? (
+                    <img
+                        src={cld(src, 200)}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70"
+                    />
+                ) : null}
+                <img
+                    src={cld(src, 1000)}
+                    srcSet={cldSrcSet(src, [1000, 1800])}
+                    sizes="(min-width: 1024px) 30vw, 50vw"
+                    alt={label}
+                    loading={eager ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={(e) => {
+                        const el = e.currentTarget;
+                        if (el.naturalWidth) setR(el.naturalWidth / el.naturalHeight);
+                    }}
+                    className={`absolute inset-0 w-full h-full ${fits ? "object-cover" : "object-contain"} transition-transform duration-700 ease-out group-hover:scale-[1.03]`}
+                />
+                <span className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-300" />
+            </span>
+            <span className="mt-2 block text-[12px] tabular-nums text-mist">
+                {String(i + 1).padStart(2, "0")}
+            </span>
+        </button>
+    );
+};
+
+const PostsWall = ({ posts, stories, title, lang, onOpen }) => (
+    <div className="space-y-10 md:space-y-12">
+        {posts.length ? (
+            <div>
+                <div className="pm-label mb-4">
+                    ↳ {String(posts.length).padStart(2, "0")} posts
+                    {lang === "PT" ? " · toca para ver em grande" : " · tap to view larger"}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                    {posts.map((src, i) => (
+                        <PostTile
+                            key={src + i}
+                            src={src}
+                            i={i}
+                            ratio={4 / 5}
+                            eager={i < 6}
+                            label={`${title} post ${i + 1}`}
+                            onOpen={() => onOpen(i)}
+                        />
+                    ))}
+                </div>
+            </div>
+        ) : null}
+        {stories.length ? (
+            <div>
+                <div className="pm-label mb-4">
+                    ↳ {String(stories.length).padStart(2, "0")} stories
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
+                    {stories.map((src, j) => (
+                        <PostTile
+                            key={src + j}
+                            src={src}
+                            i={j}
+                            ratio={9 / 16}
+                            label={`${title} story ${j + 1}`}
+                            onOpen={() => onOpen(posts.length + j)}
+                        />
+                    ))}
+                </div>
+            </div>
+        ) : null}
+    </div>
+);
+
 const NO_DRAG =
     "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
 
@@ -552,6 +644,18 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                     src={project.cover}
                     alt={title}
                     label={t(project.subtitle, lang)}
+                />
+            );
+        }
+
+        if (isPostsProject && (posts.length || stories.length)) {
+            return (
+                <PostsWall
+                    posts={posts}
+                    stories={stories}
+                    title={title}
+                    lang={lang}
+                    onOpen={setLightboxIndex}
                 />
             );
         }
@@ -860,72 +964,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             </InView>
 
                             {/* Gallery */}
-                            {isPostsProject ? (
-                                posts.length || stories.length ? (
-                                    <div className="pm-gallery space-y-10">
-                                        {posts.length ? (
-                                            <div>
-                                                <div className="pm-label mb-5">
-                                                    ↳ Posts
-                                                </div>
-                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                                                    {posts.map((src, i) => (
-                                                        <button
-                                                            key={i}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setLightboxIndex(i)
-                                                            }
-                                                            className="block cursor-pointer overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-                                                            aria-label={`Post ${i + 1}`}
-                                                        >
-                                                            <img
-                                                                src={cld(src, 1000)}
-                                                                srcSet={cldSrcSet(src, [1000, 1800])}
-                                                                sizes="(min-width: 1024px) 50vw, 100vw"
-                                                                alt={`Post ${i + 1}`}
-                                                                loading={i < 4 ? "eager" : "lazy"}
-                                                                className="w-full h-auto block"
-                                                            />
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : null}
-                                        {stories.length ? (
-                                            <div>
-                                                <div className="pm-label mb-5">
-                                                    ↳ Stories
-                                                </div>
-                                                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-                                                    {stories.map((src, j) => (
-                                                        <button
-                                                            key={j}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setLightboxIndex(
-                                                                    posts.length + j,
-                                                                )
-                                                            }
-                                                            className="block cursor-pointer overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-                                                            aria-label={`Story ${j + 1}`}
-                                                        >
-                                                            <img
-                                                                src={cld(src, 1000)}
-                                                                srcSet={cldSrcSet(src, [1000, 1800])}
-                                                                sizes="(min-width: 1024px) 50vw, 100vw"
-                                                                alt={`Story ${j + 1}`}
-                                                                loading={j < 4 ? "eager" : "lazy"}
-                                                                className="w-full h-auto block"
-                                                            />
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                ) : null
-                            ) : !motionVideos && project.gallery?.length ? (
+                            {isPostsProject ? null : !motionVideos && project.gallery?.length ? (
                                 <div className="pm-gallery">
                                     <div className="pm-label mb-5">
                                         ↳ {t(COPY.gallery, lang)}
