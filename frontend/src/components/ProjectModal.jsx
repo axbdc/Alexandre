@@ -309,6 +309,107 @@ const MotionPlayer = ({ videos, cover, alt, lang }) => {
     );
 };
 
+// MOTION com vários vídeos: mostra todos de uma vez, a tocar em silêncio
+// (só os que estão à vista). Tocar num abre-o em grande, com som, e dá para
+// passar aos outros com as setas.
+const WallTile = ({ v, i, label, onOpen, root, ratio, onRatio }) => {
+    const ref = useRef(null);
+    const setRatio = (r) => onRatio(i, r);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return undefined;
+        // o vídeo pode já ter os metadados antes de o React ligar o evento
+        if (el.readyState >= 1 && el.videoWidth) setRatio(el.videoWidth / el.videoHeight);
+        const io = new IntersectionObserver(
+            ([e]) => {
+                if (e.isIntersecting) {
+                    const p = el.play();
+                    if (p && p.catch) p.catch(() => {});
+                } else el.pause();
+            },
+            { root: root && root.current ? root.current : null, threshold: 0.25 },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [root]);
+    return (
+        <button
+            type="button"
+            onClick={() => onOpen(i)}
+            className="group text-left focus:outline-none"
+            aria-label={label}
+        >
+            <span
+                className="relative block overflow-hidden rounded-[14px] bg-ink shadow-[0_18px_40px_-24px_rgba(28,27,26,0.55)] ring-1 ring-black/5"
+                style={{ aspectRatio: String(ratio) }}
+            >
+                <video
+                    ref={ref}
+                    src={v.src}
+                    poster={videoPoster(v.src)}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    onLoadedMetadata={(e) => {
+                        const el = e.currentTarget;
+                        if (el.videoWidth && el.videoHeight) setRatio(el.videoWidth / el.videoHeight);
+                    }}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+                <span className="absolute inset-0 bg-ink/0 group-hover:bg-ink/20 transition-colors duration-300" />
+                <span className="absolute right-2.5 top-2.5 h-8 w-8 rounded-full bg-bone/90 flex items-center justify-center opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+                    <Play size={12} className="text-ink translate-x-[1px]" fill="currentColor" />
+                </span>
+            </span>
+            <span className="mt-2 flex items-baseline gap-2 text-[12px] leading-tight">
+                <span className="tabular-nums text-mist">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-graphite group-hover:text-ink transition-colors">{label}</span>
+            </span>
+        </button>
+    );
+};
+
+// Os vídeos horizontais vão para uma grelha própria (2 por linha) e os
+// verticais/quadrados para outra (4 por linha), para não ficarem buracos.
+const MotionWall = ({ videos, alt, lang, onOpen, root }) => {
+    const [ratios, setRatios] = useState({});
+    const onRatio = useCallback((i, r) => setRatios((m) => (m[i] === r ? m : { ...m, [i]: r })), []);
+    const items = videos.map((v, i) => ({ v, i, ratio: ratios[i] || 9 / 16 }));
+    const wide = items.filter((x) => x.ratio > 1.2);
+    const tall = items.filter((x) => x.ratio <= 1.2);
+    const tile = (x) => (
+        <WallTile
+            key={x.v.src + x.i}
+            v={x.v}
+            i={x.i}
+            root={root}
+            ratio={x.ratio}
+            onRatio={onRatio}
+            label={t(x.v.title, lang) || `${alt} ${x.i + 1}`}
+            onOpen={onOpen}
+        />
+    );
+    return (
+        <div>
+            <div className="pm-label mb-4">
+                ↳ {String(videos.length).padStart(2, "0")}{" "}
+                {lang === "PT" ? "vídeos · toca num para ver com som" : "videos · tap one to watch with sound"}
+            </div>
+            {wide.length ? (
+                <div className={`grid grid-cols-1 ${wide.length > 1 ? "md:grid-cols-2" : ""} gap-3 md:gap-4 items-start ${tall.length ? "mb-5 md:mb-6" : ""}`}>
+                    {wide.map(tile)}
+                </div>
+            ) : null}
+            {tall.length ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-start">
+                    {tall.map(tile)}
+                </div>
+            ) : null}
+        </div>
+    );
+};
+
 const NO_DRAG =
     "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
 
@@ -345,9 +446,15 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         project.subtype === "posts";
     const posts = (project && project.posts) || [];
     const stories = (project && project.stories) || [];
+    const motionVideos =
+        project && project.category === "motion" && project.videos && project.videos.length > 1
+            ? project.videos
+            : null;
     const gallery = isPostsProject
         ? [...posts, ...stories]
-        : (project && project.gallery) || [];
+        : motionVideos
+          ? motionVideos.map((v) => v.src)
+          : (project && project.gallery) || [];
 
     const lbNext = useCallback(
         () =>
@@ -476,6 +583,18 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                 <div className="pm-plain">
                     <img src={cld(project.cover, 1000)} alt={title} />
                 </div>
+            );
+        }
+
+        if (motionVideos) {
+            return (
+                <MotionWall
+                    videos={motionVideos}
+                    alt={title}
+                    lang={lang}
+                    root={scrollRef}
+                    onOpen={setLightboxIndex}
+                />
             );
         }
 
@@ -806,7 +925,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                         ) : null}
                                     </div>
                                 ) : null
-                            ) : project.gallery?.length ? (
+                            ) : !motionVideos && project.gallery?.length ? (
                                 <div className="pm-gallery">
                                     <div className="pm-label mb-5">
                                         ↳ {t(COPY.gallery, lang)}
@@ -951,9 +1070,14 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                                 ) : null}
 
                                 {gallery.length > 1 ? (
-                                    <span className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs tracking-[0.18em] text-bone/70 tabular-nums">
+                                    <span className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs tracking-[0.18em] text-bone/70 tabular-nums whitespace-nowrap">
                                         {String(lightboxIndex + 1).padStart(2, "0")}{" "}
                                         / {String(gallery.length).padStart(2, "0")}
+                                        {motionVideos && motionVideos[lightboxIndex] && t(motionVideos[lightboxIndex].title, lang) ? (
+                                            <span className="text-bone/90 normal-case tracking-normal ml-3">
+                                                {t(motionVideos[lightboxIndex].title, lang)}
+                                            </span>
+                                        ) : null}
                                     </span>
                                 ) : null}
                             </motion.div>
