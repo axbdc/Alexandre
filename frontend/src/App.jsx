@@ -17,6 +17,7 @@ const AdminLogin = lazy(() => import("@/admin/AdminLogin"));
 const AdminProjects = lazy(() => import("@/admin/AdminProjects"));
 const AdminHighlights = lazy(() => import("@/admin/AdminHighlights"));
 const AdminMessages = lazy(() => import("@/admin/AdminMessages"));
+const AdminPreview = lazy(() => import("@/admin/AdminPreview"));
 const RequireAuth = lazy(() => import("@/admin/RequireAuth"));
 
 // O admin usa as mesmas cores e letras do site
@@ -107,6 +108,14 @@ function App() {
                                     <AdminHighlights />
                                 </RequireAuth>
                             </AdminShell>
+                        }
+                    />
+                    <Route
+                        path="/admin/preview"
+                        element={
+                            <RequireAuth>
+                                <AdminPreview />
+                            </RequireAuth>
                         }
                     />
                     <Route path="/rm/:id" element={<RichMediaViewer />} />

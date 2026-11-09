@@ -11,7 +11,7 @@ const BIG =
 const big = (u) => cld(u, BIG);
 
 // Documento Firestore (plano) -> forma que os componentes esperam.
-const mapDoc = (id, d) => ({
+export const mapDoc = (id, d) => ({
     id,
     category: d.category,
     title: { PT: d.title_pt || "", EN: d.title_en || "" },

@@ -18,6 +18,23 @@ import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
 import AdminTabs from "@/admin/AdminTabs";
 
+// Pré-visualização: guarda o projeto em localStorage e abre /admin/preview
+// noutro separador. A página de preview lê daí e atualiza-se sozinha.
+const PREVIEW_KEY = "ptf:preview";
+const PREVIEW_WIN = "ac-preview";
+const writePreview = (p, unsaved) => {
+    const { id, ...data } = p;
+    try {
+        localStorage.setItem(PREVIEW_KEY, JSON.stringify({ id: id || "preview", data, unsaved: !!unsaved, ts: Date.now() }));
+    } catch (e) {
+        /* sem espaço: ignora */
+    }
+};
+const openPreview = (p, unsaved) => {
+    writePreview(p, unsaved);
+    window.open("/admin/preview", PREVIEW_WIN);
+};
+
 const CATS = [
     { id: "ar3d", label: "AR & 3D" },
     { id: "graphic", label: "Design Gráfico" },
@@ -182,6 +199,14 @@ const AdminProjects = () => {
     const [busy, setBusy] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [msg, setMsg] = useState("");
+    const previewOn = useRef(false);
+
+    // com a pré-visualização aberta, cada alteração no editor aparece lá
+    useEffect(() => {
+        if (!editing || !previewOn.current) return undefined;
+        const tmr = setTimeout(() => writePreview(editing, true), 300);
+        return () => clearTimeout(tmr);
+    }, [editing]);
 
     const load = async () => {
         setLoading(true);
@@ -600,13 +625,24 @@ const AdminProjects = () => {
                         <div className="text-sm text-terracotta mb-3">{msg}</div>
                     ) : null}
 
-                    <button
-                        onClick={save}
-                        disabled={busy}
-                        className="bg-ink text-bone px-6 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-terracotta transition-colors disabled:opacity-50"
-                    >
-                        {busy ? "A guardar…" : "Guardar"}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            onClick={save}
+                            disabled={busy}
+                            className="bg-ink text-bone px-6 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-terracotta transition-colors disabled:opacity-50"
+                        >
+                            {busy ? "A guardar…" : "Guardar"}
+                        </button>
+                        <button
+                            onClick={() => {
+                                previewOn.current = true;
+                                openPreview(editing, true);
+                            }}
+                            className="border border-ink text-ink px-6 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-ink hover:text-bone transition-colors"
+                        >
+                            Ver
+                        </button>
+                    </div>
 
                     <p className="text-[12px] text-mist mt-6">
                         Imagens: por agora cola o URL (ex.: thum.io ou Cloudinary).
@@ -735,6 +771,12 @@ const AdminProjects = () => {
                                         className="link-underline text-ink"
                                     >
                                         Editar
+                                    </button>
+                                    <button
+                                        onClick={() => openPreview(it, false)}
+                                        className="text-mist hover:text-ink"
+                                    >
+                                        Ver
                                     </button>
                                     <button
                                         onClick={() => duplicate(it)}
