@@ -232,6 +232,83 @@ const PlayerFrame = ({ src, alt, url, video }) => {
 };
 
 
+// MOTION com vários vídeos: leitor grande em cima e, por baixo, a lista dos
+// vídeos do cliente para trocar. O leitor adapta-se ao formato do vídeo
+// (16:9, quadrado ou vertical) para não aparecerem barras pretas enormes.
+const MotionPlayer = ({ videos, cover, alt, lang }) => {
+    const [cur, setCur] = useState(0);
+    const [ratio, setRatio] = useState(16 / 9);
+    const [autoplay, setAutoplay] = useState(false);
+    const v = videos[Math.min(cur, videos.length - 1)];
+    const vertical = ratio < 1;
+    const pick = (i) => {
+        if (i === cur) return;
+        setAutoplay(true);
+        setCur(i);
+    };
+    return (
+        <div>
+            <div className="relative border border-hairline bg-ink overflow-hidden flex justify-center">
+                <video
+                    key={v.src}
+                    src={v.src}
+                    poster={cur === 0 && cover ? cover : videoPoster(v.src)}
+                    controls
+                    playsInline
+                    autoPlay={autoplay}
+                    preload="metadata"
+                    onLoadedMetadata={(e) => {
+                        const el = e.currentTarget;
+                        if (el.videoWidth && el.videoHeight) setRatio(el.videoWidth / el.videoHeight);
+                    }}
+                    className="block bg-ink object-contain"
+                    style={
+                        vertical
+                            ? { height: "min(78vh, 760px)", aspectRatio: String(ratio), maxWidth: "100%" }
+                            : { width: "100%", aspectRatio: String(ratio) }
+                    }
+                    aria-label={t(v.title, lang) || alt}
+                />
+            </div>
+            {videos.length > 1 ? (
+                <div className="mt-3 flex gap-3 overflow-x-auto pb-2" data-no-drag>
+                    {videos.map((it, i) => {
+                        const on = i === cur;
+                        const label = t(it.title, lang);
+                        return (
+                            <button
+                                key={it.src + i}
+                                type="button"
+                                onClick={() => pick(i)}
+                                aria-pressed={on}
+                                className={`shrink-0 w-36 md:w-44 text-left group focus:outline-none ${on ? "" : "opacity-70 hover:opacity-100"}`}
+                            >
+                                <span className={`relative block aspect-video overflow-hidden bg-ink border ${on ? "border-ink" : "border-hairline"}`}>
+                                    <img
+                                        src={videoPoster(it.src) || cover}
+                                        alt=""
+                                        loading="lazy"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <span className="absolute left-2 bottom-2 h-7 w-7 rounded-full bg-bone/90 flex items-center justify-center">
+                                        <Play size={11} className="text-ink translate-x-[1px]" fill="currentColor" />
+                                    </span>
+                                </span>
+                                <span className="mt-1.5 flex items-baseline gap-2 text-[12px] leading-tight">
+                                    <span className="tabular-nums text-mist">{String(i + 1).padStart(2, "0")}</span>
+                                    <span className={`truncate ${on ? "text-ink" : "text-graphite"}`}>
+                                        {label || `${alt} ${i + 1}`}
+                                    </span>
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            ) : null}
+        </div>
+    );
+};
+
 const NO_DRAG =
     "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
 
@@ -399,6 +476,17 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                 <div className="pm-plain">
                     <img src={cld(project.cover, 1000)} alt={title} />
                 </div>
+            );
+        }
+
+        if (isMotion && project.videos && project.videos.length) {
+            return (
+                <MotionPlayer
+                    videos={project.videos}
+                    cover={project.cover}
+                    alt={title}
+                    lang={lang}
+                />
             );
         }
 

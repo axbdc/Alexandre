@@ -30,6 +30,14 @@ const writePreview = (p, unsaved) => {
         /* sem espaço: ignora */
     }
 };
+// Vídeos de um projeto motion. Os antigos só têm `video`: vira o primeiro da lista.
+const videoList = (p) =>
+    Array.isArray(p.videos) && p.videos.length
+        ? p.videos
+        : p.video
+          ? [{ src: p.video, title_pt: "", title_en: "" }]
+          : [];
+
 const openPreview = (p, unsaved) => {
     writePreview(p, unsaved);
     window.open("/admin/preview", PREVIEW_WIN);
@@ -91,6 +99,7 @@ const emptyDoc = () => ({
     cover: "",
     url: "",
     video: "",
+    videos: [],
     tools: [],
     gallery: [],
     model_glb: "",
@@ -243,6 +252,11 @@ const AdminProjects = () => {
         setBusy(true);
         setMsg("");
         const { id, ...data } = editing;
+        // motion: a lista de vídeos manda; `video` fica igual ao primeiro (compatibilidade)
+        if (Array.isArray(data.videos)) {
+            data.videos = data.videos.filter((v) => v && v.src);
+            data.video = data.videos[0] ? data.videos[0].src : "";
+        }
         data.is_richmedia = data.category === "richmedia";
         // 3D: "ar" (realidade aumentada) ou "render" (só renderização)
         if (data.category === "ar3d") data.subtype = data.subtype === "render" ? "render" : "ar";
@@ -301,7 +315,12 @@ const AdminProjects = () => {
         try {
             for (const file of list) {
                 const url = await uploadToCloudinary(file);
-                if (target === "cover" || target === "video" || target === "model_glb" || target === "model_usdz") {
+                if (target === "videos") {
+                    setEditing((e) => ({
+                        ...e,
+                        videos: [...videoList(e), { src: url, title_pt: "", title_en: "" }],
+                    }));
+                } else if (target === "cover" || target === "video" || target === "model_glb" || target === "model_usdz") {
                     setEditing((e) => ({ ...e, [target]: url }));
                 } else {
                     // gallery | posts | stories
@@ -513,36 +532,87 @@ const AdminProjects = () => {
 
                     {editing.category === "motion" ? (
                         <div className="mb-4 border border-hairline p-3">
-                            <Field
-                                label="Vídeo principal (toca dentro do site)"
-                                value={editing.video}
-                                onChange={(v) => set("video", v)}
-                            />
-                            <div className="-mt-1 flex items-center gap-3 flex-wrap">
+                            <div className="overline text-mist mb-1">Vídeos (tocam dentro do site)</div>
+                            <div className="text-[11px] text-mist mb-3">
+                                Podes pôr vários vídeos do mesmo cliente. O primeiro abre logo; os outros aparecem por baixo para escolher. A capa serve de imagem do primeiro antes do play. Máx. ~100 MB por vídeo no plano grátis do Cloudinary.
+                            </div>
+                            {videoList(editing).map((v, i, arr) => {
+                                const upd = (patch) =>
+                                    set(
+                                        "videos",
+                                        arr.map((x, j) => (j === i ? { ...x, ...patch } : x)),
+                                    );
+                                const mv = (d) => {
+                                    const next = [...arr];
+                                    const k = i + d;
+                                    if (k < 0 || k >= next.length) return;
+                                    [next[i], next[k]] = [next[k], next[i]];
+                                    set("videos", next);
+                                };
+                                return (
+                                    <div key={v.src + i} className="flex gap-3 items-start border-t border-hairline pt-3 mb-3">
+                                        <video
+                                            src={v.src}
+                                            className="w-28 h-20 bg-black object-contain shrink-0"
+                                            muted
+                                            preload="metadata"
+                                            controls
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-[11px] text-mist mb-1">
+                                                {String(i + 1).padStart(2, "0")}
+                                                {i === 0 ? " · principal" : ""}
+                                            </div>
+                                            <input
+                                                value={v.title_pt || ""}
+                                                onChange={(e) => upd({ title_pt: e.target.value })}
+                                                placeholder="Nome do vídeo (PT), ex.: Natal 2025"
+                                                className="w-full border border-hairline bg-bone px-2 py-1.5 text-sm text-ink outline-none focus:border-ink mb-1.5"
+                                            />
+                                            <input
+                                                value={v.title_en || ""}
+                                                onChange={(e) => upd({ title_en: e.target.value })}
+                                                placeholder="Nome do vídeo (EN)"
+                                                className="w-full border border-hairline bg-bone px-2 py-1.5 text-sm text-ink outline-none focus:border-ink"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-1 shrink-0 text-xs">
+                                            <button type="button" onClick={() => mv(-1)} disabled={i === 0} className="border border-hairline px-2 py-1 hover:border-ink disabled:opacity-30">↑</button>
+                                            <button type="button" onClick={() => mv(1)} disabled={i === arr.length - 1} className="border border-hairline px-2 py-1 hover:border-ink disabled:opacity-30">↓</button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set("videos", arr.filter((_, j) => j !== i))}
+                                                className="border border-hairline px-2 py-1 text-mist hover:text-terracotta hover:border-terracotta"
+                                            >
+                                                apagar
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div className="flex items-center gap-3 flex-wrap">
                                 <label className="cursor-pointer text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink">
-                                    {uploading ? "A carregar…" : "Carregar vídeo"}
+                                    {uploading ? "A carregar…" : "Carregar vídeos"}
                                     <input
                                         type="file"
                                         accept="video/*"
+                                        multiple
                                         className="hidden"
-                                        onChange={(e) =>
-                                            handleUpload(e.target.files, "video")
-                                        }
+                                        onChange={(e) => handleUpload(e.target.files, "videos")}
                                     />
                                 </label>
-                                <span className="text-[11px] text-mist">
-                                    A capa serve de imagem antes de carregar em play. Máx. ~100 MB no plano grátis do Cloudinary.
-                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const u = window.prompt("URL do vídeo (Cloudinary ou .mp4)");
+                                        if (u && u.trim())
+                                            set("videos", [...videoList(editing), { src: u.trim(), title_pt: "", title_en: "" }]);
+                                    }}
+                                    className="text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink"
+                                >
+                                    Adicionar por URL
+                                </button>
                             </div>
-                            {editing.video ? (
-                                <video
-                                    src={editing.video}
-                                    className="mt-3 w-full max-h-56 bg-black"
-                                    controls
-                                    muted
-                                    preload="metadata"
-                                />
-                            ) : null}
                         </div>
                     ) : null}
 

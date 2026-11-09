@@ -26,6 +26,18 @@ export const mapDoc = (id, d) => ({
     cover: big(d.cover || ""),
     url: d.url || undefined,
     video: d.video || undefined,
+    // Vários vídeos (motion). Projetos antigos só têm `video`: passa a ser o primeiro.
+    videos: (Array.isArray(d.videos) && d.videos.length
+        ? d.videos
+        : d.video
+          ? [{ src: d.video }]
+          : []
+    )
+        .filter((v) => v && v.src)
+        .map((v) => ({
+            src: v.src,
+            title: { PT: v.title_pt || "", EN: v.title_en || v.title_pt || "" },
+        })),
     tools: Array.isArray(d.tools) ? d.tools : [],
     gallery:
         Array.isArray(d.gallery) && d.gallery.length
