@@ -516,6 +516,22 @@ const AdminProjects = () => {
                         <Field label="Ano" value={editing.year} onChange={(v) => set("year", v)} />
                     </div>
 
+                    <label className="block mb-3">
+                        <span className="overline text-mist">Marca (junta os projetos da mesma marca no site)</span>
+                        <input
+                            list="ptf-brands"
+                            value={editing.brand || ""}
+                            onChange={(e) => set("brand", e.target.value)}
+                            placeholder="ex.: Carglass. Deixa vazio nos projetos pessoais."
+                            className="w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink"
+                        />
+                        <datalist id="ptf-brands">
+                            {[...new Set(items.map((x) => (x.brand || "").trim()).filter(Boolean))].sort().map((b) => (
+                                <option key={b} value={b} />
+                            ))}
+                        </datalist>
+                    </label>
+
                     <Field label="Resumo (PT)" value={editing.summary_pt} onChange={(v) => set("summary_pt", v)} area />
                     <Field label="Resumo (EN)" value={editing.summary_en} onChange={(v) => set("summary_en", v)} area />
                     <Field label="Descrição completa (PT)" value={editing.details_pt} onChange={(v) => set("details_pt", v)} area />

@@ -28,6 +28,19 @@ const empty = () => ({
 const input =
     "w-full border border-hairline bg-bone px-3 py-2 mt-1 text-sm text-ink outline-none focus:border-ink";
 
+// Imagens que um projeto já tem (posts, galeria, ecrãs, capa), sem repetidas.
+const projectImages = (p) => {
+    if (!p) return [];
+    const list = [
+        ...(p.posts || []),
+        ...(p.gallery || []),
+        ...((p.screens || []).map((s) => s && s.src)),
+        ...(p.stories || []),
+        p.cover,
+    ].filter((u) => typeof u === "string" && u && !/\.(mp4|mov|webm)(\?|$)/i.test(u));
+    return [...new Set(list)];
+};
+
 const AdminHighlights = () => {
     const [items, setItems] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -64,9 +77,18 @@ const AdminHighlights = () => {
     }, [projects]);
 
     const save = async () => {
-        if (!editing.image || !editing.project_id) {
-            setMsg("Falta a imagem ou o projeto.");
+        if (!editing.project_id) {
+            setMsg("Falta escolher o projeto.");
             return;
+        }
+        if (!editing.image) {
+            // sem imagem escolhida: usa a primeira imagem do projeto
+            const first = projectImages(projects.find((x) => x.id === editing.project_id))[0];
+            if (!first) {
+                setMsg("Esse projeto não tem imagens. Escolhe ou carrega uma.");
+                return;
+            }
+            editing.image = first;
         }
         setBusy(true);
         setMsg("");
@@ -149,24 +171,6 @@ const AdminHighlights = () => {
                     </div>
 
                     <div>
-                        <label className="overline text-mist">Imagem do destaque</label>
-                        <p className="text-xs text-mist mt-1">
-                            A tua melhor campanha, post, 3D... Tem de ser quadrada, tamanho de post (1080x1080 ou maior). Ocupa o cartão todo; se não for quadrada, as pontas ficam cortadas.
-                        </p>
-                        {editing.image ? (
-                            <img src={editing.image} alt="" className="mt-3 w-full max-w-[360px] aspect-square object-cover bg-pebble border border-hairline" />
-                        ) : null}
-                        <input type="file" accept="image/*,video/*" onChange={onUpload} className="mt-3 text-sm" />
-                        {uploading ? <div className="text-xs text-mist mt-1">A carregar imagem…</div> : null}
-                        <input
-                            className={input}
-                            placeholder="ou cola aqui o URL da imagem"
-                            value={editing.image}
-                            onChange={(e) => setEditing({ ...editing, image: e.target.value })}
-                        />
-                    </div>
-
-                    <div>
                         <label className="overline text-mist">Abre o projeto</label>
                         <select
                             className={input}
@@ -181,6 +185,45 @@ const AdminHighlights = () => {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    {editing.project_id ? (
+                        <div>
+                            <label className="overline text-mist">Usar uma imagem do projeto</label>
+                            <p className="text-xs text-mist mt-1">
+                                Toca numa imagem para a usar no destaque. Se não escolheres nenhuma, fica a primeira.
+                            </p>
+                            <div className="mt-3 grid grid-cols-4 md:grid-cols-6 gap-2">
+                                {projectImages(projects.find((x) => x.id === editing.project_id)).map((u) => (
+                                    <button
+                                        key={u}
+                                        type="button"
+                                        onClick={() => setEditing({ ...editing, image: u })}
+                                        className={`aspect-square bg-pebble overflow-hidden border-2 ${editing.image === u ? "border-ink" : "border-transparent hover:border-hairline"}`}
+                                    >
+                                        <img src={u.replace("/upload/", "/upload/f_auto,q_auto,w_300,c_limit/")} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ) : null}
+
+                    <div>
+                        <label className="overline text-mist">Ou carrega outra imagem</label>
+                        <p className="text-xs text-mist mt-1">
+                            A tua melhor campanha, post, 3D... Tem de ser quadrada, tamanho de post (1080x1080 ou maior). Ocupa o cartão todo; se não for quadrada, as pontas ficam cortadas.
+                        </p>
+                        {editing.image ? (
+                            <img src={editing.image} alt="" className="mt-3 w-full max-w-[360px] aspect-square object-cover bg-pebble border border-hairline" />
+                        ) : null}
+                        <input type="file" accept="image/*,video/*" onChange={onUpload} className="mt-3 text-sm" />
+                        {uploading ? <div className="text-xs text-mist mt-1">A carregar imagem…</div> : null}
+                        <input
+                            className={input}
+                            placeholder="ou cola aqui o URL da imagem"
+                            value={editing.image}
+                            onChange={(e) => setEditing({ ...editing, image: e.target.value })}
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

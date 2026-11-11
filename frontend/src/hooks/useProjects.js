@@ -66,6 +66,7 @@ export const mapDoc = (id, d) => ({
               }
             : undefined,
     subtype: d.subtype || "",
+    brand: (d.brand || "").trim(),
     posts: Array.isArray(d.posts) ? d.posts.map(big) : [],
     stories: Array.isArray(d.stories) ? d.stories.map(big) : [],
     sort_order: typeof d.sort_order === "number" ? d.sort_order : 0,

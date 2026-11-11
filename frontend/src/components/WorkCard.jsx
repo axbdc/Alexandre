@@ -59,9 +59,15 @@ const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
                 <span className="work-card-shade" aria-hidden="true" />
                 <span className="work-card-no">({String(i + 1).padStart(2, "0")})</span>
                 <span className="work-card-tags">
-                    <span>{catLabel(p.category, lang)}</span>
-                    {isARProject(p) ? <span className="work-card-ar">AR</span> : null}
-                    {p.year ? <span>{p.year}</span> : null}
+                    {p.tags ? (
+                        p.tags.map((tg) => <span key={tg}>{tg}</span>)
+                    ) : (
+                        <>
+                            <span>{catLabel(p.category, lang)}</span>
+                            {isARProject(p) ? <span className="work-card-ar">AR</span> : null}
+                            {p.year ? <span>{p.year}</span> : null}
+                        </>
+                    )}
                 </span>
                 <span className="work-card-title">
                     <span className="work-card-client">{p.highlightLabel ? t(p.highlightLabel, lang) : localize(p.client, lang)}</span>

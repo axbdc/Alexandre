@@ -691,6 +691,9 @@ html.intro-lock body {
     right: 14px;
     top: 14px;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 72%;
     gap: 6px;
 }
 .work-card-tags > span {
@@ -1449,3 +1452,10 @@ html.lenis body {
 .admin-shell .bg-white {
     border-radius: 16px;
 }
+
+/* ---------- Painel de marca ---------- */
+@keyframes brandFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes brandRise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+.brand-fade { animation: brandFade 0.35s ease both; }
+.brand-rise { animation: brandRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.work-card--small .work-card-title > .font-condensed { font-size: clamp(1.6rem, 2.2vw, 2.4rem); }

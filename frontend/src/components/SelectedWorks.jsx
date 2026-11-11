@@ -6,6 +6,7 @@ import useHighlights from "../hooks/useHighlights";
 import useReveal from "../hooks/useReveal";
 import FeaturedStrip from "./FeaturedStrip";
 import WorkCard from "./WorkCard";
+import BrandPanel from "./BrandPanel";
 import { projectPath, segmentFromLocation, findBySegment } from "../lib/projectUrl";
 
 const DEFAULT_TITLE = typeof document !== "undefined" ? document.title : "";
@@ -14,6 +15,17 @@ const DEFAULT_TITLE = typeof document !== "undefined" ? document.title : "";
 const loadModal = () => import("./ProjectModal");
 const ProjectModal = lazy(loadModal);
 
+
+// Marca de um projeto: o campo "marca" do admin. Projetos pessoais não têm marca.
+const PERSONAL = /projeto (pessoal|pr[oó]prio)|personal project|own project/i;
+const clientText = (p) => (typeof p.client === "string" ? p.client : (p.client && (p.client.PT || p.client.EN)) || "");
+const brandOf = (p) => {
+    if (p.brand) return p.brand;
+    const c = clientText(p);
+    if (!c || PERSONAL.test(c)) return "";
+    return c.replace(/\s*\(.*\)\s*$/, "").trim();
+};
+const VISIBLE = 8;
 
 const SelectedWorks = () => {
     const { lang } = useLang();
@@ -63,6 +75,42 @@ const SelectedWorks = () => {
                 : projects.filter((p) => p.category === active),
         [active, projects],
     );
+
+    // Cartões da grelha: uma marca por cartão (com todos os trabalhos dela)
+    // e os projetos pessoais à parte, cada um no seu cartão.
+    const entries = useMemo(() => {
+        const map = new Map();
+        const out = [];
+        for (const p of filtered) {
+            const b = brandOf(p);
+            if (!b) {
+                out.push({ type: "project", key: p.id, project: p });
+                continue;
+            }
+            const k = b.toLowerCase();
+            if (!map.has(k)) {
+                const entry = { type: "brand", key: "brand:" + k, name: b, projects: [] };
+                map.set(k, entry);
+                out.push(entry);
+            }
+            map.get(k).projects.push(p);
+        }
+        return out.filter((e) => e.type === "brand");
+    }, [filtered]);
+    // projetos pessoais: secção própria, por baixo das marcas
+    const personal = useMemo(() => filtered.filter((p) => !brandOf(p)), [filtered]);
+    const [showAll, setShowAll] = useState(false);
+    const [brandKey, setBrandKey] = useState(null);
+    useEffect(() => {
+        setShowAll(false);
+    }, [active]);
+    const openBrand = useMemo(() => {
+        if (!brandKey) return null;
+        const k = brandKey.slice(6);
+        const list = projects.filter((p) => brandOf(p).toLowerCase() === k);
+        return list.length ? { name: brandOf(list[0]), projects: list } : null;
+    }, [brandKey, projects]);
+    const visible = showAll ? entries : entries.slice(0, VISIBLE);
 
     const counts = useMemo(() => {
         const out = { all: projects.length };
@@ -137,12 +185,13 @@ const SelectedWorks = () => {
         return () => window.removeEventListener("popstate", onPop);
     }, []);
 
+    const navList = openBrand && openBrand.projects.some((p) => p.id === openId) ? openBrand.projects : filtered;
     const openIndex = useMemo(
-        () => filtered.findIndex((p) => p.id === openId),
-        [filtered, openId],
+        () => navList.findIndex((p) => p.id === openId),
+        [navList, openId],
     );
 
-    const open = filtered[openIndex] || null;
+    const open = navList[openIndex] || (openId ? projects.find((p) => p.id === openId) : null) || null;
 
     // abrir a partir dos destaques: garante que o projeto está na lista atual
     const openFromFeatured = useCallback((id) => {
@@ -152,15 +201,26 @@ const SelectedWorks = () => {
 
     const close = useCallback(() => setOpenId(null), []);
     const goPrev = useCallback(() => {
-        if (!filtered.length) return;
-        const next = openIndex <= 0 ? filtered.length - 1 : openIndex - 1;
-        setOpenId(filtered[next].id);
-    }, [filtered, openIndex]);
+        if (!navList.length) return;
+        const next = openIndex <= 0 ? navList.length - 1 : openIndex - 1;
+        setOpenId(navList[next].id);
+    }, [navList, openIndex]);
     const goNext = useCallback(() => {
-        if (!filtered.length) return;
-        const next = openIndex >= filtered.length - 1 ? 0 : openIndex + 1;
-        setOpenId(filtered[next].id);
-    }, [filtered, openIndex]);
+        if (!navList.length) return;
+        const next = openIndex >= navList.length - 1 ? 0 : openIndex + 1;
+        setOpenId(navList[next].id);
+    }, [navList, openIndex]);
+
+    const onCard = useCallback(
+        (id) => {
+            if (typeof id === "string" && id.startsWith("brand:")) {
+                const e = entries.find((x) => x.key === id);
+                if (e && e.projects.length === 1) setOpenId(e.projects[0].id);
+                else setBrandKey(id);
+            } else setOpenId(id);
+        },
+        [entries],
+    );
 
     return (
         <section
@@ -184,10 +244,10 @@ const SelectedWorks = () => {
                         <div
                             className="font-display text-2xl text-ink mt-1 tabular-nums"
                         >
-                            {String(filtered.length).padStart(2, "0")}
+                            {String(visible.length).padStart(2, "0")}
                             <span className="text-mist mx-2">/</span>
                             <span className="text-mist">
-                                {String(projects.length).padStart(2, "0")}
+                                {String(entries.length).padStart(2, "0")}
                             </span>
                         </div>
                     </div>
@@ -233,21 +293,89 @@ const SelectedWorks = () => {
                     </ul>
                 </div>
 
-                {/* Grelha filtrada */}
+                {/* Grelha: marcas e projetos pessoais */}
                 <ul
                     key={active}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5"
                 >
-                    {filtered.map((p, i) => (
-                        <li
-                            key={p.id}
-                            className="work-in"
-                            style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
-                        >
-                            <WorkCard p={p} i={i} lang={lang} onOpen={setOpenId} />
-                        </li>
-                    ))}
+                    {visible.map((e, i) => {
+                        let card;
+                        if (e.type === "project") card = e.project;
+                        else {
+                            const first = e.projects[0];
+                            const kinds = [...new Set(e.projects.map((p) => p.category))]
+                                .map((id) => (CATEGORIES.find((c) => c.id === id) || {}).label)
+                                .filter(Boolean)
+                                .map((l) => t(l, lang));
+                            card =
+                                e.projects.length === 1
+                                    ? first
+                                    : {
+                                          id: e.key,
+                                          title: { PT: e.name, EN: e.name },
+                                          client: lang === "PT"
+                                              ? `${String(e.projects.length).padStart(2, "0")} trabalhos`
+                                              : `${String(e.projects.length).padStart(2, "0")} pieces of work`,
+                                          cover: first.cover,
+                                          category: first.category,
+                                          tags: kinds,
+                                      };
+                        }
+                        return (
+                            <li
+                                key={e.key}
+                                className="work-in"
+                                style={{ animationDelay: `${Math.min(i % VISIBLE, 8) * 40}ms` }}
+                            >
+                                <WorkCard p={card} i={i} lang={lang} onOpen={e.type === "brand" ? () => onCard(e.key) : setOpenId} />
+                            </li>
+                        );
+                    })}
                 </ul>
+
+                {entries.length > VISIBLE ? (
+                    <div className="mt-10 md:mt-12 flex justify-center">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (showAll) {
+                                    const el = document.getElementById("projetos");
+                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }
+                                setShowAll((v) => !v);
+                            }}
+                            className="group inline-flex items-center gap-3 border border-ink text-ink px-8 py-4 text-xs md:text-sm tracking-[0.18em] uppercase hover:bg-ink hover:text-bone transition-colors"
+                        >
+                            {showAll
+                                ? lang === "PT" ? "Mostrar menos" : "Show less"
+                                : lang === "PT"
+                                  ? `Ver todas as marcas (${String(entries.length).padStart(2, "0")})`
+                                  : `See all brands (${String(entries.length).padStart(2, "0")})`}
+                        </button>
+                    </div>
+                ) : null}
+
+                {personal.length ? (
+                    <div className="mt-16 md:mt-24">
+                        <div className="flex items-end justify-between mb-8 md:mb-10">
+                            <div>
+                                <span className="section-kicker">↳ {lang === "PT" ? "Projetos pessoais" : "Personal projects"} / {String(personal.length).padStart(2, "0")}</span>
+                                <p className="mt-3 text-sm text-graphite max-w-md">
+                                    {lang === "PT"
+                                        ? "Coisas que faço por conta própria, para experimentar e aprender."
+                                        : "Things I make on my own, to experiment and learn."}
+                                </p>
+                            </div>
+                        </div>
+                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+                            {personal.map((p, i) => (
+                                <li key={p.id} className="work-in" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
+                                    <WorkCard p={p} i={i} lang={lang} onOpen={setOpenId} className="work-card--small" />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : null}
 
                 {filtered.length === 0 && (
                     <p className="text-center text-graphite py-24">
@@ -258,12 +386,21 @@ const SelectedWorks = () => {
                 )}
             </div>
 
+            <BrandPanel
+                brand={openBrand}
+                lang={lang}
+                active={active}
+                hidden={!!openId}
+                onOpen={setOpenId}
+                onClose={() => setBrandKey(null)}
+            />
+
             {modalReady ? (
                 <Suspense fallback={null}>
                     <ProjectModal
                         project={open}
                         index={openIndex >= 0 ? openIndex : 0}
-                        total={filtered.length}
+                        total={navList.length}
                         onClose={close}
                         onPrev={goPrev}
                         onNext={goNext}
