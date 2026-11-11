@@ -1108,7 +1108,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             {isRM ? (
                                 <div className="px-5 md:px-8 pt-5 flex justify-center">
                                     <a
-                                        href={project.richmedia && project.richmedia.html ? project.richmedia.html : `/rm/${project.id}`}
+                                        href={`/rm/${project.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="group inline-flex items-center gap-3 bg-ink text-bone px-8 md:px-10 py-4 md:py-5 text-sm md:text-base tracking-[0.18em] uppercase hover:bg-terracotta transition-colors shadow-[0_18px_44px_-18px_rgba(28,27,26,0.55)]"
