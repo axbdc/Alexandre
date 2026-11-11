@@ -462,6 +462,74 @@ const usePostRatios = (list) => {
     return ratios;
 };
 
+// DESIGN GRÁFICO (banners, cartazes, impressão...): a galeria em grelha no topo,
+// agrupada por formato para as filas ficarem alinhadas.
+const bucketOf = (r) => {
+    if (r > 1.25) return { key: "wide", ratio: r > 1.6 ? 16 / 9 : 4 / 3, cols: "md:grid-cols-2" };
+    if (r > 0.9) return { key: "square", ratio: 1, cols: "md:grid-cols-4" };
+    if (r > 0.7) return { key: "portrait", ratio: 4 / 5, cols: "md:grid-cols-4" };
+    return { key: "tall", ratio: 9 / 16, cols: "md:grid-cols-5" };
+};
+const ORDER = ["wide", "square", "portrait", "tall"];
+
+const useRatios = (list) => {
+    const [ratios, setRatios] = useState({});
+    useEffect(() => {
+        let alive = true;
+        list.forEach((src) => {
+            const im = new Image();
+            im.onload = () => {
+                if (!alive || !im.naturalWidth) return;
+                setRatios((m) => ({ ...m, [src]: im.naturalWidth / im.naturalHeight }));
+            };
+            im.src = cld(src, 200);
+        });
+        return () => {
+            alive = false;
+        };
+    }, [list.join("|")]);
+    return ratios;
+};
+
+const GalleryWall = ({ images, title, lang, onOpen }) => {
+    const ratios = useRatios(images);
+    const ready = images.every((src) => ratios[src]);
+    const groups = {};
+    images.forEach((src, i) => {
+        const b = bucketOf(ratios[src] || 1);
+        (groups[b.key] = groups[b.key] || { ...b, items: [] }).items.push({ src, i });
+    });
+    let n = 0;
+    return (
+        <div>
+            <div className="pm-label mb-4">
+                ↳ {String(images.length).padStart(2, "0")}{" "}
+                {lang === "PT" ? "peças · toca para ver em grande" : "pieces · tap to view larger"}
+            </div>
+            <div className={`space-y-3 md:space-y-4 transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"}`}>
+                {ORDER.filter((k) => groups[k]).map((k) => (
+                    <div key={k} className={`grid grid-cols-2 ${groups[k].cols} gap-3 md:gap-4`}>
+                        {groups[k].items.map((x) => {
+                            const num = n++;
+                            return (
+                                <PostTile
+                                    key={x.src + x.i}
+                                    src={x.src}
+                                    i={num}
+                                    ratio={groups[k].ratio}
+                                    eager={num < 8}
+                                    label={`${title} ${num + 1}`}
+                                    onOpen={() => onOpen(x.i)}
+                                />
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const PostsWall = ({ posts, stories, title, lang, onOpen }) => {
     const ratios = usePostRatios(posts);
     const ready = posts.every((src) => ratios[src]);
@@ -558,6 +626,13 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         project.category === "graphic" &&
         project.subtype === "posts";
     const posts = (project && project.posts) || [];
+    // design gráfico sem posts/stories mas com galeria a sério (não só a capa)
+    const graphicWall =
+        project &&
+        project.category === "graphic" &&
+        !(project.subtype === "posts" && ((project.posts || []).length || (project.stories || []).length)) &&
+        project.gallery &&
+        project.gallery.length > 1;
     const stories = (project && project.stories) || [];
     const motionVideos =
         project && project.category === "motion" && project.videos && project.videos.length > 1
@@ -674,6 +749,17 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                 <PostsWall
                     posts={posts}
                     stories={stories}
+                    title={title}
+                    lang={lang}
+                    onOpen={setLightboxIndex}
+                />
+            );
+        }
+
+        if (graphicWall) {
+            return (
+                <GalleryWall
+                    images={project.gallery}
                     title={title}
                     lang={lang}
                     onOpen={setLightboxIndex}
@@ -985,7 +1071,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             </InView>
 
                             {/* Gallery */}
-                            {isPostsProject ? null : !motionVideos && project.gallery?.length ? (
+                            {isPostsProject || graphicWall ? null : !motionVideos && project.gallery?.length ? (
                                 <div className="pm-gallery">
                                     <div className="pm-label mb-5">
                                         ↳ {t(COPY.gallery, lang)}
