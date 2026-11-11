@@ -18,11 +18,11 @@
   ],
   "headers": [
     {
-      "source": "/(favicon.ico|favicon-32x32.png|apple-touch-icon.png|icon-192.png|icon-512.png|phone-frame.png|site.webmanifest|og-image.jpg|alexandre-badge.jpg)",
+      "source": "/(favicon.ico|favicon-32x32.png|apple-touch-icon.png|icon-192.png|icon-512.png|phone-frame.png|site.webmanifest|og-image.jpg|alexandre-badge.jpg|alexandre-badge.webp)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=604800"
+          "value": "public, max-age=2592000"
         }
       ]
     }

@@ -9,7 +9,7 @@
         --sand: #DEDAD1;
         --ink: #1C1B1A;
         --graphite: #5C5A56;
-        --mist: #8F8D88;
+        --mist: #6E6C66;
         --terracotta: #A85B48;
         --terracotta-hover: #8C4939;
         --hairline: #DCD8CF;
@@ -20,7 +20,7 @@
         --c-sand: 222 218 209;
         --c-ink: 28 27 26;
         --c-graphite: 92 90 86;
-        --c-mist: 143 141 136;
+        --c-mist: 110 108 102;
         --c-accent: 168 91 72;
         --c-accent-hover: 140 73 57;
         --c-hairline: 220 216 207;
@@ -183,7 +183,7 @@
     --c-sand: 232 229 223;       /* superfícies 2 */
     --c-ink: 20 20 19;           /* texto principal */
     --c-graphite: 88 87 83;      /* texto secundário */
-    --c-mist: 150 148 142;       /* texto discreto */
+    --c-mist: 110 108 102;       /* texto discreto (contraste AA) */
     --c-accent: 25 39 200;       /* destaque, azul #1927C8 */
     --c-accent-hover: 18 29 160;
     --c-hairline: 226 223 216;   /* linhas */
@@ -826,11 +826,19 @@ html.intro-lock body {
     letter-spacing: -0.025em;
 }
 .wr-word {
-    color: rgb(var(--c-accent) / 0.16);
-    transition: color 0.35s ease;
+    color: transparent;
+    background-color: rgb(var(--c-accent) / 0.16);
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: background-color 0.35s ease;
 }
 .wr-word.lit {
-    color: var(--terracotta);
+    background-color: var(--terracotta);
+}
+.sr-only-text {
+    position: absolute !important;
+    width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 .list-caps li {
     font-weight: 700;

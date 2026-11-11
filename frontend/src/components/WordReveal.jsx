@@ -40,8 +40,9 @@ const WordReveal = ({ text, className = "" }) => {
 
     return (
         <p ref={ref} className={`word-reveal ${className}`}>
+            <span className="sr-only-text">{text}</span>
             {text.split(" ").map((w, i) => (
-                <span key={i} className="wr-word">
+                <span key={i} className="wr-word" aria-hidden="true">
                     {w}{" "}
                 </span>
             ))}

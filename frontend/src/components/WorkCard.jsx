@@ -32,6 +32,12 @@ const useCover = (url) => {
 // logos ficarem com o mesmo peso no cartão.
 const trim = (u) => (u ? u.replace(/(res\.cloudinary\.com\/[^/]+\/image\/upload\/)/g, "$1e_trim/") : u);
 
+// largura real com que o cartão aparece; o logótipo ocupa cerca de metade do cartão
+const cardSizes = (grid, brand) => {
+    if (grid) return brand ? "(min-width: 1024px) 13vw, (min-width: 640px) 28vw, 56vw" : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw";
+    return brand ? "(min-width: 1024px) 21vw, (min-width: 768px) 24vw, 42vw" : "(min-width: 1024px) 40vw, (min-width: 768px) 46vw, 78vw";
+};
+
 const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
     const info = useCover(p.cover);
     const brand = !!(info && info.logo);
@@ -50,8 +56,8 @@ const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
                 <img
                     className="work-card-img"
                     src={brand ? trim(cld(p.cover, 1400)) : cld(p.cover, 1400)}
-                    srcSet={brand ? trim(cldSrcSet(p.cover, [700, 1000, 1400])) : cldSrcSet(p.cover, [700, 1000, 1400, 1800, 2400])}
-                    sizes={className.includes("work-card--grid") ? "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" : "(min-width: 1024px) 50vw, 100vw"}
+                    srcSet={brand ? trim(cldSrcSet(p.cover, [300, 500, 700, 1000])) : cldSrcSet(p.cover, [500, 700, 1000, 1400, 1800, 2400])}
+                    sizes={cardSizes(className.includes("work-card--grid"), brand)}
                     alt={t(p.title, lang)}
                     loading="lazy"
                     decoding="async"

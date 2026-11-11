@@ -72,8 +72,8 @@ export const PROJECTS = [];
 
 export const ABOUT = {
     heading: {
-        PT: "Sou o Alexandre, designer multidisciplinar. Tenho 23 anos e vivo entre a Ericeira e Lisboa.",
-        EN: "I'm Alexandre, a multidisciplinary designer. I'm 23 and I live between Ericeira and Lisbon.",
+        PT: "Sou o Alexandre, designer multidisciplinar. Vivo entre a Ericeira e Lisboa.",
+        EN: "I'm Alexandre, a multidisciplinary designer. I live between Ericeira and Lisbon.",
     },
     body: [
         {
@@ -89,22 +89,22 @@ export const ABOUT = {
     clients: [
         "Danone · Blédina · Aptamil",
         "Burger King",
+        "Coca-Cola · Del Valle Kapo",
+        "Volkswagen",
+        "Toyota",
+        "Haleon · Centrum · Sensodyne",
         "Carglass",
-        "Deloitte",
+        "Claro",
+        "SPAR",
+        "Mediclinic · ER24",
         "Bayer · Clarityne",
         "Distell · Savanna",
         "Solverde Group",
         "Sonasol",
-        "Bright International School",
-        "Madeira Rústica",
-        "Bruti",
-        "Talay Thai House",
-        "BerryLab Açaí",
-        "…",
     ],
     // Crachá da secção "Sobre"
     badge: {
-        photo: "/alexandre-badge.jpg?v=2",
+        photo: "/alexandre-badge.webp?v=3",
         dept: { PT: "Design Department", EN: "Design Department" },
         name: "Alexandre Cosme",
         role: "Design & Multimedia Lead",

@@ -160,7 +160,8 @@ const StretchText = ({ text, className = "", fit = true, max = 1.4, as: Tag = "d
     const chars = Array.from(text);
 
     return (
-        <Tag ref={boxRef} className={`stretch-text ${ready ? "is-ready" : ""} ${className}`} aria-label={text} {...rest}>
+        <Tag ref={boxRef} className={`stretch-text ${ready ? "is-ready" : ""} ${className}`} {...rest}>
+            <span className="sr-only-text">{text}</span>
             <span ref={lineRef} className="stretch-line" aria-hidden="true">
                 {chars.map((ch, i) =>
                     ch === " " ? (

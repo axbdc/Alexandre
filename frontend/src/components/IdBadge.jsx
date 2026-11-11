@@ -82,7 +82,7 @@ const IdBadge = ({ lang }) => {
                     <div className="badge-inner">
                         <div className="badge-dept">{t(b.dept, lang)}</div>
                         <div className="badge-photo">
-                            <img src={b.photo} alt="Alexandre Cosme" loading="lazy" decoding="async" />
+                            <img src={b.photo} alt="Alexandre Cosme" width="960" height="960" loading="lazy" decoding="async" />
                         </div>
                         <div className="badge-field">
                             <span>{lang === "PT" ? "Nome:" : "Name:"}</span>
