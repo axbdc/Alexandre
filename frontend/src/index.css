@@ -1459,3 +1459,47 @@ html.lenis body {
 .brand-fade { animation: brandFade 0.35s ease both; }
 .brand-rise { animation: brandRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .work-card--small .work-card-title > .font-condensed { font-size: clamp(1.6rem, 2.2vw, 2.4rem); }
+
+/* separadores "Nesta marca" no topo do projeto */
+.pm-brandtabs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--hairline, rgb(28 27 26 / 0.12));
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.pm-brandtabs::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) { .pm-brandtabs { padding: 10px 32px; } }
+.pm-brandtabs-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    white-space: nowrap;
+}
+.pm-brandtabs-list { display: flex; gap: 6px; }
+.pm-brandtab {
+    white-space: nowrap;
+    border: 1px solid rgb(28 27 26 / 0.18);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    color: var(--ink);
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.pm-brandtab:hover { border-color: var(--ink); }
+.pm-brandtab.is-on { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+
+/* grelha de 4 por linha: cartões mais pequenos */
+.work-card--grid .work-card-media { aspect-ratio: 1 / 1; }
+.work-card--grid .work-card-title > .font-condensed { font-size: clamp(1.35rem, 1.7vw, 2rem); }
+.work-card--grid .work-card-client { font-size: 0.64rem; }
+.work-card--grid .work-card-tags > span { font-size: 0.58rem; padding: 3px 6px; }
+.work-card--grid .work-card-no { font-size: 0.8rem; }
+.work-card--grid.work-card--brand .work-card-img { padding: 20% 22% 34%; }
+.work-card--grid .work-card-bar { height: 40px; font-size: 0.72rem; }
+.work-card--grid:hover .work-card-title { transform: translateY(-40px); }
+@media (hover: none) { .work-card--grid .work-card-title { transform: translateY(-40px); } }

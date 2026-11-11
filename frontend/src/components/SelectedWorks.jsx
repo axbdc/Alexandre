@@ -6,7 +6,6 @@ import useHighlights from "../hooks/useHighlights";
 import useReveal from "../hooks/useReveal";
 import FeaturedStrip from "./FeaturedStrip";
 import WorkCard from "./WorkCard";
-import BrandPanel from "./BrandPanel";
 import { projectPath, segmentFromLocation, findBySegment } from "../lib/projectUrl";
 
 const DEFAULT_TITLE = typeof document !== "undefined" ? document.title : "";
@@ -25,7 +24,7 @@ const brandOf = (p) => {
     if (!c || PERSONAL.test(c)) return "";
     return c.replace(/\s*\(.*\)\s*$/, "").trim();
 };
-const VISIBLE = 8;
+const STEP = 4;
 
 const SelectedWorks = () => {
     const { lang } = useLang();
@@ -99,19 +98,13 @@ const SelectedWorks = () => {
     }, [filtered]);
     // projetos pessoais: secção própria, por baixo das marcas
     const personal = useMemo(() => filtered.filter((p) => !brandOf(p)), [filtered]);
-    const [showAll, setShowAll] = useState(false);
-    const [brandKey, setBrandKey] = useState(null);
+    const [shown, setShown] = useState(STEP);
     useEffect(() => {
-        setShowAll(false);
+        setShown(STEP);
     }, [active]);
-    const openBrand = useMemo(() => {
-        if (!brandKey) return null;
-        const k = brandKey.slice(6);
-        const list = projects.filter((p) => brandOf(p).toLowerCase() === k);
-        return list.length ? { name: brandOf(list[0]), projects: list } : null;
-    }, [brandKey, projects]);
-    const visible = showAll ? entries : entries.slice(0, VISIBLE);
+    const visible = entries.slice(0, shown);
 
+    const allBrandCount = useMemo(() => new Set(projects.map((p) => brandOf(p).toLowerCase()).filter(Boolean)).size, [projects]);
     const counts = useMemo(() => {
         const out = { all: projects.length };
         for (const c of CATEGORIES) {
@@ -185,7 +178,26 @@ const SelectedWorks = () => {
         return () => window.removeEventListener("popstate", onPop);
     }, []);
 
-    const navList = openBrand && openBrand.projects.some((p) => p.id === openId) ? openBrand.projects : filtered;
+    // trabalhos da mesma marca do projeto aberto (separadores no topo do projeto)
+    const openProject = openId ? projects.find((p) => p.id === openId) : null;
+    const brandList = useMemo(() => {
+        if (!openProject) return [];
+        const b = brandOf(openProject).toLowerCase();
+        if (!b) return [];
+        const list = projects.filter((p) => brandOf(p).toLowerCase() === b);
+        // o tipo escolhido no filtro aparece primeiro
+        return active === "all" ? list : [...list.filter((p) => p.category === active), ...list.filter((p) => p.category !== active)];
+    }, [openProject, projects, active]);
+    const siblings = useMemo(() => {
+        const used = {};
+        return brandList.map((p) => {
+            const c = CATEGORIES.find((x) => x.id === p.category);
+            const base = c ? t(c.label, lang) : t(p.title, lang);
+            used[base] = (used[base] || 0) + 1;
+            return { id: p.id, base, title: t(p.title, lang) };
+        }).map((x) => ({ id: x.id, label: used[x.base] > 1 ? x.title : x.base }));
+    }, [brandList, lang]);
+    const navList = filtered;
     const openIndex = useMemo(
         () => navList.findIndex((p) => p.id === openId),
         [navList, openId],
@@ -211,13 +223,11 @@ const SelectedWorks = () => {
         setOpenId(navList[next].id);
     }, [navList, openIndex]);
 
+    // cartão de marca: abre logo o primeiro trabalho; os outros ficam nos separadores
     const onCard = useCallback(
-        (id) => {
-            if (typeof id === "string" && id.startsWith("brand:")) {
-                const e = entries.find((x) => x.key === id);
-                if (e && e.projects.length === 1) setOpenId(e.projects[0].id);
-                else setBrandKey(id);
-            } else setOpenId(id);
+        (key) => {
+            const e = entries.find((x) => x.key === key);
+            if (e) setOpenId(e.projects[0].id);
         },
         [entries],
     );
@@ -272,7 +282,7 @@ const SelectedWorks = () => {
                                         }`}
                                     >
                                         <span className="text-sm tracking-wide">
-                                            {t(c.label, lang)}
+                                            {c.id === "all" ? (lang === "PT" ? "Marcas" : "Brands") : t(c.label, lang)}
                                         </span>
                                         <span
                                             className={`text-xs tabular-nums ${
@@ -281,7 +291,7 @@ const SelectedWorks = () => {
                                                     : "text-mist"
                                             }`}
                                         >
-                                            {String(counts[c.id]).padStart(
+                                            {String(c.id === "all" ? allBrandCount : counts[c.id]).padStart(
                                                 2,
                                                 "0",
                                             )}
@@ -296,7 +306,7 @@ const SelectedWorks = () => {
                 {/* Grelha: marcas e projetos pessoais */}
                 <ul
                     key={active}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
                 >
                     {visible.map((e, i) => {
                         let card;
@@ -325,33 +335,26 @@ const SelectedWorks = () => {
                             <li
                                 key={e.key}
                                 className="work-in"
-                                style={{ animationDelay: `${Math.min(i % VISIBLE, 8) * 40}ms` }}
+                                style={{ animationDelay: `${(i % STEP) * 60}ms` }}
                             >
-                                <WorkCard p={card} i={i} lang={lang} onOpen={e.type === "brand" ? () => onCard(e.key) : setOpenId} />
+                                <WorkCard p={card} i={i} lang={lang} className="work-card--grid" onOpen={e.type === "brand" ? () => onCard(e.key) : setOpenId} />
                             </li>
                         );
                     })}
                 </ul>
 
-                {entries.length > VISIBLE ? (
-                    <div className="mt-10 md:mt-12 flex justify-center">
+                {entries.length > shown ? (
+                    <div className="mt-10 md:mt-12 flex flex-col items-center gap-3">
                         <button
                             type="button"
-                            onClick={() => {
-                                if (showAll) {
-                                    const el = document.getElementById("projetos");
-                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }
-                                setShowAll((v) => !v);
-                            }}
+                            onClick={() => setShown((n) => n + STEP)}
                             className="group inline-flex items-center gap-3 border border-ink text-ink px-8 py-4 text-xs md:text-sm tracking-[0.18em] uppercase hover:bg-ink hover:text-bone transition-colors"
                         >
-                            {showAll
-                                ? lang === "PT" ? "Mostrar menos" : "Show less"
-                                : lang === "PT"
-                                  ? `Ver todas as marcas (${String(entries.length).padStart(2, "0")})`
-                                  : `See all brands (${String(entries.length).padStart(2, "0")})`}
+                            {lang === "PT" ? "Mostrar mais" : "Show more"}
                         </button>
+                        <span className="text-xs text-mist tabular-nums">
+                            {String(visible.length).padStart(2, "0")} / {String(entries.length).padStart(2, "0")}
+                        </span>
                     </div>
                 ) : null}
 
@@ -367,10 +370,10 @@ const SelectedWorks = () => {
                                 </p>
                             </div>
                         </div>
-                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                             {personal.map((p, i) => (
                                 <li key={p.id} className="work-in" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
-                                    <WorkCard p={p} i={i} lang={lang} onOpen={setOpenId} className="work-card--small" />
+                                    <WorkCard p={p} i={i} lang={lang} onOpen={setOpenId} className="work-card--grid" />
                                 </li>
                             ))}
                         </ul>
@@ -386,21 +389,14 @@ const SelectedWorks = () => {
                 )}
             </div>
 
-            <BrandPanel
-                brand={openBrand}
-                lang={lang}
-                active={active}
-                hidden={!!openId}
-                onOpen={setOpenId}
-                onClose={() => setBrandKey(null)}
-            />
-
             {modalReady ? (
                 <Suspense fallback={null}>
                     <ProjectModal
                         project={open}
                         index={openIndex >= 0 ? openIndex : 0}
                         total={navList.length}
+                        siblings={siblings}
+                        onPick={setOpenId}
                         onClose={close}
                         onPrev={goPrev}
                         onNext={goNext}

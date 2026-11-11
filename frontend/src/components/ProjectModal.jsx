@@ -688,7 +688,7 @@ const STAGGER = { hidden: {}, show: { transition: { staggerChildren: 0.08, delay
 const RISE = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } } };
 const TITLE_IN = { hidden: { y: "105%" }, show: { y: 0, transition: { duration: 0.9, ease: EASE } } };
 
-const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction = 1 }) => {
+const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction = 1, siblings, onPick }) => {
     const lang = useLang().lang;
     const dragControls = useDragControls();
     const scrollRef = useRef(null);
@@ -1024,6 +1024,26 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             </div>
                         </div>
 
+                        {/* Outros trabalhos da mesma marca: troca sem sair do projeto */}
+                        {siblings && siblings.length > 1 ? (
+                            <div className="pm-brandtabs shrink-0" data-no-drag>
+                                <span className="pm-brandtabs-label">{lang === "PT" ? "Nesta marca" : "This brand"}</span>
+                                <div className="pm-brandtabs-list">
+                                    {siblings.map((sb) => (
+                                        <button
+                                            key={sb.id}
+                                            type="button"
+                                            onClick={() => onPick && onPick(sb.id)}
+                                            aria-pressed={sb.id === project.id}
+                                            className={`pm-brandtab ${sb.id === project.id ? "is-on" : ""}`}
+                                        >
+                                            {sb.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+
                         {/* Scrollable content */}
                         <div className="flex-1 overflow-y-auto pm-scroll" ref={scrollRef}>
                             <motion.div className="pm-head" variants={STAGGER} initial="hidden" animate="show">
@@ -1339,7 +1359,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
 
 // Abrir/fechar com animação: guarda o último projeto para a animação de saída
 // e calcula a direção (anterior/seguinte) para o cartão deslizar para o lado certo.
-const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
+const ProjectModal = ({ project, index, total, onClose, onPrev, onNext, siblings, onPick }) => {
     const last = useRef(null);
     const prevIndex = useRef(index);
     const dir = useRef(1);
@@ -1366,6 +1386,8 @@ const ProjectModal = ({ project, index, total, onClose, onPrev, onNext }) => {
                     onClose={onClose}
                     onPrev={onPrev}
                     onNext={onNext}
+                    siblings={siblings}
+                    onPick={onPick}
                 />
             ) : null}
         </AnimatePresence>
