@@ -591,6 +591,79 @@ const PostsWall = ({ posts, stories, title, lang, onOpen }) => {
     );
 };
 
+// RICH MEDIA em HTML: corre o rich media verdadeiro dentro de um iframe isolado.
+// O HTML já traz o próprio telemóvel; aqui só se ajusta o tamanho ao espaço.
+const RmHtml = ({ url, title }) => {
+    const [doc, setDoc] = useState("");
+    const [size, setSize] = useState({ w: 420, h: 820 });
+    const [scale, setScale] = useState(1);
+    const wrap = useRef(null);
+    const key = useRef("rm" + Math.random().toString(36).slice(2));
+    useEffect(() => {
+        let alive = true;
+        fetch(url)
+            .then((r) => r.text())
+            .then((html) => {
+                if (!alive) return;
+                const inject =
+                    "<style>html,body{background:transparent!important;overflow:hidden}</style>" +
+                    "<script>(function(){function s(){var d=document.documentElement,b=document.body;" +
+                    "parent.postMessage({rm:'" + key.current + "',w:Math.max(d.scrollWidth,b?b.scrollWidth:0)," +
+                    "h:Math.max(d.scrollHeight,b?b.scrollHeight:0)},'*')}window.addEventListener('load',function(){s();setTimeout(s,400)})})()<\/script>";
+                setDoc(/<\/head>/i.test(html) ? html.replace(/<\/head>/i, inject + "</head>") : inject + html);
+            })
+            .catch(() => {});
+        return () => {
+            alive = false;
+        };
+    }, [url]);
+    useEffect(() => {
+        const on = (e) => {
+            if (e.data && e.data.rm === key.current && e.data.w && e.data.h) {
+                setSize({ w: Math.min(e.data.w, 1400), h: Math.min(e.data.h, 2000) });
+            }
+        };
+        window.addEventListener("message", on);
+        return () => window.removeEventListener("message", on);
+    }, []);
+    useEffect(() => {
+        const el = wrap.current;
+        if (!el) return undefined;
+        const fit = () => {
+            const maxW = el.clientWidth;
+            const maxH = Math.max(420, window.innerHeight * 0.82);
+            setScale(Math.min(1, maxW / size.w, maxH / size.h));
+        };
+        fit();
+        const ro = new ResizeObserver(fit);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [size]);
+    return (
+        <div ref={wrap} className="w-full flex justify-center" data-no-drag>
+            <div style={{ width: size.w * scale, height: size.h * scale }} className="relative">
+                {doc ? (
+                    <iframe
+                        title={title}
+                        srcDoc={doc}
+                        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                        style={{
+                            width: size.w,
+                            height: size.h,
+                            border: 0,
+                            transform: `scale(${scale})`,
+                            transformOrigin: "0 0",
+                            background: "transparent",
+                        }}
+                    />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-mist">A carregar…</div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const NO_DRAG =
     "button, a, input, textarea, select, video, iframe, model-viewer, .overflow-x-auto, [data-no-drag]";
 
@@ -626,6 +699,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         project.category === "graphic" &&
         project.subtype === "posts";
     const posts = (project && project.posts) || [];
+    const [rmView, setRmView] = useState("html");
     // design gráfico sem posts/stories mas com galeria a sério (não só a capa)
     const graphicWall =
         project &&
@@ -716,8 +790,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
     const isRM = !!(
         cat === "richmedia" &&
         project.richmedia &&
-        project.richmedia.screens &&
-        project.richmedia.screens.length
+        ((project.richmedia.screens && project.richmedia.screens.length) || project.richmedia.html)
     );
 
     const renderCover = () => {
@@ -782,6 +855,37 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
         }
 
         if (cat === "richmedia") {
+            if (project.richmedia && project.richmedia.html) {
+                const hasScreens = !!project.richmedia.screens?.length;
+                return (
+                    <div>
+                        {hasScreens ? (
+                            <div className="flex justify-center gap-2 mb-5" data-no-drag>
+                                {[
+                                    ["html", lang === "PT" ? "Interativo" : "Interactive"],
+                                    ["screens", lang === "PT" ? "Ecrãs" : "Screens"],
+                                ].map(([k, label]) => (
+                                    <button
+                                        key={k}
+                                        type="button"
+                                        onClick={() => setRmView(k)}
+                                        className={`px-4 py-2 text-[11px] tracking-[0.18em] uppercase border transition-colors ${
+                                            rmView === k ? "bg-ink text-bone border-ink" : "border-hairline text-graphite hover:border-ink"
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : null}
+                        {rmView === "screens" && hasScreens ? (
+                            <PhoneStrip screens={project.richmedia.screens} fit={project.richmedia.fit} />
+                        ) : (
+                            <RmHtml url={project.richmedia.html} title={title} />
+                        )}
+                    </div>
+                );
+            }
             if (project.richmedia && project.richmedia.screens?.length) {
                 return (
                     <PhoneStrip
@@ -984,7 +1088,7 @@ const ModalInner = ({ project, index, total, onClose, onPrev, onNext, direction 
                             {isRM ? (
                                 <div className="px-5 md:px-8 pt-5 flex justify-center">
                                     <a
-                                        href={`/rm/${project.id}`}
+                                        href={project.richmedia && project.richmedia.html ? project.richmedia.html : `/rm/${project.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="group inline-flex items-center gap-3 bg-ink text-bone px-8 md:px-10 py-4 md:py-5 text-sm md:text-base tracking-[0.18em] uppercase hover:bg-terracotta transition-colors shadow-[0_18px_44px_-18px_rgba(28,27,26,0.55)]"

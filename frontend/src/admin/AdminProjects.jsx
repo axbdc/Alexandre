@@ -16,6 +16,7 @@ import { warmProject } from "@/lib/warm";
 import { PROJECTS } from "@/data/content";
 import { uploadToCloudinary, CLOUDINARY_CLOUD } from "@/lib/cloudinary";
 import RichMediaEditor from "@/admin/RichMediaEditor";
+import { bundleRichMedia } from "@/lib/rmBundle";
 import AdminTabs from "@/admin/AdminTabs";
 
 // Pré-visualização: guarda o projeto em localStorage e abre /admin/preview
@@ -30,6 +31,18 @@ const writePreview = (p, unsaved) => {
         /* sem espaço: ignora */
     }
 };
+// Rich media em HTML: junta a pasta num só ficheiro e guarda-o no Cloudinary.
+const uploadRmHtml = async (files) => {
+    const { html, used } = await bundleRichMedia(files);
+    const fd = new FormData();
+    fd.append("file", new File([html], "rich-media.html", { type: "text/html" }));
+    fd.append("upload_preset", "portfolio");
+    const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/raw/upload`, { method: "POST", body: fd });
+    const j = await r.json();
+    if (!j.secure_url) throw new Error((j.error && j.error.message) || "Falhou o upload");
+    return { url: j.secure_url, used, kb: Math.round(html.length / 1024) };
+};
+
 // Vídeos de um projeto motion. Os antigos só têm `video`: vira o primeiro da lista.
 const videoList = (p) =>
     Array.isArray(p.videos) && p.videos.length
@@ -209,6 +222,7 @@ const AdminProjects = () => {
     const [uploading, setUploading] = useState(false);
     const [msg, setMsg] = useState("");
     const previewOn = useRef(false);
+    const [rmBusy, setRmBusy] = useState(false);
 
     // com a pré-visualização aberta, cada alteração no editor aparece lá
     useEffect(() => {
@@ -679,6 +693,51 @@ const AdminProjects = () => {
                                 onFit={(f) => set("rm_fit", f)}
                                 onMsg={setMsg}
                             />
+                        </div>
+                    ) : null}
+
+                    {editing.category === "richmedia" ? (
+                        <div className="mb-6 border border-hairline p-4">
+                            <div className="overline text-mist mb-1">Rich media em HTML (interativo)</div>
+                            <div className="text-[11px] text-mist mb-3">
+                                Escolhe a pasta da entrega (a que tem o index.html e as pastas das imagens). Fica tudo num só ficheiro e o site mostra o rich media a funcionar. Se não houver HTML, o site usa os ecrãs de cima como protótipo.
+                            </div>
+                            {editing.rm_html ? (
+                                <div className="flex items-center gap-3 flex-wrap text-sm mb-3">
+                                    <span className="text-ink">HTML carregado</span>
+                                    <a href={editing.rm_html} target="_blank" rel="noopener noreferrer" className="link-underline text-ink">
+                                        abrir
+                                    </a>
+                                    <button type="button" onClick={() => set("rm_html", "")} className="text-mist hover:text-terracotta">
+                                        remover
+                                    </button>
+                                </div>
+                            ) : null}
+                            <label className="cursor-pointer inline-block text-xs tracking-[0.18em] uppercase border border-hairline px-3 py-2 hover:border-ink">
+                                {rmBusy ? "A preparar…" : editing.rm_html ? "Substituir pasta" : "Carregar pasta"}
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    webkitdirectory=""
+                                    directory=""
+                                    multiple
+                                    onChange={async (e) => {
+                                        const files = e.target.files;
+                                        if (!files || !files.length) return;
+                                        setRmBusy(true);
+                                        try {
+                                            const r = await uploadRmHtml(files);
+                                            set("rm_html", r.url);
+                                            setMsg(`Rich media em HTML carregado (${r.used.length} ficheiros embutidos, ${r.kb} KB).`);
+                                        } catch (err) {
+                                            setMsg(`Erro no HTML: ${err.message}`);
+                                        } finally {
+                                            setRmBusy(false);
+                                            e.target.value = "";
+                                        }
+                                    }}
+                                />
+                            </label>
                         </div>
                     ) : null}
 

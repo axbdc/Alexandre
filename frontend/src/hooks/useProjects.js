@@ -49,6 +49,7 @@ export const mapDoc = (id, d) => ({
         d.category === "richmedia" || d.is_richmedia
             ? {
                   fit: d.rm_fit || "contain",
+                  html: d.rm_html || "",
                   screens: (d.screens || []).map((sc) => {
                       if (!sc || !sc.src) return sc;
                       const out = { ...sc, src: cld(sc.src, 1200) };
