@@ -51,7 +51,7 @@ const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
                     className="work-card-img"
                     src={brand ? trim(cld(p.cover, 1400)) : cld(p.cover, 1400)}
                     srcSet={brand ? trim(cldSrcSet(p.cover, [700, 1000, 1400])) : cldSrcSet(p.cover, [700, 1000, 1400, 1800, 2400])}
-                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    sizes={className.includes("work-card--grid") ? "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" : "(min-width: 1024px) 50vw, 100vw"}
                     alt={t(p.title, lang)}
                     loading="lazy"
                     decoding="async"
