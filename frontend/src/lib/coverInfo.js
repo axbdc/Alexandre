@@ -4,7 +4,7 @@
 // O resultado fica guardado (memória + localStorage) para não repetir.
 import { cld } from "./img";
 
-const KEY = "ptf:cover-info:v1";
+const KEY = "ptf:cover-info:v2";
 let store = {};
 try {
     store = JSON.parse(localStorage.getItem(KEY) || "{}");
@@ -37,6 +37,8 @@ const analyse = (url) =>
                 let total = 0;
                 // cor da marca: média dos píxeis opacos mais saturados
                 let r = 0, g = 0, b = 0, w = 0;
+                let opaque = 0;
+                let light = 0;
                 for (let i = 0; i < d.length; i += 4) {
                     total++;
                     const a = d[i + 3];
@@ -46,6 +48,9 @@ const analyse = (url) =>
                     }
                     const R = d[i], G = d[i + 1], B = d[i + 2];
                     const mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+                    opaque++;
+                    const lum = (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255;
+                    if (lum > 0.82 && mx - mn < 40) light++;
                     const sat = mx ? (mx - mn) / mx : 0;
                     const wt = sat * sat * (a / 255);
                     r += R * wt;
@@ -55,7 +60,9 @@ const analyse = (url) =>
                 }
                 const logo = clear / total > 0.12;
                 const color = w > 0.5 ? [Math.round(r / w), Math.round(g / w), Math.round(b / w)] : null;
-                resolve({ logo, color });
+                // logo com muito branco (texto branco, versão negativa): fundo escuro
+                const dark = logo && opaque > 0 && light / opaque > 0.15;
+                resolve({ logo, color, dark });
             } catch (e) {
                 resolve({ logo: false, color: null });
             }
@@ -79,6 +86,14 @@ export const getCoverInfo = (url) => {
 };
 
 export const peekCoverInfo = (url) => store[url] || null;
+
+// Fundo escuro para logos claros: cor da marca bem escurecida.
+export const brandDark = (color) => {
+    const base = [28, 27, 26];
+    if (!color) return "rgb(28 27 26)";
+    const m = base.map((v, i) => Math.round(v * 0.78 + color[i] * 0.22));
+    return `rgb(${m[0]} ${m[1]} ${m[2]})`;
+};
 
 // Tom suave da cor da marca, misturado com o fundo do site.
 export const brandTint = (color, amount = 0.13) => {

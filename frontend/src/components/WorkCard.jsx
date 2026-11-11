@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCoverInfo, peekCoverInfo, brandTint } from "../lib/coverInfo";
+import { getCoverInfo, peekCoverInfo, brandTint, brandDark } from "../lib/coverInfo";
 import { t } from "../context/LanguageContext";
 import { CATEGORIES } from "../data/content";
 import { cld, cldSrcSet } from "../lib/img";
@@ -35,7 +35,8 @@ const trim = (u) => (u ? u.replace(/(res\.cloudinary\.com\/[^/]+\/image\/upload\
 const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
     const info = useCover(p.cover);
     const brand = !!(info && info.logo);
-    const mode = !info ? "is-loading" : brand ? "work-card--brand" : "work-card--photo";
+    const dark = brand && info.dark;
+    const mode = !info ? "is-loading" : brand ? `work-card--brand${dark ? " work-card--dark" : ""}` : "work-card--photo";
     return (
         <button
             type="button"
@@ -43,7 +44,7 @@ const WorkCard = ({ p, i, lang, onOpen, className = "", fill = false }) => {
             data-cursor="project"
             aria-label={t(p.title, lang)}
             className={`work-card group ${fill ? "work-card--fill" : ""} ${mode} ${className}`}
-            style={brand ? { "--card-tint": brandTint(info.color) } : undefined}
+            style={brand ? { "--card-tint": dark ? brandDark(info.color) : brandTint(info.color) } : undefined}
         >
             <div className="work-card-media">
                 <img
